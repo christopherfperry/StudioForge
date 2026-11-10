@@ -128,7 +128,8 @@ public struct SetupPermissionsView: View {
                 }
             }
             Section("Library folders (Music › StudioForge)") {
-                ForEach(permissions.folders, id: \.name) { f in
+                ForEach(permissions.folders.indices, id: \.self) { i in
+                    let f = permissions.folders[i]
                     StatusRow(ok: f.exists && f.writable, text: f.name + (f.exists ? (f.writable ? "" : " — not writable") : " — missing"))
                 }
                 HStack {

@@ -147,7 +147,7 @@ public final class AppModel: ObservableObject {
 
     public func open(_ url: URL) {
         do {
-            let p = ProjectPackage.newerAutosave(in: url) ?? (try ProjectPackage.load(from: url))
+            let p = try ProjectPackage.newerAutosave(in: url) ?? ProjectPackage.load(from: url)
             undo.clear(); project = p; packageURL = url; isDirty = false
             engine.load(project: p, packageURL: url)
             RecentProjects.shared.add(url)

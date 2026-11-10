@@ -4,6 +4,7 @@ import AppKit
 import UniformTypeIdentifiers
 import SFCore
 import SFEffects
+import SFInstruments
 import SFEngine
 import SFProject
 import SFPresets

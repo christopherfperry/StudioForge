@@ -237,7 +237,7 @@ struct StemSeparatorSheet: View {
                 let urls = try StemWriter.write(stems, baseName: url.deletingPathExtension().lastPathComponent, to: folder)
                 DispatchQueue.main.async {
                     job.running = false
-                    if addToProject { model.importAudio(urls.sorted { $0.key.rawValue < $1.key.rawValue }.map(\.value)) }
+                    if addToProject { model.importAudio(urls.sorted { $0.key.rawValue < $1.key.rawValue }.map { $0.value }) }
                     model.status = "Separated \(urls.count) stems with \(sep.name)"
                     close()
                 }
