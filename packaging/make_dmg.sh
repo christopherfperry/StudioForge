@@ -106,7 +106,9 @@ else
   run hdiutil attach "$RW" -readwrite -noverify -noautoopen -mountpoint "$MOUNT"
   # Custom volume icon flag
   if command -v SetFile >/dev/null 2>&1; then run SetFile -a C "$MOUNT"; fi
-  if [[ "$DRY_RUN" != "1" ]]; then
+  if [[ "${CI:-}" == "true" ]]; then
+    echo "CI detected: skipping Finder AppleScript layout (no GUI session)"
+  elif [[ "$DRY_RUN" != "1" ]]; then
     # Finder layout. Fails harmlessly on headless CI without Finder automation permission.
     osascript <<EOF || echo "warning: Finder layout via AppleScript failed; DMG will use default layout"
 tell application "Finder"
