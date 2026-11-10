@@ -1,0 +1,138 @@
+# StudioForge
+
+A personal multi-track DAW for macOS 13+ (SwiftUI + CoreAudio). It records audio and instruments with low latency, includes its own effects and instruments, ships JSON presets (with artist-style tones), generates drum beats, separates stems, and exports to common audio formats.
+
+> **Honesty note.** This source was written on a Linux machine. It was **not compiled or run on macOS**. The platform-independent modules build with Swift 5.10.1 on Linux, and 17 unit tests pass there: DSP, effects, instruments, presets, beat generator, analysis, HPSS separation, projects, offline render and export. Everything that needs Apple frameworks sits behind `#if os(macOS)` and has **never been compiled**: CoreAudio I/O, CoreMIDI, the SwiftUI UI, Core ML separation, and the AVFoundation encoders and decoders. Expect a few compile fixes on the first Xcode build. See *Known gaps* below.
+
+## Install
+
+Opening a disk image never installs anything by itself, because macOS does not auto-run software from a DMG. Use one of the following (macOS 13 Ventura or later).
+
+### Recommended: `Install StudioForge.pkg`
+A normal macOS Installer package: double-click it and click through.
+- It installs StudioForge.app into /Applications.
+- It creates `~/Music/StudioForge/...` and `~/Library/Application Support/StudioForge` for the logged-in user.
+- It copies the factory presets, removes quarantine and registers the app with LaunchServices.
+- Its last page explains the microphone prompt that appears on first launch. No installer can grant microphone access in advance.
+
+To get the package:
+- **GitHub Actions** (no Xcode needed): push the repository and download the **StudioForge-installers** artifact from the Actions tab (section A below). It contains `Install StudioForge.pkg` and `StudioForge-<version>.dmg`.
+- **On a Mac:** run `./packaging/make_pkg.sh`, which writes `dist/Install StudioForge.pkg`. `./packaging/make_dmg.sh` builds the package as well and puts it in the DMG.
+- **Signing:** set `INSTALLER_IDENTITY="Developer ID Installer: Name (TEAMID)"` to sign the package with `productsign`. Add `NOTARIZE=1` plus `NOTARY_PROFILE` (or `APPLE_ID`/`APPLE_TEAM_ID`/`APPLE_APP_PASSWORD`) to notarize it.
+- **Unsigned package:** Control-click it › **Open** › **Open**.
+
+The DMG shows **Install StudioForge.pkg** as the main item at the top. Below it is the alternative: drag StudioForge onto Applications.
+
+### A. Prebuilt DMG from GitHub Actions (no Xcode on your Mac)
+1. Push this folder to a GitHub repository (private is fine). `.github/workflows/release.yml` runs on a `macos-14` runner: it runs the tests, builds a universal (arm64 + x86_64) app and creates `StudioForge-<version>.dmg`.
+2. Open the repository's **Actions** tab, then **Release DMG**, then the latest run, and download the **StudioForge-installers** artifact (the `.pkg` and the DMG). You can also start a build with **Run workflow**. Pushing a tag such as `v0.2.1` attaches the package and DMG to a GitHub Release as well.
+3. Double-click the DMG and drag **StudioForge** onto **Applications**.
+4. Optional: add the secrets `MACOS_INSTALLER_IDENTITY`, `MACOS_CERT_P12_BASE64`, `MACOS_CERT_PASSWORD`, `MACOS_SIGN_IDENTITY`, `APPLE_ID`, `APPLE_TEAM_ID` and `APPLE_APP_PASSWORD` to get a Developer ID signed, notarized DMG. Without them the DMG is ad-hoc signed.
+
+### B. Build the DMG yourself
+```bash
+./packaging/make_dmg.sh            # -> dist/Install StudioForge.pkg + dist/StudioForge-0.2.1.dmg
+```
+The script builds the Release app (universal when full Xcode is installed, otherwise your Mac's architecture), signs it ad hoc with the entitlements, and creates a compressed DMG. The DMG contains the app, an Applications shortcut, a background image with an arrow, a volume icon and an arranged Finder window. It uses `create-dmg` if that is installed (`brew install create-dmg`). Otherwise it uses `hdiutil` plus AppleScript.
+
+Signed and notarized builds:
+```bash
+SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" NOTARIZE=1 NOTARY_PROFILE=myprofile ./packaging/make_dmg.sh
+```
+Run `DRY_RUN=1 ./packaging/make_dmg.sh` to print every step without running anything.
+
+### C. Source installer (builds on your Mac)
+Open `StudioForge-Source-Installer.dmg` and read **START HERE.txt**. **Control-click** **Install StudioForge.command** › **Open** › **Open**. A plain double-click is blocked because the script is unsigned. If it is still blocked, copy it to the Desktop and run `xattr -dr com.apple.quarantine ~/Desktop/"Install StudioForge.command"`. The Xcode Command Line Tools are required (the script offers to install them). It does the following:
+1. Checks for the Xcode Command Line Tools and offers to install them.
+2. Builds the app.
+3. Installs it to `/Applications`, or to `~/Applications` if you decline to use an admin password.
+4. Removes the quarantine flag and registers the `.sfproj` document type.
+5. Creates the library folders and launches the app.
+
+This image is an ISO 9660 disk image (Rock Ridge + Joliet), not a UDIF DMG; macOS mounts it on double-click. Rebuild it with `packaging/build_source_image.sh`, which runs on Linux or macOS.
+
+### Gatekeeper (unsigned / ad-hoc builds)
+Builds that are not notarized trigger "StudioForge can't be opened because Apple cannot check it for malicious software". To open it the first time:
+- **Control-click** (or right-click) StudioForge.app (or `Install StudioForge.command`) and choose **Open**, then **Open** again.
+- Or go to **System Settings › Privacy & Security** and click **Open Anyway**.
+- Or run `xattr -dr com.apple.quarantine /Applications/StudioForge.app`.
+
+### What first launch sets up
+- Library folders: `~/Music/StudioForge/{Projects, Recordings, Exports, Presets/User, Presets/Factory, ImpulseResponses, Models, Samples}` and `~/Library/Application Support/StudioForge`. The factory presets are copied to `Presets/Factory` for browsing. Projects save to `Projects`, recordings made before the first save go to `Recordings`, and models download to `Models`.
+- A welcome screen explains microphone and audio-input access, then asks for it.
+- **Help › Setup & Permissions** shows microphone status and folder status. It has buttons to create missing folders and to open the Microphone, Files & Folders and Bluetooth privacy panes, Sound settings and Audio MIDI Setup.
+- Projects are `.sfproj` packages (`com.studioforge.project`). Double-clicking one in Finder opens StudioForge. Older `.sforge` projects still open.
+
+## Build and run (on your Mac)
+
+Requirements: macOS 13 or later, and Xcode 15+ (or its Command Line Tools with Swift 5.9+).
+
+```bash
+unzip StudioForge.zip && cd mac_daw
+./build.sh                 # builds release, assembles build/StudioForge.app, ad-hoc signs it
+open build/StudioForge.app
+```
+
+Other ways to build:
+* **Xcode:** `open Package.swift`, choose the `StudioForge` scheme, then Run.
+* **XcodeGen:** `brew install xcodegen && xcodegen generate && open StudioForge.xcodeproj`. This uses `project.yml`, `Resources/Info.plist` and `StudioForge.entitlements`.
+* **Tests:** `swift test` (also works on Linux).
+
+On first launch, macOS asks for microphone access. You need it for any audio input, including USB and Thunderbolt interfaces. Pick your interface and buffer size under **Audio Settings** (the slider icon).
+
+To bundle ffmpeg for MP3/OGG export: `FFMPEG=$(which ffmpeg) ./build.sh`.
+
+## Features
+
+| Area | What's there |
+|---|---|
+| Engine | Unlimited audio, instrument and drum tracks. Record, play, loop, punch in/out, metronome with count-in. Per-track volume, pan, mute, solo, arm and monitor mode. Input = any channel or stereo pair on any CoreAudio device. Clips can be split, trimmed, moved, faded and muted. Tempo and time signature, snapshot undo/redo, zoom. |
+| Latency | Buffer 32–1024 samples. One full-duplex AUHAL when input and output are the same device. Lock-free real-time path (atomics, SPSC rings, object swap; no locks or allocation in the render callback). Automatic latency compensation for recordings, plus a manual offset. Plugin delay compensation. Latency and CPU readout. Monitor = Off for interface direct monitoring. |
+| Record clean | The dry input is **always** recorded. "Also capture wet" writes a second, linked, muted clip with the effects printed. |
+| Effects (33) | Parametric EQ, filters, auto-wah, formant; compressor, limiter, gate; overdrive/distortion/fuzz (8 modes), bitcrusher, waveshaper, amp (8 models) plus cabinet IR (9 synthesized cabs, or your own IR); chorus, flanger, phaser, tremolo, ring mod, vocoder-style; delay, pitch shift and octaver; reverbs: room, hall, plate, spring, chamber, cathedral, shimmer, reverse, gated, ambient/huge, and convolution with user IR loading. Every effect has bypass and mix. |
+| Instruments | Subtractive synth (multi-osc, unison, filter, envelopes, LFO, FM, noise), bass synth, keys (piano, EP, Rhodes, organ, harpsichord, string machine), trumpet/brass with mutes, and a drum machine (synth voices plus sample pads). CoreMIDI input from all sources, plus an on-screen keyboard. |
+| Presets | 111 factory presets as JSON (`Sources/SFPresets/Resources/Presets`). User presets live in `~/Library/Application Support/StudioForge/Presets` and override factory ones with the same id. Preset browser, **Tone Picker** (artist + instrument), save-as-preset. |
+| Beat generator | 27 styles (industrial, doom, grunge, goth, nu-metal, new wave, alt-rock, plus artist-style templates such as NIN "Closer" at 92 BPM and "March of the Pigs" in 7/8). Controls for tempo, swing, humanize, complexity and fills. **Match to recording** estimates tempo, beats, key, energy and swing, then drops a fitting beat. MIDI export. |
+| Stem separation | Demucs **htdemucs_6s** via Core ML (vocals, drums, bass, guitar, piano, other), with a model manager (download, import, delete, progress). DSP fallback with no model (HPSS plus band masks). Drum-part splitter: kick, snare, toms, hi-hat, cymbals. |
+| Projects | `.sfproj` package (legacy `.sforge` still opens): `project.json` plus `Audio/`, `Peaks/`, `Bounces/`. Autosave (`autosave.json`, offered when newer), recent projects, built-in and user templates. |
+| Export | WAV and AIFF (built in). FLAC, AAC/M4A, ALAC and CAF (Apple encoders, with ffmpeg fallback). MP3 and OGG need ffmpeg. Master, stems or both. Bit depth, sample rate, TPDF dither, normalize, loop range, MIDI. All exports are offline bounces. |
+| UX | Onboarding tour, one-click templates (Vocals, Guitar, Band, Beat + Synth), dark theme, tooltips, drag-and-drop audio import, mixer, inspector with generic controls for every effect and instrument. |
+
+Keyboard shortcuts: Space = play/stop, R = record, L = loop, K = metronome, S = split, X = mixer, ⌘Z / ⇧⌘Z = undo/redo, ⌘S = save, ⌘O = open, ⌘I = import, ⌘E = export, ⌘+ / ⌘− = zoom.
+
+## Stem-separation model (first-run download, about 1–2 GB)
+
+The Core ML model is **not bundled** (it is large, and Demucs weights have their own license). There are two ways to get it:
+
+1. **Convert it yourself** (recommended):
+   ```bash
+   python3 -m venv .venv && source .venv/bin/activate
+   pip install torch==2.3.1 demucs==4.0.1 coremltools
+   python3 tools/convert_demucs_to_coreml.py --out htdemucs_6s.mlpackage
+   ```
+   Then use **Stems → Import…** and choose the `.mlpackage`. Model contract: input `mix` [1,2,N] at 44.1 kHz; output `sources` [1,6,2,N] in the order drums, bass, other, vocals, guitar, piano.
+   The conversion script is **untested**. coremltools has no `istft`, so the script uses a matrix iDFT plus overlap-add. Check its output against PyTorch before relying on it.
+2. **Host your converted model** (a zipped `.mlpackage` or `.mlmodelc`) and paste its URL into the Stems sheet. The URL is stored in UserDefaults under `SFSeparationModelURL`. You then get a download progress bar.
+
+Without the model, StudioForge uses the DSP separator automatically. It is lower quality but always available.
+
+## MP3 / OGG
+
+Apple provides no MP3 or Vorbis encoder. StudioForge calls **ffmpeg** (`brew install ffmpeg`). It looks in the app bundle, `/opt/homebrew/bin`, `/usr/local/bin`, `$PATH`, or the path stored in UserDefaults under `SFFFmpegPath`. A LAME-based encoder can be added by registering an `AudioEncoder` (see docs/EXTENDING.md).
+
+## Artist presets: disclaimer
+
+Artist-named presets and beat styles (NIN, Killing Joke, Type O Negative, Deftones and others) are **original DSP approximations of a general tonal character**. They are built only from StudioForge's own effects and instruments. They are not copies of any recording, sample, proprietary plugin or preset, and they do not imply any affiliation.
+
+## rea.tools
+
+As you suggested, https://rea.tools/ ("REA – Reverse Engineer Anything", an MIT-licensed agent toolkit for inspecting binaries, JavaScript and runtimes) was consulted only as a reference for how software can be studied. **No proprietary code was inspected, decompiled or copied.** All StudioForge code is original.
+
+## Known gaps / next steps
+
+* None of the macOS code (UI, CoreAudio, CoreMIDI, Core ML, AVFoundation) has been compiled yet. Build it in Xcode and fix whatever comes up.
+* **AU/AUv3 hosting as inserts is not implemented yet.** The graph already reserves an `"au"` effect type, and `EffectRegistry.registerDynamic(typeID:"au")` is the hook to add an `AUAudioUnit` wrapper (see docs/EXTENDING.md). Right now an `"au"` slot is skipped with a log message.
+* The arrangement view is functional but basic: no piano-roll editor, automation lanes or tempo map (tempo is constant).
+* Split-device mode (different input and output devices) adds about one buffer of latency. For sample-accurate sync, use an Aggregate Device.
+
+See docs/ARCHITECTURE.md, docs/EXTENDING.md and CHANGELOG.md.

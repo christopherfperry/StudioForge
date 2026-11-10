@@ -1,0 +1,49 @@
+{
+  "id": "killing-joke-tribal-floor-tom-kit",
+  "name": "Killing Joke - Tribal Floor Tom Kit",
+  "category": "Drums",
+  "artistStyle": "Killing Joke",
+  "tags": [
+    "drums"
+  ],
+  "description": "Pounding tom-driven tribal kit. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 5.0,
+        "attack": 10.0,
+        "release": 120.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.15,
+        "dry": 1.0,
+        "decay": 1.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -3.0,
+      "pad41.tune": -4.0,
+      "pad41.decay": 1.8,
+      "pad41.level": 0.0,
+      "pad45.decay": 1.4,
+      "pad36.decay": 1.0
+    }
+  },
+  "beatStyle": "industrial",
+  "tempo": 124
+}

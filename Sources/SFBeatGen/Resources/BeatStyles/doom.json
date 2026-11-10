@@ -1,0 +1,41 @@
+{
+  "id": "doom",
+  "name": "Doom Crawl",
+  "genre": "Doom",
+  "artistStyle": "",
+  "description": "Slow, heavy half-time doom crawl (two-bar pattern over 8th-note grid).",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 8,
+  "tempoRange": [
+    55,
+    90
+  ],
+  "defaultTempo": 70,
+  "defaultSwing": 0.0,
+  "lanes": {
+    "kick": "X.......|........",
+    "snare": "........|X.......",
+    "ride": "x...x...|x...x...",
+    "crash": "X.......|........"
+  },
+  "complexLanes": {
+    "kick": "...?..x.|..?.....",
+    "tomLow": "........|......?."
+  },
+  "fills": [
+    {
+      "tomHigh": "x.x.....",
+      "tomMid": "....x.x.",
+      "tomLow": "........",
+      "snare": "........"
+    },
+    {
+      "snare": "x...x.xx",
+      "tomLow": "..x....."
+    }
+  ],
+  "phraseAccent": []
+}

@@ -1,0 +1,35 @@
+{
+  "id": "doom-goth",
+  "name": "Gothic Doom Waltz",
+  "genre": "Doom",
+  "artistStyle": "Type O Negative",
+  "description": "Slow, heavy 6/8 gothic doom sway.",
+  "timeSignature": {
+    "numerator": 6,
+    "denominator": 8
+  },
+  "stepsPerBar": 6,
+  "tempoRange": [
+    50,
+    85
+  ],
+  "defaultTempo": 66,
+  "defaultSwing": 0.0,
+  "lanes": {
+    "kick": "X.....|......",
+    "snare": "......|X.....",
+    "ride": "x.x.x.|x.x.x.",
+    "crash": "X.....|......"
+  },
+  "complexLanes": {
+    "kick": "...?..|..?..."
+  },
+  "fills": [
+    {
+      "tomHigh": "x.x...",
+      "tomMid": "...x..",
+      "tomLow": "....xx"
+    }
+  ],
+  "phraseAccent": []
+}

@@ -1,0 +1,34 @@
+{
+  "id": "bass-di-starter",
+  "name": "Bass DI Starter",
+  "category": "Bass",
+  "artistStyle": "",
+  "tags": [
+    "starter"
+  ],
+  "description": "Compressed DI bass. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 4.0,
+        "attack": 15.0,
+        "release": 150.0,
+        "makeup": 4.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 35.0
+      }
+    }
+  ]
+}

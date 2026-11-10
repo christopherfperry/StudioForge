@@ -1,0 +1,64 @@
+{
+  "id": "soundgarden-soaring-grunge-vocal",
+  "name": "Soundgarden - Soaring Grunge Vocal",
+  "category": "Vocal",
+  "artistStyle": "Soundgarden",
+  "tags": [
+    "vocal"
+  ],
+  "description": "Wide-range rock vocal with presence and plate. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 4.0,
+        "attack": 8.0,
+        "release": 120.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 90.0,
+        "peak3Freq": 3000.0,
+        "peak3Gain": 3.0
+      }
+    },
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 250.0,
+        "sync": 4.0,
+        "feedback": 0.15,
+        "wet": 0.1,
+        "pingpong": 0.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    },
+    {
+      "type": "reverb.plate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.15,
+        "dry": 1.0,
+        "decay": 1.6
+      }
+    }
+  ],
+  "tempo": 104
+}

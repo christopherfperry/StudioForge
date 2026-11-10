@@ -1,0 +1,37 @@
+{
+  "id": "nin-starfuckers",
+  "name": "Starfuckers Swagger",
+  "genre": "Industrial",
+  "artistStyle": "Nine Inch Nails",
+  "description": "Swaggering, swung glam-industrial groove (Starfuckers, Inc.-style; original pattern).",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    116,
+    136
+  ],
+  "defaultTempo": 128,
+  "defaultSwing": 0.2,
+  "lanes": {
+    "kick": "X..x|..x.|X..x|.x..",
+    "snare": "....|X...|....|X...",
+    "hatClosed": "x.x.|x.x.|x.x.|x.x."
+  },
+  "complexLanes": {
+    "tambourine": "..x.|..x.|..x.|..x.",
+    "snare": "...o|....|..o.|...."
+  },
+  "fills": [
+    {
+      "snare": "....|x.x.|xxxx|XXXX",
+      "kick": "x..x|..x.|x...|...."
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ],
+  "kitPreset": "starfuckers-kit-glam-crunch"
+}

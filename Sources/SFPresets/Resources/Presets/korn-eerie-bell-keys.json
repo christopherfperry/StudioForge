@@ -1,0 +1,43 @@
+{
+  "id": "korn-eerie-bell-keys",
+  "name": "KoRn - Eerie Bell Keys",
+  "category": "Keys",
+  "artistStyle": "KoRn",
+  "tags": [
+    "keys"
+  ],
+  "description": "Detuned, eerie Rhodes bell. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "flanger",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.1,
+        "depth": 0.4,
+        "delay": 3.0,
+        "feedback": 0.3,
+        "wet": 0.25
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.25,
+        "dry": 1.0,
+        "decay": 3.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 2.0,
+      "brightness": 0.7,
+      "tune": -15.0
+    }
+  },
+  "tempo": 98
+}

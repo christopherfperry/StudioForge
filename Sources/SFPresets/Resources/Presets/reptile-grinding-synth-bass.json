@@ -1,0 +1,83 @@
+{
+  "id": "reptile-grinding-synth-bass",
+  "name": "Reptile - Grinding Synth Bass",
+  "category": "Synth",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "Reptile"
+  ],
+  "description": "Detuned, filter-swept, distorted mono synth with industrial grit (Reptile-style). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 6.0,
+        "drive": 18.0,
+        "tone": 4000.0,
+        "preHPF": 60.0,
+        "output": -12.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "bitcrusher",
+      "mix": 0.35,
+      "bypassed": false,
+      "params": {
+        "bits": 10.0,
+        "downsample": 2.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 6.0,
+        "attack": 3.0,
+        "release": 80.0,
+        "makeup": 6.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.12,
+        "dry": 1.0,
+        "size": 0.4,
+        "decay": 0.7
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.bass",
+    "params": {
+      "osc1Wave": 0.0,
+      "osc2Wave": 1.0,
+      "osc2Detune": 12.0,
+      "unison": 3.0,
+      "unisonDetune": 20.0,
+      "cutoff": 500.0,
+      "resonance": 3.0,
+      "filterEnv": 0.6,
+      "filtD": 0.25,
+      "filtS": 0.15,
+      "drive": 0.6,
+      "mono": 1.0,
+      "glide": 40.0,
+      "lfoRate": 0.15,
+      "lfoCutoff": 0.8
+    }
+  },
+  "beatStyle": "nin-reptile",
+  "tempo": 100
+}

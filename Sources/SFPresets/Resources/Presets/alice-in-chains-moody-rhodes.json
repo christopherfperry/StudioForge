@@ -1,0 +1,42 @@
+{
+  "id": "alice-in-chains-moody-rhodes",
+  "name": "Alice in Chains - Moody Rhodes",
+  "category": "Keys",
+  "artistStyle": "Alice in Chains",
+  "tags": [
+    "keys"
+  ],
+  "description": "Dark tremolo Rhodes. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "tremolo",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 4.0,
+        "depth": 0.3,
+        "shape": 0.0,
+        "stereo": 0.0
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.2,
+        "dry": 1.0,
+        "decay": 1.4
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 2.0,
+      "brightness": 0.35,
+      "modDepth": 0.3
+    }
+  },
+  "tempo": 92
+}

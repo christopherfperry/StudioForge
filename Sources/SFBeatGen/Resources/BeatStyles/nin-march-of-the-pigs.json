@@ -1,0 +1,36 @@
+{
+  "id": "nin-march-of-the-pigs",
+  "name": "March of the Pigs 7/8 Stomp",
+  "genre": "Industrial",
+  "artistStyle": "Nine Inch Nails",
+  "description": "Frantic stomp in 7/8 (14 sixteenths per bar; March of the Pigs-style; original pattern).",
+  "timeSignature": {
+    "numerator": 7,
+    "denominator": 8
+  },
+  "stepsPerBar": 14,
+  "tempoRange": [
+    120,
+    150
+  ],
+  "defaultTempo": 134,
+  "defaultSwing": 0.0,
+  "lanes": {
+    "kick": "X.x.|..x.|X...|..",
+    "snare": "....|X...|..X.|..",
+    "hatClosed": "x.x.|x.x.|x.x.|x.",
+    "crash": "X...|....|....|.."
+  },
+  "complexLanes": {
+    "snare": "....|...o|....|.o",
+    "china": "....|....|....|?."
+  },
+  "fills": [
+    {
+      "snare": "x.x.|x.x.|xxxx|XX",
+      "kick": "x...|x...|x...|x."
+    }
+  ],
+  "phraseAccent": [],
+  "kitPreset": "march-of-the-pigs-kit-7-8-stomp"
+}

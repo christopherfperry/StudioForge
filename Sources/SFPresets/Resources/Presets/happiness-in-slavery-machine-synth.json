@@ -1,0 +1,82 @@
+{
+  "id": "happiness-in-slavery-machine-synth",
+  "name": "Happiness in Slavery - Machine Synth",
+  "category": "Synth",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "Happiness in Slavery",
+    "mechanical"
+  ],
+  "description": "Mechanical, ring-modulated metallic sequence synth (Happiness in Slavery-style). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "ringmod",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "frequency": 330.0,
+        "lfoRate": 0.3,
+        "lfoDepth": 0.5,
+        "wet": 0.45
+      }
+    },
+    {
+      "type": "bitcrusher",
+      "mix": 0.4,
+      "bypassed": false,
+      "params": {
+        "bits": 8.0,
+        "downsample": 6.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "gate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -40.0,
+        "release": 30.0,
+        "range": -80.0,
+        "hold": 20.0
+      }
+    },
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 160.0,
+        "sync": 7.0,
+        "feedback": 0.25,
+        "wet": 0.2,
+        "pingpong": 0.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 1.0,
+      "osc2Wave": 0.0,
+      "osc2Semi": 7.0,
+      "fmAmount": 1.8,
+      "cutoff": 2600.0,
+      "resonance": 4.0,
+      "filterEnv": 0.5,
+      "filtD": 0.08,
+      "filtS": 0.0,
+      "ampD": 0.12,
+      "ampS": 0.1,
+      "mono": 1.0
+    }
+  },
+  "beatStyle": "nin-happiness-in-slavery",
+  "tempo": 120
+}

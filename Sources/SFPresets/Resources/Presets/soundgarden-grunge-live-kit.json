@@ -1,0 +1,49 @@
+{
+  "id": "soundgarden-grunge-live-kit",
+  "name": "Soundgarden - Grunge Live Kit",
+  "category": "Drums",
+  "artistStyle": "Soundgarden",
+  "tags": [
+    "drums"
+  ],
+  "description": "Roomy, punchy acoustic-style kit. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 4.0,
+        "attack": 15.0,
+        "release": 150.0,
+        "makeup": 4.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.2,
+        "dry": 1.0,
+        "size": 0.6,
+        "decay": 1.1
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -3.0,
+      "pad36.decay": 1.0,
+      "pad38.decay": 1.1,
+      "pad38.tone": 0.6,
+      "pad49.decay": 2.8
+    }
+  },
+  "beatStyle": "grunge",
+  "tempo": 104
+}

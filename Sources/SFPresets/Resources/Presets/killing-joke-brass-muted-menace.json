@@ -1,0 +1,53 @@
+{
+  "id": "killing-joke-brass-muted-menace",
+  "name": "Killing Joke Brass - Muted Menace",
+  "category": "Synth",
+  "artistStyle": "Killing Joke",
+  "tags": [
+    "trumpet",
+    "brass",
+    "muted"
+  ],
+  "description": "Harmon-muted trumpet through a dark tape delay: eerie and cold. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 380.0,
+        "sync": 2.0,
+        "feedback": 0.45,
+        "wet": 0.3,
+        "pingpong": 1.0,
+        "lowCut": 300.0,
+        "highCut": 2500.0,
+        "modDepth": 0.3,
+        "drive": 0.4,
+        "offsetR": 0.0
+      }
+    },
+    {
+      "type": "reverb.plate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.22,
+        "dry": 1.0,
+        "decay": 2.2
+      }
+    }
+  ],
+  "instrument": {
+    "type": "brass.trumpet",
+    "params": {
+      "brightness": 0.5,
+      "breath": 0.45,
+      "mute": 1.0,
+      "vibratoDepth": 12.0,
+      "scoop": 40.0,
+      "growl": 0.0,
+      "gain": -4.0
+    }
+  }
+}

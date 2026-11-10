@@ -1,0 +1,43 @@
+{
+  "id": "industrial",
+  "name": "Industrial Stomp",
+  "genre": "Industrial",
+  "artistStyle": "",
+  "description": "Mechanical four-on-the-floor-ish stomp with metallic accents.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    95,
+    135
+  ],
+  "defaultTempo": 112,
+  "defaultSwing": 0.0,
+  "lanes": {
+    "kick": "X...|..x.|X...|..x.",
+    "snare": "....|X...|....|X...",
+    "hatClosed": "x.x.|x.x.|x.x.|x.x.",
+    "metal": "....|....|....|...?"
+  },
+  "complexLanes": {
+    "hatClosed": "xoxo|xoxo|xoxo|xoxo",
+    "kick": "....|....|....|.?..",
+    "clap": "....|?...|....|x..."
+  },
+  "fills": [
+    {
+      "snare": "x.x.|x.x.|xxxx|XXXX",
+      "kick": "x...|x...|x...|x...",
+      "hatClosed": "................"
+    },
+    {
+      "metal": "x.x.|x.x.|xxxx|xxxx",
+      "kick": "x...|x...|x...|x..."
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ]
+}

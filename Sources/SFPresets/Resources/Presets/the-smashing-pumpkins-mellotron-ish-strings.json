@@ -1,0 +1,45 @@
+{
+  "id": "the-smashing-pumpkins-mellotron-ish-strings",
+  "name": "The Smashing Pumpkins - Mellotron-ish Strings",
+  "category": "Keys",
+  "artistStyle": "The Smashing Pumpkins",
+  "tags": [
+    "keys"
+  ],
+  "description": "Wobbly tape strings. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "chorus",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.2,
+        "depth": 6.0,
+        "delay": 15.0,
+        "voices": 2.0,
+        "feedback": 0.1,
+        "spread": 0.8,
+        "wet": 0.4
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.25,
+        "dry": 1.0,
+        "decay": 3.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 5.0,
+      "attack": 0.3,
+      "ensemble": 0.6
+    }
+  },
+  "tempo": 112
+}

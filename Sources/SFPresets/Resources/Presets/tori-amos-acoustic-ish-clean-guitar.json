@@ -1,0 +1,65 @@
+{
+  "id": "tori-amos-acoustic-ish-clean-guitar",
+  "name": "Tori Amos - Acoustic-ish Clean Guitar",
+  "category": "Guitar",
+  "artistStyle": "Tori Amos",
+  "tags": [
+    "guitar"
+  ],
+  "description": "Clean, bright, natural guitar. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 3.0,
+        "attack": 10.0,
+        "release": 120.0,
+        "makeup": 3.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 0.0,
+        "gain": 2.0,
+        "bass": 5.0,
+        "mid": 5.0,
+        "treble": 6.5,
+        "presence": 5.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 90.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 0.0,
+        "mic": 0.2,
+        "lowCut": 70.0,
+        "highCut": 11000.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "reverb.chamber",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.15,
+        "dry": 1.0,
+        "decay": 1.5
+      }
+    }
+  ],
+  "tempo": 90
+}

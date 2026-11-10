@@ -1,0 +1,62 @@
+{
+  "id": "paradise-lost-doom-rhythm-guitar",
+  "name": "Paradise Lost - Doom Rhythm Guitar",
+  "category": "Guitar",
+  "artistStyle": "Paradise Lost",
+  "tags": [
+    "guitar"
+  ],
+  "description": "Thick, slow, mid-heavy downtuned rhythm tone. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "gate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -55.0,
+        "release": 80.0,
+        "range": -80.0,
+        "hold": 20.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 2.0,
+        "gain": 7.5,
+        "bass": 6.0,
+        "mid": 6.0,
+        "treble": 5.0,
+        "presence": 5.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 110.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 3.0,
+        "mic": 0.4,
+        "lowCut": 70.0,
+        "highCut": 7000.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.08,
+        "dry": 1.0,
+        "decay": 0.8
+      }
+    }
+  ],
+  "tempo": 80
+}

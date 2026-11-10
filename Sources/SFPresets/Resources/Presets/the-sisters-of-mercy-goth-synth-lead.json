@@ -1,0 +1,50 @@
+{
+  "id": "the-sisters-of-mercy-goth-synth-lead",
+  "name": "The Sisters of Mercy - Goth Synth Lead",
+  "category": "Synth",
+  "artistStyle": "The Sisters of Mercy",
+  "tags": [
+    "synth"
+  ],
+  "description": "Cold square lead. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 380.0,
+        "sync": 2.0,
+        "feedback": 0.35,
+        "wet": 0.25,
+        "pingpong": 1.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.25,
+        "dry": 1.0,
+        "decay": 3.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 1.0,
+      "osc2Wave": 1.0,
+      "osc2Octave": 1.0,
+      "cutoff": 2500.0,
+      "mono": 1.0
+    }
+  },
+  "tempo": 132
+}

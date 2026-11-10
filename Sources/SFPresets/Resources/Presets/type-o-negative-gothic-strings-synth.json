@@ -1,0 +1,49 @@
+{
+  "id": "type-o-negative-gothic-strings-synth",
+  "name": "Type O Negative - Gothic Strings Synth",
+  "category": "Synth",
+  "artistStyle": "Type O Negative",
+  "tags": [
+    "synth"
+  ],
+  "description": "Dark, chorused string synth. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "chorus",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.3,
+        "depth": 6.0,
+        "delay": 18.0,
+        "voices": 3.0,
+        "feedback": 0.1,
+        "spread": 1.0,
+        "wet": 0.4
+      }
+    },
+    {
+      "type": "reverb.cathedral",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 5.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 0.0,
+      "osc2Wave": 0.0,
+      "osc2Detune": 12.0,
+      "unison": 4.0,
+      "cutoff": 1500.0,
+      "ampA": 1.0,
+      "ampR": 3.0
+    }
+  },
+  "tempo": 72
+}

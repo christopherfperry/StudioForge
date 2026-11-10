@@ -1,0 +1,71 @@
+{
+  "id": "closer-funk-synth-bass",
+  "name": "Closer - Funk Synth Bass",
+  "category": "Synth",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "Closer",
+    "funk"
+  ],
+  "description": "Round, slightly squelchy mono bass synth for an industrial-funk groove (Closer-style). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 4.0,
+        "attack": 8.0,
+        "release": 100.0,
+        "makeup": 4.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 7.0,
+        "drive": 8.0,
+        "tone": 3000.0,
+        "preHPF": 30.0,
+        "output": -6.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowShelfFreq": 90.0,
+        "lowShelfGain": 3.0,
+        "peak2Freq": 900.0,
+        "peak2Gain": 2.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.bass",
+    "params": {
+      "osc1Wave": 1.0,
+      "pulseWidth": 0.35,
+      "osc2Level": 0.3,
+      "subLevel": 0.7,
+      "cutoff": 380.0,
+      "resonance": 2.5,
+      "filterEnv": 0.7,
+      "filtD": 0.18,
+      "filtS": 0.1,
+      "ampR": 0.05,
+      "mono": 1.0,
+      "glide": 15.0
+    }
+  },
+  "beatStyle": "nin-closer",
+  "tempo": 92
+}

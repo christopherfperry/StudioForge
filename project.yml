@@ -1,0 +1,27 @@
+# XcodeGen spec: `brew install xcodegen && xcodegen generate` creates StudioForge.xcodeproj.
+# Alternatively open Package.swift directly in Xcode, or run ./build.sh.
+name: StudioForge
+options:
+  deploymentTarget:
+    macOS: "13.0"
+packages:
+  StudioForgeKit:
+    path: .
+targets:
+  StudioForge:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/StudioForgeApp
+    dependencies:
+      - package: StudioForgeKit
+        product: StudioForgeKit
+    settings:
+      base:
+        INFOPLIST_FILE: Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: StudioForge.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.studioforge.daw
+        MACOSX_DEPLOYMENT_TARGET: "13.0"
+        SWIFT_VERSION: "5.0"
+        CODE_SIGN_IDENTITY: "-"
+        ENABLE_HARDENED_RUNTIME: NO

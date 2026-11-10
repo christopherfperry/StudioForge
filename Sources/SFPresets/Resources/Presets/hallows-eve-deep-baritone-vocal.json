@@ -1,0 +1,96 @@
+{
+  "id": "hallows-eve-deep-baritone-vocal",
+  "name": "Hallows Eve - Deep Baritone Vocal",
+  "category": "Vocal",
+  "artistStyle": "Type O Negative",
+  "tags": [
+    "vocal",
+    "baritone",
+    "gothic",
+    "doubling",
+    "Hallows Eve"
+  ],
+  "description": "Deep, cavernous baritone: warm low-mid EQ, slow chorus, octave-down doubling and a long dark gothic reverb. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 60.0,
+        "lowShelfFreq": 150.0,
+        "lowShelfGain": 3.0,
+        "peak2Freq": 2500.0,
+        "peak2Gain": -2.0,
+        "highShelfFreq": 9000.0,
+        "highShelfGain": -3.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -22.0,
+        "ratio": 3.5,
+        "attack": 15.0,
+        "release": 180.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "pitchshift",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "semitones": -12.0,
+        "cents": 0.0,
+        "window": 60.0,
+        "wet": 0.18,
+        "detuneR": 6.0
+      }
+    },
+    {
+      "type": "doubler",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "delayL": 22.0,
+        "delayR": 31.0,
+        "detune": 10.0,
+        "width": 1.0,
+        "wet": 0.45
+      }
+    },
+    {
+      "type": "chorus",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.3,
+        "depth": 5.0,
+        "delay": 18.0,
+        "voices": 3.0,
+        "feedback": 0.15,
+        "spread": 1.0,
+        "wet": 0.35
+      }
+    },
+    {
+      "type": "reverb.cathedral",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.28,
+        "dry": 1.0,
+        "size": 0.95,
+        "decay": 5.5,
+        "predelay": 40.0,
+        "damping": 4200.0
+      }
+    }
+  ],
+  "tempo": 70
+}

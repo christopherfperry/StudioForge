@@ -1,0 +1,53 @@
+{
+  "id": "duran-duran-arpeggio-synth",
+  "name": "Duran Duran - Arpeggio Synth",
+  "category": "Synth",
+  "artistStyle": "Duran Duran",
+  "tags": [
+    "synth"
+  ],
+  "description": "Bright plucky arp synth. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 250.0,
+        "sync": 4.0,
+        "feedback": 0.35,
+        "wet": 0.25,
+        "pingpong": 1.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.2,
+        "dry": 1.0,
+        "decay": 2.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 1.0,
+      "osc2Wave": 0.0,
+      "cutoff": 2200.0,
+      "filterEnv": 0.6,
+      "filtD": 0.15,
+      "filtS": 0.0,
+      "ampD": 0.3,
+      "ampS": 0.2
+    }
+  },
+  "tempo": 120
+}

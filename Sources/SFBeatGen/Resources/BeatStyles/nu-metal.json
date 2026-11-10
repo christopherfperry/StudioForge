@@ -1,0 +1,44 @@
+{
+  "id": "nu-metal",
+  "name": "Nu-Metal Bounce",
+  "genre": "Nu-Metal",
+  "artistStyle": "",
+  "description": "Syncopated, bouncy nu-metal groove with ghosted snares.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    85,
+    115
+  ],
+  "defaultTempo": 98,
+  "defaultSwing": 0.15,
+  "lanes": {
+    "kick": "X..x|..x.|.x..|x...",
+    "snare": "....|X...|....|X...",
+    "hatClosed": "x.x.|x.x.|x.x.|x.x."
+  },
+  "complexLanes": {
+    "snare": "..o.|...o|o...|..o.",
+    "hatOpen": "....|....|....|..x.",
+    "china": "....|....|....|...?"
+  },
+  "fills": [
+    {
+      "tomHigh": "....|....|xx..|....",
+      "tomMid": "....|....|..xx|....",
+      "tomLow": "....|....|....|xxXX",
+      "snare": "x...|x...|....|....",
+      "kick": "x...|x...|x...|x..."
+    },
+    {
+      "snare": "x..x|..x.|x.x.|XXXX",
+      "kick": "x..x|..x.|x.x.|...."
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "id": "soundgarden-heavy",
+  "name": "Heavy Grunge Shuffle",
+  "genre": "Grunge",
+  "artistStyle": "Soundgarden",
+  "description": "Heavy, slightly swung grunge groove.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    80,
+    120
+  ],
+  "defaultTempo": 100,
+  "defaultSwing": 0.25,
+  "lanes": {
+    "kick": "X...|..x.|x...|x...",
+    "snare": "....|X...|....|X...",
+    "ride": "x.x.|x.x.|x.x.|x.x."
+  },
+  "complexLanes": {
+    "snare": "....|..o.|....|.o.o"
+  },
+  "fills": [
+    {
+      "snare": "....|....|x.x.|xxxx",
+      "tomHigh": "x.x.|....|....|....",
+      "tomMid": "....|x.x.|....|....",
+      "tomLow": "....|....|....|....",
+      "kick": "x...|x...|x...|x..."
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ]
+}

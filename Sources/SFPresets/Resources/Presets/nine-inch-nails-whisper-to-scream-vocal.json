@@ -1,0 +1,77 @@
+{
+  "id": "nine-inch-nails-whisper-to-scream-vocal",
+  "name": "Nine Inch Nails - Whisper to Scream Vocal",
+  "category": "Vocal",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "vocal"
+  ],
+  "description": "Intimate close vocal that can explode; distortion parallel-blended. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -24.0,
+        "ratio": 6.0,
+        "attack": 3.0,
+        "release": 80.0,
+        "makeup": 6.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 0.35,
+      "bypassed": false,
+      "params": {
+        "mode": 1.0,
+        "drive": 18.0,
+        "tone": 5000.0,
+        "preHPF": 200.0,
+        "output": -12.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 90.0,
+        "peak3Freq": 3500.0,
+        "peak3Gain": 3.0
+      }
+    },
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 120.0,
+        "sync": 0.0,
+        "feedback": 0.1,
+        "wet": 0.1,
+        "pingpong": 0.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    },
+    {
+      "type": "reverb.plate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.15,
+        "dry": 1.0,
+        "decay": 1.4
+      }
+    }
+  ],
+  "tempo": 110
+}

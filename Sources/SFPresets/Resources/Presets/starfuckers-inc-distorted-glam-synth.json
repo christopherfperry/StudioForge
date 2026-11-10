@@ -1,0 +1,85 @@
+{
+  "id": "starfuckers-inc-distorted-glam-synth",
+  "name": "Starfuckers, Inc. - Distorted Glam Synth",
+  "category": "Synth",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "Starfuckers"
+  ],
+  "description": "Bright, overdriven glam-industrial lead/bass hybrid with bitcrushed edge (Starfuckers, Inc.-style). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 4.0,
+        "drive": 20.0,
+        "tone": 7000.0,
+        "preHPF": 80.0,
+        "output": -14.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "bitcrusher",
+      "mix": 0.3,
+      "bypassed": false,
+      "params": {
+        "bits": 9.0,
+        "downsample": 2.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 6.0,
+        "attack": 2.0,
+        "release": 60.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 200.0,
+        "sync": 4.0,
+        "feedback": 0.2,
+        "wet": 0.15,
+        "pingpong": 0.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 1.0,
+      "osc2Wave": 0.0,
+      "osc2Octave": -1.0,
+      "fmAmount": 0.8,
+      "unison": 2.0,
+      "unisonDetune": 12.0,
+      "cutoff": 3200.0,
+      "resonance": 2.0,
+      "filterEnv": 0.5,
+      "filtD": 0.2,
+      "mono": 1.0
+    }
+  },
+  "beatStyle": "nin-starfuckers",
+  "tempo": 128
+}

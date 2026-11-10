@@ -1,0 +1,35 @@
+{
+  "id": "korn-bounce",
+  "name": "KoRn Bounce",
+  "genre": "Nu-Metal",
+  "artistStyle": "KoRn",
+  "description": "Choppy, bouncy nu-metal stutter groove.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    85,
+    110
+  ],
+  "defaultTempo": 98,
+  "defaultSwing": 0.2,
+  "lanes": {
+    "kick": "X.xx|..x.|.xx.|x...",
+    "snare": "....|X...|....|X...",
+    "hatClosed": "x.x.|x.x.|x.x.|x.x."
+  },
+  "complexLanes": {
+    "snare": "..o.|..oo|o...|..o.",
+    "china": "x...|....|x...|...."
+  },
+  "fills": [
+    {
+      "snare": "x.xx|.x.x|x.xx|XXXX"
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ]
+}

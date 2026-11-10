@@ -1,0 +1,47 @@
+{
+  "id": "marilyn-manson-noise-synth-stab",
+  "name": "Marilyn Manson - Noise Synth Stab",
+  "category": "Synth",
+  "artistStyle": "Marilyn Manson",
+  "tags": [
+    "synth"
+  ],
+  "description": "Ring-modulated noise stab. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "ringmod",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "frequency": 400.0,
+        "lfoRate": 0.2,
+        "lfoDepth": 0.5,
+        "wet": 0.4
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 2.0,
+        "drive": 20.0,
+        "tone": 6000.0,
+        "preHPF": 100.0,
+        "output": -14.0,
+        "bias": 0.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 0.0,
+      "noiseLevel": 0.4,
+      "cutoff": 4000.0,
+      "ampD": 0.2,
+      "ampS": 0.0
+    }
+  },
+  "tempo": 108
+}

@@ -1,0 +1,68 @@
+{
+  "id": "happiness-in-slavery-kit-mechanical",
+  "name": "Happiness in Slavery Kit - Mechanical",
+  "category": "Drums",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "kit",
+    "beat"
+  ],
+  "description": "Clanking, mechanical, quantized kit with metal percussion and gated room. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "ringmod",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "frequency": 180.0,
+        "lfoRate": 0.1,
+        "lfoDepth": 0.3,
+        "wet": 0.2
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 8.0,
+        "attack": 2.0,
+        "release": 60.0,
+        "makeup": 6.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.gated",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.25,
+        "dry": 1.0,
+        "gateTime": 180.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -3.0,
+      "pad36.tune": 0.0,
+      "pad36.decay": 0.8,
+      "pad36.snap": 0.9,
+      "pad36.drive": 0.5,
+      "pad38.model": 9.0,
+      "pad38.tune": 0.0,
+      "pad38.decay": 0.7,
+      "pad75.level": 0.0,
+      "pad42.model": 9.0,
+      "pad42.tune": 12.0,
+      "pad42.decay": 0.3
+    }
+  },
+  "beatStyle": "nin-happiness-in-slavery",
+  "tempo": 120
+}

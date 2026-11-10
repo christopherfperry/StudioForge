@@ -1,0 +1,67 @@
+{
+  "id": "eraser-swelling-pad-to-noise",
+  "name": "Eraser - Swelling Pad to Noise",
+  "category": "Synth",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "Eraser",
+    "pad"
+  ],
+  "description": "Slow-building detuned pad with noise and a band-pass sweep that erupts into distortion (Eraser-style). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "filter",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 2.0,
+        "cutoff": 1200.0,
+        "resonance": 2.5,
+        "drive": 6.0,
+        "lfoRate": 0.05,
+        "lfoDepth": 2.5
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 2.0,
+        "drive": 14.0,
+        "tone": 5000.0,
+        "preHPF": 100.0,
+        "output": -14.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "reverb.ambient",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.35,
+        "dry": 1.0,
+        "decay": 8.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 0.0,
+      "osc2Wave": 0.0,
+      "unison": 5.0,
+      "unisonDetune": 30.0,
+      "noiseLevel": 0.25,
+      "cutoff": 1800.0,
+      "ampA": 2.5,
+      "ampR": 3.0,
+      "filtA": 3.0,
+      "filterEnv": 0.4
+    }
+  },
+  "beatStyle": "nin-eraser",
+  "tempo": 84
+}

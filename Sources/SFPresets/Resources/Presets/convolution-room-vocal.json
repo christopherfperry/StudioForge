@@ -1,0 +1,39 @@
+{
+  "id": "convolution-room-vocal",
+  "name": "Convolution Room Vocal",
+  "category": "Vocal",
+  "artistStyle": "",
+  "tags": [
+    "convolution",
+    "ir"
+  ],
+  "description": "Vocal through the convolution reverb (load your own IR in the effect). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 3.0,
+        "attack": 10.0,
+        "release": 120.0,
+        "makeup": 3.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.convolution",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "irType": 1.0,
+        "decay": 1.5,
+        "predelay": 10.0,
+        "wet": 0.25,
+        "dry": 1.0
+      }
+    }
+  ]
+}

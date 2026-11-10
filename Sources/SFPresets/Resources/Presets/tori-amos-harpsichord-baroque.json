@@ -1,0 +1,30 @@
+{
+  "id": "tori-amos-harpsichord-baroque",
+  "name": "Tori Amos - Harpsichord Baroque",
+  "category": "Synth",
+  "artistStyle": "Tori Amos",
+  "tags": [
+    "synth"
+  ],
+  "description": "Bright harpsichord for baroque colours. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "reverb.chamber",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.2,
+        "dry": 1.0,
+        "decay": 1.6
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 4.0,
+      "brightness": 0.6
+    }
+  },
+  "tempo": 90
+}

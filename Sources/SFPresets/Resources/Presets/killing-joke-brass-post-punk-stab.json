@@ -1,0 +1,83 @@
+{
+  "id": "killing-joke-brass-post-punk-stab",
+  "name": "Killing Joke Brass - Post-Punk Stab",
+  "category": "Synth",
+  "artistStyle": "Killing Joke",
+  "tags": [
+    "trumpet",
+    "brass",
+    "post-punk"
+  ],
+  "description": "Abrasive post-punk trumpet stabs: bright open bell, growl, slap delay and a gritty amp push. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 4.0,
+        "attack": 5.0,
+        "release": 90.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 3.0,
+        "drive": 12.0,
+        "tone": 6000.0,
+        "preHPF": 200.0,
+        "output": -10.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 110.0,
+        "sync": 0.0,
+        "feedback": 0.15,
+        "wet": 0.18,
+        "pingpong": 0.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.18,
+        "dry": 1.0,
+        "size": 0.5,
+        "decay": 0.9
+      }
+    }
+  ],
+  "instrument": {
+    "type": "brass.trumpet",
+    "params": {
+      "brightness": 0.85,
+      "breath": 0.3,
+      "vibratoDepth": 8.0,
+      "scoop": 120.0,
+      "attack": 0.02,
+      "growl": 0.35,
+      "ensemble": 2.0,
+      "formant": 1500.0,
+      "gain": -6.0
+    }
+  }
+}

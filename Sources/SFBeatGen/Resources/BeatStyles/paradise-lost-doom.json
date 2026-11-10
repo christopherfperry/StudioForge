@@ -1,0 +1,39 @@
+{
+  "id": "paradise-lost-doom",
+  "name": "Gothic Doom March",
+  "genre": "Doom",
+  "artistStyle": "Paradise Lost",
+  "description": "Mid-tempo gothic doom march.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    70,
+    100
+  ],
+  "defaultTempo": 88,
+  "defaultSwing": 0.0,
+  "lanes": {
+    "kick": "X...|..x.|X...|....",
+    "snare": "....|X...|....|X...",
+    "ride": "x...|x...|x...|x..."
+  },
+  "complexLanes": {
+    "kick": "....|....|..x.|..x.",
+    "tomLow": "....|....|....|...?"
+  },
+  "fills": [
+    {
+      "snare": "....|....|x.x.|xxxx",
+      "tomHigh": "x.x.|....|....|....",
+      "tomMid": "....|x.x.|....|....",
+      "tomLow": "....|....|....|....",
+      "kick": "x...|x...|x...|x..."
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ]
+}

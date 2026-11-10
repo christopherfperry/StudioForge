@@ -1,0 +1,15 @@
+{
+  "id": "synth-starter",
+  "name": "Synth Starter",
+  "category": "Synth",
+  "artistStyle": "",
+  "tags": [
+    "starter"
+  ],
+  "description": "Init subtractive synth. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {}
+  }
+}

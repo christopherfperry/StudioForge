@@ -1,0 +1,65 @@
+{
+  "id": "korn-7-string-drop-a-riff",
+  "name": "KoRn - 7-String Drop-A Riff",
+  "category": "Guitar",
+  "artistStyle": "KoRn",
+  "tags": [
+    "guitar"
+  ],
+  "description": "Scooped, bass-heavy, tight 7-string chug. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "gate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -50.0,
+        "release": 40.0,
+        "range": -80.0,
+        "hold": 20.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 0.0,
+        "drive": 6.0,
+        "tone": 4000.0,
+        "preHPF": 500.0,
+        "output": -6.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 4.0,
+        "gain": 7.0,
+        "bass": 7.5,
+        "mid": 2.5,
+        "treble": 6.5,
+        "presence": 5.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 150.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 2.0,
+        "mic": 0.3,
+        "lowCut": 70.0,
+        "highCut": 11000.0,
+        "output": 0.0
+      }
+    }
+  ],
+  "tempo": 98
+}

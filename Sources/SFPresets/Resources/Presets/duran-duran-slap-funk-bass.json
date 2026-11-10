@@ -1,0 +1,51 @@
+{
+  "id": "duran-duran-slap-funk-bass",
+  "name": "Duran Duran - Slap Funk Bass",
+  "category": "Bass",
+  "artistStyle": "Duran Duran",
+  "tags": [
+    "bass"
+  ],
+  "description": "Bright punchy fretless/slap-style tone. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -24.0,
+        "ratio": 6.0,
+        "attack": 3.0,
+        "release": 80.0,
+        "makeup": 6.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowShelfGain": 3.0,
+        "peak3Freq": 2500.0,
+        "peak3Gain": 4.0
+      }
+    },
+    {
+      "type": "chorus",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.5,
+        "depth": 2.0,
+        "delay": 8.0,
+        "voices": 1.0,
+        "feedback": 0.0,
+        "spread": 0.4,
+        "wet": 0.2
+      }
+    }
+  ],
+  "tempo": 120
+}

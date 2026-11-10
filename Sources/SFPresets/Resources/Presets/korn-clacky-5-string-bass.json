@@ -1,0 +1,52 @@
+{
+  "id": "korn-clacky-5-string-bass",
+  "name": "KoRn - Clacky 5-String Bass",
+  "category": "Bass",
+  "artistStyle": "KoRn",
+  "tags": [
+    "bass"
+  ],
+  "description": "Bright, clanky slap-attack bass. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -22.0,
+        "ratio": 6.0,
+        "attack": 2.0,
+        "release": 60.0,
+        "makeup": 6.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowShelfGain": 4.0,
+        "peak2Freq": 500.0,
+        "peak2Gain": -4.0,
+        "peak3Freq": 3000.0,
+        "peak3Gain": 6.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 0.0,
+        "drive": 6.0,
+        "tone": 6000.0,
+        "preHPF": 40.0,
+        "output": -4.0,
+        "bias": 0.0
+      }
+    }
+  ],
+  "tempo": 98
+}

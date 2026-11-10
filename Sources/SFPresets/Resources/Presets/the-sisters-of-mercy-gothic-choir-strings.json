@@ -1,0 +1,45 @@
+{
+  "id": "the-sisters-of-mercy-gothic-choir-strings",
+  "name": "The Sisters of Mercy - Gothic Choir Strings",
+  "category": "Keys",
+  "artistStyle": "The Sisters of Mercy",
+  "tags": [
+    "keys"
+  ],
+  "description": "Lush string machine. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "chorus",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.3,
+        "depth": 6.0,
+        "delay": 16.0,
+        "voices": 3.0,
+        "feedback": 0.15,
+        "spread": 1.0,
+        "wet": 0.5
+      }
+    },
+    {
+      "type": "reverb.cathedral",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 4.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 5.0,
+      "attack": 0.5,
+      "ensemble": 0.9
+    }
+  },
+  "tempo": 132
+}

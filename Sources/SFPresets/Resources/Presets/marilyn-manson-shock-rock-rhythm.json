@@ -1,0 +1,61 @@
+{
+  "id": "marilyn-manson-shock-rock-rhythm",
+  "name": "Marilyn Manson - Shock Rock Rhythm",
+  "category": "Guitar",
+  "artistStyle": "Marilyn Manson",
+  "tags": [
+    "guitar"
+  ],
+  "description": "Thick, saturated, gated wall of guitar. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "gate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -48.0,
+        "release": 40.0,
+        "range": -80.0,
+        "hold": 20.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 4.0,
+        "gain": 7.0,
+        "bass": 6.0,
+        "mid": 4.0,
+        "treble": 6.5,
+        "presence": 5.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 90.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 2.0,
+        "mic": 0.3,
+        "lowCut": 70.0,
+        "highCut": 11000.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "peak2Freq": 700.0,
+        "peak2Gain": -3.0
+      }
+    }
+  ],
+  "tempo": 108
+}

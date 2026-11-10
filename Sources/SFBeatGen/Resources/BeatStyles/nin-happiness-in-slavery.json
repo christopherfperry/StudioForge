@@ -1,0 +1,38 @@
+{
+  "id": "nin-happiness-in-slavery",
+  "name": "Happiness in Slavery Machine",
+  "genre": "Industrial",
+  "artistStyle": "Nine Inch Nails",
+  "description": "Rigid, clanking, quantised machine beat (Happiness in Slavery-style; original pattern).",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    110,
+    132
+  ],
+  "defaultTempo": 120,
+  "defaultSwing": 0.0,
+  "lanes": {
+    "kick": "X...|X...|X...|X...",
+    "snare": "....|X...|....|X...",
+    "hatClosed": "xxxx|xxxx|xxxx|xxxx",
+    "metal": "x..x|..x.|x..x|..x."
+  },
+  "complexLanes": {
+    "metal": "x..x|.xx.|x..x|.xxx",
+    "cowbell": "..x.|..x.|..x.|..x."
+  },
+  "fills": [
+    {
+      "metal": "xxxx|xxxx|xxxx|XXXX",
+      "snare": "....|....|....|x.x."
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ],
+  "kitPreset": "happiness-in-slavery-kit-mechanical"
+}

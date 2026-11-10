@@ -1,0 +1,79 @@
+{
+  "id": "duran-duran-funky-new-wave-clean",
+  "name": "Duran Duran - Funky New Wave Clean",
+  "category": "Guitar",
+  "artistStyle": "Duran Duran",
+  "tags": [
+    "guitar"
+  ],
+  "description": "Bright, compressed, chorused funk guitar. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -24.0,
+        "ratio": 5.0,
+        "attack": 5.0,
+        "release": 90.0,
+        "makeup": 6.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 0.0,
+        "gain": 3.0,
+        "bass": 5.0,
+        "mid": 5.0,
+        "treble": 7.5,
+        "presence": 7.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 90.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 0.0,
+        "mic": 0.2,
+        "lowCut": 70.0,
+        "highCut": 11000.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "chorus",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.8,
+        "depth": 4.0,
+        "delay": 10.0,
+        "voices": 2.0,
+        "feedback": 0.1,
+        "spread": 1.0,
+        "wet": 0.45
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.15,
+        "dry": 1.0,
+        "decay": 1.0
+      }
+    }
+  ],
+  "tempo": 120
+}

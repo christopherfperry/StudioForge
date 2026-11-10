@@ -1,0 +1,59 @@
+{
+  "id": "paradise-lost-gothic-doom-vocal",
+  "name": "Paradise Lost - Gothic Doom Vocal",
+  "category": "Vocal",
+  "artistStyle": "Paradise Lost",
+  "tags": [
+    "vocal"
+  ],
+  "description": "Dark baritone with plate and hall, subtle doubling. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 4.0,
+        "attack": 10.0,
+        "release": 150.0,
+        "makeup": 4.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 80.0,
+        "peak1Freq": 250.0,
+        "peak1Gain": 2.0
+      }
+    },
+    {
+      "type": "doubler",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "delayL": 20.0,
+        "delayR": 28.0,
+        "detune": 6.0,
+        "width": 0.8,
+        "wet": 0.35
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.22,
+        "dry": 1.0,
+        "decay": 3.0
+      }
+    }
+  ],
+  "tempo": 80
+}

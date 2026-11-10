@@ -1,0 +1,55 @@
+{
+  "id": "alice-in-chains-wah-sludge-guitar",
+  "name": "Alice in Chains - Wah Sludge Guitar",
+  "category": "Guitar",
+  "artistStyle": "Alice in Chains",
+  "tags": [
+    "guitar"
+  ],
+  "description": "Mid-scooped heavy tone with auto-wah colour. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "autowah",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 0.0,
+        "sensitivity": 0.5,
+        "minFreq": 400.0,
+        "maxFreq": 2000.0,
+        "q": 4.0,
+        "rate": 1.5,
+        "release": 120.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 3.0,
+        "gain": 6.5,
+        "bass": 6.0,
+        "mid": 4.0,
+        "treble": 6.0,
+        "presence": 5.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 90.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 2.0,
+        "mic": 0.35,
+        "lowCut": 70.0,
+        "highCut": 11000.0,
+        "output": 0.0
+      }
+    }
+  ],
+  "tempo": 92
+}

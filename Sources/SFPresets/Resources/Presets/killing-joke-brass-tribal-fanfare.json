@@ -1,0 +1,61 @@
+{
+  "id": "killing-joke-brass-tribal-fanfare",
+  "name": "Killing Joke Brass - Tribal Fanfare",
+  "category": "Synth",
+  "artistStyle": "Killing Joke",
+  "tags": [
+    "trumpet",
+    "brass",
+    "fanfare"
+  ],
+  "description": "Massed 3-player trumpet fanfare with cathedral-like space, for the tribal, apocalyptic choruses. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 150.0,
+        "peak3Freq": 2500.0,
+        "peak3Gain": 2.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 3.0,
+        "attack": 15.0,
+        "release": 150.0,
+        "makeup": 3.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.cathedral",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 4.5
+      }
+    }
+  ],
+  "instrument": {
+    "type": "brass.trumpet",
+    "params": {
+      "brightness": 0.7,
+      "breath": 0.2,
+      "vibratoRate": 5.5,
+      "vibratoDepth": 20.0,
+      "scoop": 60.0,
+      "ensemble": 3.0,
+      "growl": 0.15,
+      "gain": -8.0
+    }
+  }
+}

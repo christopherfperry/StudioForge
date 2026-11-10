@@ -1,0 +1,61 @@
+{
+  "id": "duran-duran-new-romantic-vocal",
+  "name": "Duran Duran - New Romantic Vocal",
+  "category": "Vocal",
+  "artistStyle": "Duran Duran",
+  "tags": [
+    "vocal"
+  ],
+  "description": "Polished, bright vocal with chorus and plate. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 4.0,
+        "attack": 8.0,
+        "release": 120.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 100.0,
+        "highShelfFreq": 8000.0,
+        "highShelfGain": 3.0
+      }
+    },
+    {
+      "type": "chorus",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.5,
+        "depth": 2.0,
+        "delay": 12.0,
+        "voices": 2.0,
+        "feedback": 0.05,
+        "spread": 0.8,
+        "wet": 0.2
+      }
+    },
+    {
+      "type": "reverb.plate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.2,
+        "dry": 1.0,
+        "decay": 2.0
+      }
+    }
+  ],
+  "tempo": 120
+}

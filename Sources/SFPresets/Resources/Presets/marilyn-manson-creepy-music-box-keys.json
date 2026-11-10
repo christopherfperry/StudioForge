@@ -1,0 +1,43 @@
+{
+  "id": "marilyn-manson-creepy-music-box-keys",
+  "name": "Marilyn Manson - Creepy Music Box Keys",
+  "category": "Keys",
+  "artistStyle": "Marilyn Manson",
+  "tags": [
+    "keys"
+  ],
+  "description": "Detuned harpsichord with flanger. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "flanger",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.1,
+        "depth": 0.5,
+        "delay": 3.0,
+        "feedback": 0.4,
+        "wet": 0.3
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 3.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 4.0,
+      "tune": -20.0,
+      "brightness": 0.7
+    }
+  },
+  "tempo": 108
+}

@@ -1,0 +1,66 @@
+{
+  "id": "eraser-kit-building-tribal",
+  "name": "Eraser Kit - Building Tribal",
+  "category": "Drums",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "kit",
+    "beat"
+  ],
+  "description": "Toms-heavy tribal build with distortion bloom. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 7.0,
+        "drive": 10.0,
+        "tone": 6000.0,
+        "preHPF": 30.0,
+        "output": -8.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 4.0,
+        "attack": 20.0,
+        "release": 150.0,
+        "makeup": 4.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.18,
+        "dry": 1.0,
+        "decay": 2.5
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -3.0,
+      "pad41.tune": -7.0,
+      "pad41.decay": 1.6,
+      "pad41.drive": 0.3,
+      "pad45.tune": -2.0,
+      "pad45.decay": 1.3,
+      "pad36.decay": 1.2,
+      "pad36.drive": 0.3
+    }
+  },
+  "beatStyle": "nin-eraser",
+  "tempo": 84
+}

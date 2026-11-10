@@ -1,0 +1,46 @@
+{
+  "id": "tori-amos-b-sendorfer-style-grand",
+  "name": "Tori Amos - Bösendorfer-style Grand",
+  "category": "Keys",
+  "artistStyle": "Tori Amos",
+  "tags": [
+    "keys"
+  ],
+  "description": "Expressive, bright grand piano. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -16.0,
+        "ratio": 2.0,
+        "attack": 20.0,
+        "release": 200.0,
+        "makeup": 2.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.18,
+        "dry": 1.0,
+        "decay": 2.2
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 0.0,
+      "brightness": 0.65,
+      "decay": 1.4,
+      "velocity": 0.95
+    }
+  },
+  "tempo": 90
+}

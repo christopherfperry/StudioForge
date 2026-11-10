@@ -1,0 +1,51 @@
+{
+  "id": "nine-inch-nails-broken-piano",
+  "name": "Nine Inch Nails - Broken Piano",
+  "category": "Keys",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "keys"
+  ],
+  "description": "Detuned, lo-fi piano with bitcrush and room. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "bitcrusher",
+      "mix": 0.3,
+      "bypassed": false,
+      "params": {
+        "bits": 12.0,
+        "downsample": 2.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 120.0,
+        "highCut": 9000.0
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.25,
+        "dry": 1.0,
+        "decay": 1.2
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 0.0,
+      "brightness": 0.4,
+      "tune": -12.0,
+      "attackNoise": 0.6
+    }
+  },
+  "tempo": 110
+}

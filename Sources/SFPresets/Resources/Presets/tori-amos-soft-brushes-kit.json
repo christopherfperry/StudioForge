@@ -1,0 +1,49 @@
+{
+  "id": "tori-amos-soft-brushes-kit",
+  "name": "Tori Amos - Soft Brushes Kit",
+  "category": "Drums",
+  "artistStyle": "Tori Amos",
+  "tags": [
+    "drums"
+  ],
+  "description": "Light, gentle kit. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 3.0,
+        "attack": 20.0,
+        "release": 200.0,
+        "makeup": 2.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.chamber",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.2,
+        "dry": 1.0,
+        "decay": 1.4
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -6.0,
+      "pad36.decay": 0.8,
+      "pad36.tone": 0.3,
+      "pad38.tone": 0.3,
+      "pad38.snap": 0.3,
+      "pad51.level": -6.0
+    }
+  },
+  "beatStyle": "alt-rock",
+  "tempo": 90
+}

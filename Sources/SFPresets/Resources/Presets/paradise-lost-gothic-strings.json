@@ -1,0 +1,46 @@
+{
+  "id": "paradise-lost-gothic-strings",
+  "name": "Paradise Lost - Gothic Strings",
+  "category": "Synth",
+  "artistStyle": "Paradise Lost",
+  "tags": [
+    "synth"
+  ],
+  "description": "Melancholic string machine pad. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "chorus",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.3,
+        "depth": 5.0,
+        "delay": 15.0,
+        "voices": 3.0,
+        "feedback": 0.1,
+        "spread": 1.0,
+        "wet": 0.4
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 4.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 5.0,
+      "attack": 0.8,
+      "release": 2.0,
+      "ensemble": 0.8
+    }
+  },
+  "tempo": 80
+}

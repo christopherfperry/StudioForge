@@ -1,0 +1,64 @@
+{
+  "id": "spring-reverb-surf",
+  "name": "Spring Reverb Surf",
+  "category": "Guitar",
+  "artistStyle": "",
+  "tags": [
+    "spring",
+    "surf"
+  ],
+  "description": "Clean amp with drippy spring reverb and tremolo. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 0.0,
+        "gain": 3.0,
+        "bass": 5.0,
+        "mid": 5.0,
+        "treble": 7.0,
+        "presence": 5.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 90.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 0.0,
+        "mic": 0.3,
+        "lowCut": 70.0,
+        "highCut": 11000.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "tremolo",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 6.0,
+        "depth": 0.5,
+        "shape": 0.0,
+        "stereo": 0.0
+      }
+    },
+    {
+      "type": "reverb.spring",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "decay": 2.5,
+        "tension": 0.5,
+        "tone": 3500.0,
+        "drip": 0.8,
+        "wet": 0.4
+      }
+    }
+  ]
+}

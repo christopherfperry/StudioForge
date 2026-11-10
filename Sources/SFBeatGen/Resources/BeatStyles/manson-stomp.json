@@ -1,0 +1,37 @@
+{
+  "id": "manson-stomp",
+  "name": "Shock Rock Stomp",
+  "genre": "Industrial",
+  "artistStyle": "Marilyn Manson",
+  "description": "Stomping, glam-industrial beat.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    95,
+    120
+  ],
+  "defaultTempo": 108,
+  "defaultSwing": 0.0,
+  "lanes": {
+    "kick": "X...|....|X.x.|....",
+    "snare": "....|X...|....|X...",
+    "clap": "....|X...|....|X...",
+    "hatClosed": "x.x.|x.x.|x.x.|x.x."
+  },
+  "complexLanes": {
+    "metal": "....|..?.|....|..x."
+  },
+  "fills": [
+    {
+      "snare": "x.x.|x.x.|xxxx|XXXX",
+      "kick": "x...|x...|x...|x...",
+      "hatClosed": "................"
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ]
+}

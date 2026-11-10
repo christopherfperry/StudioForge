@@ -1,0 +1,62 @@
+{
+  "id": "starfuckers-kit-glam-crunch",
+  "name": "Starfuckers Kit - Glam Crunch",
+  "category": "Drums",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "kit",
+    "beat"
+  ],
+  "description": "Fat swinging kick with crunchy, bitcrushed snare and hats. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "bitcrusher",
+      "mix": 0.35,
+      "bypassed": false,
+      "params": {
+        "bits": 11.0,
+        "downsample": 2.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 6.0,
+        "attack": 5.0,
+        "release": 90.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "limiter",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "ceiling": -0.8,
+        "input": 2.0,
+        "release": 60.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -2.0,
+      "pad36.decay": 1.0,
+      "pad36.drive": 0.5,
+      "pad38.tune": 3.0,
+      "pad38.drive": 0.5,
+      "pad38.snap": 0.8,
+      "pad42.drive": 0.4
+    }
+  },
+  "beatStyle": "nin-starfuckers",
+  "tempo": 128
+}

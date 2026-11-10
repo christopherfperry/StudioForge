@@ -1,0 +1,47 @@
+{
+  "id": "soundgarden-swirling-synth-pad",
+  "name": "Soundgarden - Swirling Synth Pad",
+  "category": "Synth",
+  "artistStyle": "Soundgarden",
+  "tags": [
+    "synth"
+  ],
+  "description": "Phased drone pad. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "phaser",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.15,
+        "depth": 0.8,
+        "center": 600.0,
+        "stages": 8.0,
+        "feedback": 0.6,
+        "wet": 0.5
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 3.5
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 0.0,
+      "osc2Wave": 2.0,
+      "cutoff": 1500.0,
+      "ampA": 1.5,
+      "ampR": 2.5,
+      "unison": 3.0
+    }
+  },
+  "tempo": 104
+}

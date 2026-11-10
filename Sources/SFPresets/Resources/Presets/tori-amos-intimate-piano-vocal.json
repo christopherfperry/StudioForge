@@ -1,0 +1,47 @@
+{
+  "id": "tori-amos-intimate-piano-vocal",
+  "name": "Tori Amos - Intimate Piano Vocal",
+  "category": "Vocal",
+  "artistStyle": "Tori Amos",
+  "tags": [
+    "vocal"
+  ],
+  "description": "Natural, close, airy vocal with chamber reverb. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 3.0,
+        "attack": 10.0,
+        "release": 150.0,
+        "makeup": 3.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 80.0,
+        "highShelfFreq": 10000.0,
+        "highShelfGain": 3.0
+      }
+    },
+    {
+      "type": "reverb.chamber",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.2,
+        "dry": 1.0,
+        "decay": 1.8
+      }
+    }
+  ],
+  "tempo": 90
+}

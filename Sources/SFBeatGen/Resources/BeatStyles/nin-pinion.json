@@ -1,0 +1,35 @@
+{
+  "id": "nin-pinion",
+  "name": "Pinion Thunder",
+  "genre": "Industrial",
+  "artistStyle": "Nine Inch Nails",
+  "description": "Sparse, huge hits that leave space (Pinion-style; original pattern).",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 8,
+  "tempoRange": [
+    60,
+    84
+  ],
+  "defaultTempo": 72,
+  "defaultSwing": 0.0,
+  "lanes": {
+    "kick": "X.......|........",
+    "tomLow": "........|X.......",
+    "crash": "X.......|........"
+  },
+  "complexLanes": {
+    "snare": "........|....X...",
+    "tomMid": "......?.|......?."
+  },
+  "fills": [
+    {
+      "tomLow": "x.x.xxXX",
+      "kick": "x...x..."
+    }
+  ],
+  "phraseAccent": [],
+  "kitPreset": "pinion-kit-distant-thunder"
+}

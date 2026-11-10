@@ -1,0 +1,64 @@
+#!/bin/bash
+# Installer postinstall (runs as root). $2 = install location, $3 = target volume.
+# Sets up the library for the logged-in console user, clears quarantine and registers the app.
+# Must never fail the installation: every step is best effort and logged to /var/log/install.log.
+set -u
+
+TARGET_VOL="${3:-/}"
+[[ "$TARGET_VOL" == "/" ]] && TARGET_VOL=""
+APP="${SF_APP_PATH:-$TARGET_VOL/Applications/StudioForge.app}"
+log() { echo "StudioForge postinstall: $*"; }
+
+if [[ "${SF_DRY_RUN:-0}" == "1" ]]; then
+  run() { echo "+ $*"; }
+else
+  run() { "$@" || log "warning: '$*' failed"; }
+fi
+
+# 1. Console user (the person at the Mac, not root)
+CONSOLE_USER="${SF_CONSOLE_USER:-$(stat -f%Su /dev/console 2>/dev/null || true)}"
+if [[ -z "$CONSOLE_USER" || "$CONSOLE_USER" == "root" || "$CONSOLE_USER" == "loginwindow" ]]; then
+  log "no console user logged in; the app creates the library on first launch."
+else
+  USER_HOME="${SF_USER_HOME:-$(dscl . -read "/Users/$CONSOLE_USER" NFSHomeDirectory 2>/dev/null | awk '{print $2}')}"
+  [[ -z "$USER_HOME" ]] && USER_HOME="/Users/$CONSOLE_USER"
+  USER_GROUP="$(id -gn "$CONSOLE_USER" 2>/dev/null || echo staff)"
+  LIB="$USER_HOME/Music/StudioForge"
+  SUPPORT="$USER_HOME/Library/Application Support/StudioForge"
+  log "setting up $LIB for $CONSOLE_USER"
+
+  for f in Projects Recordings Exports Presets/User Presets/Factory ImpulseResponses Models Samples; do
+    run mkdir -p "$LIB/$f"
+  done
+  run mkdir -p "$SUPPORT"
+
+  # 2. Copy bundled factory presets (never overwrite existing files)
+  PRESETS=""
+  for c in "$APP/Contents/Resources/StudioForge_SFPresets.bundle/Contents/Resources/Presets" \
+           "$APP/Contents/Resources/StudioForge_SFPresets.bundle/Presets" \
+           "$APP/Contents/Resources/StudioForge_SFPresets.resources/Presets"; do
+    if [[ -d "$c" ]]; then PRESETS="$c"; break; fi
+  done
+  if [[ -n "$PRESETS" ]]; then
+    run rsync -a --ignore-existing "$PRESETS/" "$LIB/Presets/Factory/"
+  else
+    log "bundled presets not found in $APP (the app copies them on first launch)"
+  fi
+
+  # 3. Ownership: the user, not root
+  run chown -R "$CONSOLE_USER:$USER_GROUP" "$LIB" "$SUPPORT"
+  # ~/Music and ~/Library/Application Support may have been created just now by mkdir -p
+  run chown "$CONSOLE_USER:$USER_GROUP" "$USER_HOME/Music"
+fi
+
+# 4. Quarantine + LaunchServices (.sfproj double-click, icon)
+if [[ -d "$APP" || "${SF_DRY_RUN:-0}" == "1" ]]; then
+  run xattr -dr com.apple.quarantine "$APP"
+  LSREG="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
+  if [[ -x "$LSREG" || "${SF_DRY_RUN:-0}" == "1" ]]; then run "$LSREG" -f "$APP"; fi
+else
+  log "warning: $APP not found"
+fi
+
+log "done"
+exit 0

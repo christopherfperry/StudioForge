@@ -1,0 +1,62 @@
+{
+  "id": "march-of-the-pigs-noise-stab",
+  "name": "March of the Pigs - Noise Stab",
+  "category": "Synth",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "March of the Pigs"
+  ],
+  "description": "Short, nasty fuzz-saturated synth stabs for frantic 7/8 stomps (March of the Pigs-style). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 2.0,
+        "drive": 30.0,
+        "tone": 6500.0,
+        "preHPF": 150.0,
+        "output": -16.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "bitcrusher",
+      "mix": 0.3,
+      "bypassed": false,
+      "params": {
+        "bits": 6.0,
+        "downsample": 3.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "gate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -36.0,
+        "release": 25.0,
+        "range": -80.0,
+        "hold": 20.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 0.0,
+      "osc2Wave": 1.0,
+      "osc2Semi": -5.0,
+      "noiseLevel": 0.3,
+      "cutoff": 5000.0,
+      "ampD": 0.1,
+      "ampS": 0.0,
+      "ampR": 0.05
+    }
+  },
+  "beatStyle": "nin-march-of-the-pigs",
+  "tempo": 134
+}

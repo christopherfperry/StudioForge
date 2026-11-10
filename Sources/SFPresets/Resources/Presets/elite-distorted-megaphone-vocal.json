@@ -1,0 +1,106 @@
+{
+  "id": "elite-distorted-megaphone-vocal",
+  "name": "Elite - Distorted Megaphone Vocal",
+  "category": "Vocal",
+  "artistStyle": "Deftones",
+  "tags": [
+    "vocal",
+    "scream",
+    "distorted",
+    "megaphone",
+    "Elite"
+  ],
+  "description": "Screamed vocal with heavy distortion, band-limited megaphone filtering, gritty compression and a short slap. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "gate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -50.0,
+        "release": 50.0,
+        "range": -80.0,
+        "hold": 20.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -26.0,
+        "ratio": 8.0,
+        "attack": 2.0,
+        "release": 60.0,
+        "makeup": 8.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 1.0,
+        "drive": 26.0,
+        "tone": 4200.0,
+        "preHPF": 350.0,
+        "output": -16.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 7.0,
+        "mic": 0.4,
+        "lowCut": 400.0,
+        "highCut": 4200.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 300.0,
+        "peak2Freq": 1500.0,
+        "peak2Gain": 6.0,
+        "peak2Q": 1.2,
+        "highCut": 6500.0
+      }
+    },
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 90.0,
+        "sync": 0.0,
+        "feedback": 0.1,
+        "wet": 0.15,
+        "pingpong": 0.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.12,
+        "dry": 1.0,
+        "size": 0.35,
+        "decay": 0.6
+      }
+    }
+  ]
+}

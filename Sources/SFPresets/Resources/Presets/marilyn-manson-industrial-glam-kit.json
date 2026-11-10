@@ -1,0 +1,50 @@
+{
+  "id": "marilyn-manson-industrial-glam-kit",
+  "name": "Marilyn Manson - Industrial Glam Kit",
+  "category": "Drums",
+  "artistStyle": "Marilyn Manson",
+  "tags": [
+    "drums"
+  ],
+  "description": "Stomping, distorted kit with claps. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 7.0,
+        "drive": 8.0,
+        "tone": 8000.0,
+        "preHPF": 20.0,
+        "output": -6.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 6.0,
+        "attack": 5.0,
+        "release": 80.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -3.0,
+      "pad36.drive": 0.6,
+      "pad38.drive": 0.4,
+      "pad39.level": -2.0
+    }
+  },
+  "beatStyle": "industrial",
+  "tempo": 108
+}

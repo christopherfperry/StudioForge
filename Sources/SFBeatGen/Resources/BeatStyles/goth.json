@@ -1,0 +1,43 @@
+{
+  "id": "goth",
+  "name": "Goth Drum Machine",
+  "genre": "Goth",
+  "artistStyle": "",
+  "description": "Driving 80s goth drum-machine pulse: straight kicks, relentless 16th hats, big snare.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    115,
+    150
+  ],
+  "defaultTempo": 132,
+  "defaultSwing": 0.0,
+  "lanes": {
+    "kick": "X...|x...|X...|x...",
+    "snare": "....|X...|....|X...",
+    "hatClosed": "xxxx|xxxx|xxxx|xxxx"
+  },
+  "complexLanes": {
+    "hatOpen": "..x.|..x.|..x.|..x.",
+    "tomMid": "....|....|....|..??"
+  },
+  "fills": [
+    {
+      "tomHigh": "x.x.|....|....|....",
+      "tomMid": "....|x.x.|....|....",
+      "tomLow": "....|....|x.x.|x.x.",
+      "hatClosed": "................"
+    },
+    {
+      "snare": "x.x.|x.x.|xxxx|XXXX",
+      "kick": "x...|x...|x...|x...",
+      "hatClosed": "................"
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "id": "type-o-negative-gothic-church-organ",
+  "name": "Type O Negative - Gothic Church Organ",
+  "category": "Keys",
+  "artistStyle": "Type O Negative",
+  "tags": [
+    "keys"
+  ],
+  "description": "Huge organ in a cathedral. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "reverb.cathedral",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.35,
+        "dry": 1.0,
+        "decay": 6.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 3.0,
+      "registration": 4.0,
+      "modRate": 1.0,
+      "modDepth": 0.3
+    }
+  },
+  "tempo": 72
+}

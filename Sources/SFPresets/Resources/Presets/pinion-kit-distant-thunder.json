@@ -1,0 +1,51 @@
+{
+  "id": "pinion-kit-distant-thunder",
+  "name": "Pinion Kit - Distant Thunder",
+  "category": "Drums",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "kit",
+    "beat"
+  ],
+  "description": "Sparse, huge, reverberant hits. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "reverb.cathedral",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.35,
+        "dry": 1.0,
+        "decay": 6.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 3.0,
+        "attack": 30.0,
+        "release": 300.0,
+        "makeup": 3.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -3.0,
+      "pad36.decay": 2.0,
+      "pad36.tune": -6.0,
+      "pad41.tune": -9.0,
+      "pad41.decay": 2.5,
+      "pad49.decay": 3.5
+    }
+  },
+  "beatStyle": "nin-pinion",
+  "tempo": 72
+}

@@ -1,0 +1,56 @@
+{
+  "id": "closer-lead-synth-whine",
+  "name": "Closer - Lead Synth Whine",
+  "category": "Synth",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "Closer",
+    "lead"
+  ],
+  "description": "Thin, portamento sine/square lead with vibrato that cuts through the mix. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 320.0,
+        "sync": 5.0,
+        "feedback": 0.3,
+        "wet": 0.2,
+        "pingpong": 0.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    },
+    {
+      "type": "reverb.plate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.18,
+        "dry": 1.0,
+        "decay": 1.8
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 3.0,
+      "osc2Wave": 1.0,
+      "osc2Level": 0.25,
+      "osc2Octave": 1.0,
+      "cutoff": 4500.0,
+      "glide": 120.0,
+      "mono": 1.0,
+      "lfoRate": 5.5,
+      "lfoPitch": 0.15
+    }
+  },
+  "tempo": 92
+}

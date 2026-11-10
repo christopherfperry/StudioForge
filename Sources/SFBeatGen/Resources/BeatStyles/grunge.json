@@ -1,0 +1,47 @@
+{
+  "id": "grunge",
+  "name": "Grunge Rock",
+  "genre": "Grunge",
+  "artistStyle": "",
+  "description": "Loose, heavy alt-rock groove with open hats.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    85,
+    130
+  ],
+  "defaultTempo": 104,
+  "defaultSwing": 0.1,
+  "lanes": {
+    "kick": "X...|..x.|x.x.|....",
+    "snare": "....|X...|....|X...",
+    "hatClosed": "x.x.|x.x.|x.x.|x.x."
+  },
+  "complexLanes": {
+    "hatOpen": "....|....|....|..?.",
+    "snare": "....|...o|..o.|...o",
+    "kick": "....|....|....|.?.."
+  },
+  "fills": [
+    {
+      "snare": "....|....|x.x.|xxxx",
+      "tomHigh": "x.x.|....|....|....",
+      "tomMid": "....|x.x.|....|....",
+      "tomLow": "....|....|....|....",
+      "kick": "x...|x...|x...|x..."
+    },
+    {
+      "tomHigh": "....|....|xx..|....",
+      "tomMid": "....|....|..xx|....",
+      "tomLow": "....|....|....|xxXX",
+      "snare": "x...|x...|....|....",
+      "kick": "x...|x...|x...|x..."
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ]
+}

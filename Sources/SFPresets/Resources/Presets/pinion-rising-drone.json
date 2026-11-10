@@ -1,0 +1,67 @@
+{
+  "id": "pinion-rising-drone",
+  "name": "Pinion - Rising Drone",
+  "category": "Synth",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "Pinion",
+    "drone"
+  ],
+  "description": "Ominous, slowly-opening drone that rises in pitch and grit (Pinion-style intro). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "filter",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 0.0,
+        "cutoff": 400.0,
+        "resonance": 1.5,
+        "drive": 6.0,
+        "lfoRate": 0.03,
+        "lfoDepth": 3.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 7.0,
+        "drive": 10.0,
+        "tone": 3000.0,
+        "preHPF": 40.0,
+        "output": -8.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "reverb.cathedral",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 6.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 0.0,
+      "osc2Wave": 0.0,
+      "osc2Octave": -1.0,
+      "unison": 4.0,
+      "unisonDetune": 18.0,
+      "cutoff": 600.0,
+      "ampA": 3.0,
+      "ampR": 4.0,
+      "lfoRate": 0.08,
+      "lfoCutoff": 1.5
+    }
+  },
+  "beatStyle": "nin-pinion",
+  "tempo": 72
+}

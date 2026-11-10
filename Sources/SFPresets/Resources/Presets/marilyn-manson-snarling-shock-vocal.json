@@ -1,0 +1,63 @@
+{
+  "id": "marilyn-manson-snarling-shock-vocal",
+  "name": "Marilyn Manson - Snarling Shock Vocal",
+  "category": "Vocal",
+  "artistStyle": "Marilyn Manson",
+  "tags": [
+    "vocal"
+  ],
+  "description": "Distorted, telephone-filtered snarl with doubling. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -24.0,
+        "ratio": 8.0,
+        "attack": 2.0,
+        "release": 60.0,
+        "makeup": 7.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 1.0,
+        "drive": 20.0,
+        "tone": 4500.0,
+        "preHPF": 300.0,
+        "output": -14.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 250.0,
+        "peak2Freq": 1800.0,
+        "peak2Gain": 5.0,
+        "highCut": 8000.0
+      }
+    },
+    {
+      "type": "doubler",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "delayL": 14.0,
+        "delayR": 22.0,
+        "detune": 12.0,
+        "width": 1.0,
+        "wet": 0.4
+      }
+    }
+  ],
+  "tempo": 108
+}

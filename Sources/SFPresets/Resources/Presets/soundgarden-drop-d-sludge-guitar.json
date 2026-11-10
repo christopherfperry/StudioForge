@@ -1,0 +1,54 @@
+{
+  "id": "soundgarden-drop-d-sludge-guitar",
+  "name": "Soundgarden - Drop-D Sludge Guitar",
+  "category": "Guitar",
+  "artistStyle": "Soundgarden",
+  "tags": [
+    "guitar"
+  ],
+  "description": "Big fuzzy crunch for heavy drop-tuned riffs. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 2.0,
+        "drive": 14.0,
+        "tone": 3500.0,
+        "preHPF": 90.0,
+        "output": -12.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 1.0,
+        "gain": 7.0,
+        "bass": 6.0,
+        "mid": 6.0,
+        "treble": 5.0,
+        "presence": 5.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 90.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 3.0,
+        "mic": 0.35,
+        "lowCut": 70.0,
+        "highCut": 11000.0,
+        "output": 0.0
+      }
+    }
+  ],
+  "tempo": 104
+}

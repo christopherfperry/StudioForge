@@ -1,0 +1,127 @@
+{
+  "id": "tyrant-s-serenade-lead",
+  "name": "Tyrant's Serenade Lead",
+  "category": "Guitar",
+  "artistStyle": "Paradise Lost",
+  "tags": [
+    "lead",
+    "gothic",
+    "doom",
+    "melodic",
+    "Tyrant's Serenade"
+  ],
+  "description": "Melodic gothic-doom lead: tight high-gain British stack, gentle chorus for width, dotted-eighth delay and a long dark hall. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "gate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -58.0,
+        "release": 60.0,
+        "range": -80.0,
+        "hold": 20.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 0.0,
+        "drive": 10.0,
+        "tone": 3800.0,
+        "preHPF": 700.0,
+        "output": -10.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 2.0,
+        "gain": 7.2,
+        "bass": 4.5,
+        "mid": 6.5,
+        "treble": 6.0,
+        "presence": 5.5,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 140.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 3.0,
+        "mic": 0.35,
+        "lowCut": 90.0,
+        "highCut": 7500.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "peak2Freq": 800.0,
+        "peak2Gain": 2.0,
+        "peak2Q": 0.8,
+        "peak3Freq": 3200.0,
+        "peak3Gain": -1.5,
+        "lowCut": 100.0
+      }
+    },
+    {
+      "type": "chorus",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.45,
+        "depth": 2.5,
+        "delay": 14.0,
+        "voices": 2.0,
+        "feedback": 0.05,
+        "spread": 0.9,
+        "wet": 0.3
+      }
+    },
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 450.0,
+        "sync": 5.0,
+        "feedback": 0.32,
+        "wet": 0.22,
+        "pingpong": 1.0,
+        "lowCut": 250.0,
+        "highCut": 4200.0,
+        "modDepth": 0.15,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.24,
+        "dry": 1.0,
+        "size": 0.85,
+        "decay": 3.8,
+        "predelay": 35.0,
+        "damping": 5200.0,
+        "lowCut": 180.0
+      }
+    }
+  ],
+  "tempo": 88
+}

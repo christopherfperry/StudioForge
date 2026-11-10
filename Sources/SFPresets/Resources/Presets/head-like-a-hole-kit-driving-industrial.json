@@ -1,0 +1,66 @@
+{
+  "id": "head-like-a-hole-kit-driving-industrial",
+  "name": "Head Like a Hole Kit - Driving Industrial",
+  "category": "Drums",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "kit",
+    "beat"
+  ],
+  "description": "Driving, punchy machine kit with clap-layered snare and tight hats. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 5.0,
+        "attack": 8.0,
+        "release": 100.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 7.0,
+        "drive": 6.0,
+        "tone": 9000.0,
+        "preHPF": 20.0,
+        "output": -4.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "limiter",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "ceiling": -0.8,
+        "input": 2.0,
+        "release": 60.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -2.0,
+      "pad36.tune": -1.0,
+      "pad36.decay": 0.9,
+      "pad36.drive": 0.4,
+      "pad36.snap": 0.8,
+      "pad38.snap": 0.8,
+      "pad38.drive": 0.3,
+      "pad39.level": -3.0
+    }
+  },
+  "beatStyle": "nin-head-like-a-hole",
+  "tempo": 118
+}

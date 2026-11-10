@@ -1,0 +1,52 @@
+{
+  "id": "alt-rock",
+  "name": "Alt-Rock Drive",
+  "genre": "Alt-Rock",
+  "artistStyle": "",
+  "description": "Straight-ahead 90s alt-rock beat.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    90,
+    140
+  ],
+  "defaultTempo": 112,
+  "defaultSwing": 0.0,
+  "lanes": {
+    "kick": "X...|....|x.x.|....",
+    "snare": "....|X...|....|X...",
+    "hatClosed": "x.x.|x.x.|x.x.|x.x."
+  },
+  "complexLanes": {
+    "kick": "....|..?.|....|.?..",
+    "snare": "....|...o|....|..o.",
+    "ride": "x.x.|x.x.|x.x.|x.x."
+  },
+  "fills": [
+    {
+      "snare": "....|....|x.x.|xxxx",
+      "tomHigh": "x.x.|....|....|....",
+      "tomMid": "....|x.x.|....|....",
+      "tomLow": "....|....|....|....",
+      "kick": "x...|x...|x...|x..."
+    },
+    {
+      "snare": "x.x.|x.x.|xxxx|XXXX",
+      "kick": "x...|x...|x...|x...",
+      "hatClosed": "................"
+    },
+    {
+      "tomHigh": "....|....|xx..|....",
+      "tomMid": "....|....|..xx|....",
+      "tomLow": "....|....|....|xxXX",
+      "snare": "x...|x...|....|....",
+      "kick": "x...|x...|x...|x..."
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "deftones-shoegaze-pad",
+  "name": "Deftones - Shoegaze Pad",
+  "category": "Synth",
+  "artistStyle": "Deftones",
+  "tags": [
+    "synth"
+  ],
+  "description": "Reverse-reverb drenched pad. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "reverb.reverse",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.4,
+        "dry": 1.0
+      }
+    },
+    {
+      "type": "reverb.ambient",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 7.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 0.0,
+      "osc2Wave": 2.0,
+      "unison": 4.0,
+      "cutoff": 2000.0,
+      "ampA": 1.2,
+      "ampR": 3.0
+    }
+  },
+  "tempo": 100
+}

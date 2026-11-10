@@ -1,0 +1,40 @@
+{
+  "id": "duran-dance",
+  "name": "New Romantic Dance",
+  "genre": "New Wave",
+  "artistStyle": "Duran Duran",
+  "description": "Danceable, glossy new-wave beat.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    110,
+    132
+  ],
+  "defaultTempo": 120,
+  "defaultSwing": 0.05,
+  "lanes": {
+    "kick": "X...|x...|X...|x...",
+    "snare": "....|X...|....|X...",
+    "hatClosed": "xoxo|xoxo|xoxo|xoxo",
+    "clap": "....|x...|....|x..."
+  },
+  "complexLanes": {
+    "hatOpen": "..x.|..x.|..x.|..x.",
+    "tambourine": "....|x...|....|x..."
+  },
+  "fills": [
+    {
+      "tomHigh": "....|....|xx..|....",
+      "tomMid": "....|....|..xx|....",
+      "tomLow": "....|....|....|xxXX",
+      "snare": "x...|x...|....|....",
+      "kick": "x...|x...|x...|x..."
+    }
+  ],
+  "phraseAccent": [
+    "crash"
+  ]
+}

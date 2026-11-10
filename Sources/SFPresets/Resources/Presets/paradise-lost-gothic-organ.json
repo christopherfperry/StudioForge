@@ -1,0 +1,31 @@
+{
+  "id": "paradise-lost-gothic-organ",
+  "name": "Paradise Lost - Gothic Organ",
+  "category": "Keys",
+  "artistStyle": "Paradise Lost",
+  "tags": [
+    "keys"
+  ],
+  "description": "Church-style organ with cathedral reverb. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "reverb.cathedral",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 5.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 3.0,
+      "registration": 5.0,
+      "modDepth": 0.2
+    }
+  },
+  "tempo": 80
+}

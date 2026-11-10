@@ -1,0 +1,34 @@
+{
+  "id": "tori-ballad",
+  "name": "Piano Ballad Brushes",
+  "genre": "Alt-Rock",
+  "artistStyle": "Tori Amos",
+  "description": "Gentle ballad pattern with rim clicks.",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    60,
+    100
+  ],
+  "defaultTempo": 80,
+  "defaultSwing": 0.15,
+  "lanes": {
+    "kick": "x...|....|..x.|....",
+    "rim": "....|x...|....|x...",
+    "ride": "x.x.|x.x.|x.x.|x.x."
+  },
+  "complexLanes": {
+    "kick": "....|...?|....|....",
+    "snare": "....|...o|....|.o.."
+  },
+  "fills": [
+    {
+      "tomHigh": "....|....|..x.|x...",
+      "tomLow": "....|....|....|..x."
+    }
+  ],
+  "phraseAccent": []
+}

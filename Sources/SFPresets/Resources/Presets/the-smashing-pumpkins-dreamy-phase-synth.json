@@ -1,0 +1,47 @@
+{
+  "id": "the-smashing-pumpkins-dreamy-phase-synth",
+  "name": "The Smashing Pumpkins - Dreamy Phase Synth",
+  "category": "Synth",
+  "artistStyle": "The Smashing Pumpkins",
+  "tags": [
+    "synth"
+  ],
+  "description": "Phased pad. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "phaser",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.2,
+        "depth": 0.8,
+        "center": 700.0,
+        "stages": 8.0,
+        "feedback": 0.5,
+        "wet": 0.5
+      }
+    },
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 3.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 0.0,
+      "osc2Wave": 0.0,
+      "unison": 3.0,
+      "cutoff": 1800.0,
+      "ampA": 0.8,
+      "ampR": 2.0
+    }
+  },
+  "tempo": 112
+}

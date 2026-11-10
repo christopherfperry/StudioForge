@@ -1,0 +1,16 @@
+{
+  "id": "bass-synth-starter",
+  "name": "Bass Synth Starter",
+  "category": "Bass",
+  "artistStyle": "",
+  "tags": [
+    "starter",
+    "synth"
+  ],
+  "description": "Init bass synth. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [],
+  "instrument": {
+    "type": "synth.bass",
+    "params": {}
+  }
+}

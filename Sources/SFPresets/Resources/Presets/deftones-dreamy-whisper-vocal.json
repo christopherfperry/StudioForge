@@ -1,0 +1,64 @@
+{
+  "id": "deftones-dreamy-whisper-vocal",
+  "name": "Deftones - Dreamy Whisper Vocal",
+  "category": "Vocal",
+  "artistStyle": "Deftones",
+  "tags": [
+    "vocal"
+  ],
+  "description": "Airy, breathy vocal with shimmer. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -22.0,
+        "ratio": 4.0,
+        "attack": 8.0,
+        "release": 150.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 120.0,
+        "highShelfFreq": 10000.0,
+        "highShelfGain": 4.0
+      }
+    },
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 380.0,
+        "sync": 2.0,
+        "feedback": 0.3,
+        "wet": 0.18,
+        "pingpong": 1.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    },
+    {
+      "type": "reverb.shimmer",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.22,
+        "dry": 1.0,
+        "decay": 4.0
+      }
+    }
+  ],
+  "tempo": 100
+}

@@ -1,0 +1,85 @@
+{
+  "id": "closer-kit-dry-heavy-kick",
+  "name": "Closer Kit - Dry Heavy Kick",
+  "category": "Drums",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "kit",
+    "beat"
+  ],
+  "description": "Huge dry, compressed kick, tight snappy snare, crunchy hats; industrial-funk groove at ~92 BPM. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -22.0,
+        "ratio": 6.0,
+        "attack": 15.0,
+        "release": 120.0,
+        "makeup": 6.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 7.0,
+        "drive": 6.0,
+        "tone": 9000.0,
+        "preHPF": 20.0,
+        "output": -4.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowShelfFreq": 70.0,
+        "lowShelfGain": 4.0,
+        "peak2Freq": 400.0,
+        "peak2Gain": -3.0
+      }
+    },
+    {
+      "type": "limiter",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "ceiling": -0.8,
+        "input": 2.0,
+        "release": 60.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -2.0,
+      "pad36.tune": -4.0,
+      "pad36.decay": 1.4,
+      "pad36.tone": 0.35,
+      "pad36.snap": 0.8,
+      "pad36.drive": 0.45,
+      "pad36.level": 2.0,
+      "pad38.tune": 1.0,
+      "pad38.decay": 0.6,
+      "pad38.tone": 0.6,
+      "pad38.snap": 0.7,
+      "pad38.drive": 0.2,
+      "pad42.decay": 0.5,
+      "pad42.tone": 0.7,
+      "pad42.drive": 0.3,
+      "pad46.decay": 1.6
+    }
+  },
+  "beatStyle": "nin-closer",
+  "tempo": 92
+}

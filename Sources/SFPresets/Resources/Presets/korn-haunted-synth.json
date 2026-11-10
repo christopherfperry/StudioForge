@@ -1,0 +1,35 @@
+{
+  "id": "korn-haunted-synth",
+  "name": "KoRn - Haunted Synth",
+  "category": "Synth",
+  "artistStyle": "KoRn",
+  "tags": [
+    "synth"
+  ],
+  "description": "Creepy wobbly lead. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "reverb.hall",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0,
+        "decay": 3.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 3.0,
+      "osc2Wave": 2.0,
+      "lfoRate": 6.0,
+      "lfoPitch": 0.4,
+      "cutoff": 3000.0,
+      "mono": 1.0,
+      "glide": 80.0
+    }
+  },
+  "tempo": 98
+}

@@ -1,0 +1,56 @@
+{
+  "id": "nine-inch-nails-distorted-mono-lead",
+  "name": "Nine Inch Nails - Distorted Mono Lead",
+  "category": "Synth",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "synth"
+  ],
+  "description": "Aggressive saw lead with drive. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 1.0,
+        "drive": 16.0,
+        "tone": 6000.0,
+        "preHPF": 100.0,
+        "output": -12.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "delay",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "time": 300.0,
+        "sync": 5.0,
+        "feedback": 0.3,
+        "wet": 0.2,
+        "pingpong": 0.0,
+        "lowCut": 120.0,
+        "highCut": 6000.0,
+        "modDepth": 0.1,
+        "drive": 0.0,
+        "offsetR": 0.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.subtractive",
+    "params": {
+      "osc1Wave": 0.0,
+      "osc2Wave": 0.0,
+      "osc2Detune": 15.0,
+      "cutoff": 3500.0,
+      "resonance": 2.0,
+      "mono": 1.0,
+      "glide": 30.0,
+      "drive": 0.4
+    }
+  },
+  "tempo": 110
+}

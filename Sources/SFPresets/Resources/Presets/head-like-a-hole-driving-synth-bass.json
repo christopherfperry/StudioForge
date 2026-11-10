@@ -1,0 +1,66 @@
+{
+  "id": "head-like-a-hole-driving-synth-bass",
+  "name": "Head Like a Hole - Driving Synth Bass",
+  "category": "Synth",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "Head Like a Hole"
+  ],
+  "description": "Punchy 16th-note sequenced synth bass with bite (Head Like a Hole-style). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 5.0,
+        "attack": 4.0,
+        "release": 80.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 1.0,
+        "drive": 10.0,
+        "tone": 4500.0,
+        "preHPF": 40.0,
+        "output": -10.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "peak3Freq": 2000.0,
+        "peak3Gain": 3.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "synth.bass",
+    "params": {
+      "osc1Wave": 0.0,
+      "osc2Wave": 1.0,
+      "osc2Detune": 8.0,
+      "cutoff": 900.0,
+      "resonance": 2.0,
+      "filterEnv": 0.5,
+      "filtD": 0.12,
+      "filtS": 0.2,
+      "ampR": 0.04,
+      "mono": 1.0
+    }
+  },
+  "beatStyle": "nin-head-like-a-hole",
+  "tempo": 118
+}

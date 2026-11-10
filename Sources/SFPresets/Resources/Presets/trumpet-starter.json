@@ -1,0 +1,27 @@
+{
+  "id": "trumpet-starter",
+  "name": "Trumpet Starter",
+  "category": "Synth",
+  "artistStyle": "",
+  "tags": [
+    "starter",
+    "brass"
+  ],
+  "description": "Plain open trumpet. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.15,
+        "dry": 1.0,
+        "decay": 1.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "brass.trumpet",
+    "params": {}
+  }
+}

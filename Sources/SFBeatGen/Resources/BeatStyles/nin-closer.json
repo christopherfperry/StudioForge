@@ -1,0 +1,35 @@
+{
+  "id": "nin-closer",
+  "name": "Closer Groove",
+  "genre": "Industrial",
+  "artistStyle": "Nine Inch Nails",
+  "description": "Dry, heavy-kick industrial-funk groove around 92 BPM (Closer-style; original pattern).",
+  "timeSignature": {
+    "numerator": 4,
+    "denominator": 4
+  },
+  "stepsPerBar": 16,
+  "tempoRange": [
+    86,
+    98
+  ],
+  "defaultTempo": 92,
+  "defaultSwing": 0.08,
+  "lanes": {
+    "kick": "X...|...x|..X.|....",
+    "snare": "....|X...|....|X...",
+    "hatClosed": "x.xx|x.x.|x.xx|x.x."
+  },
+  "complexLanes": {
+    "hatClosed": "xoxx|xox.|xoxx|xoxo",
+    "snare": "....|...o|....|.o.."
+  },
+  "fills": [
+    {
+      "snare": "....|....|..x.|x.XX",
+      "kick": "x...|...x|..x.|x..."
+    }
+  ],
+  "phraseAccent": [],
+  "kitPreset": "closer-kit-dry-heavy-kick"
+}

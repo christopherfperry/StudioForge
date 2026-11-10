@@ -1,0 +1,45 @@
+{
+  "id": "soundgarden-psychedelic-organ",
+  "name": "Soundgarden - Psychedelic Organ",
+  "category": "Keys",
+  "artistStyle": "Soundgarden",
+  "tags": [
+    "keys"
+  ],
+  "description": "Rotary organ with phaser. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "phaser",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.3,
+        "depth": 0.7,
+        "center": 700.0,
+        "stages": 6.0,
+        "feedback": 0.4,
+        "wet": 0.4
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.2,
+        "dry": 1.0,
+        "decay": 1.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "keys",
+    "params": {
+      "model": 3.0,
+      "registration": 0.0,
+      "modRate": 6.5,
+      "modDepth": 0.6
+    }
+  },
+  "tempo": 104
+}

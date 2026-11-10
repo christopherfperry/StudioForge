@@ -1,0 +1,48 @@
+{
+  "id": "duran-duran-new-wave-drum-machine",
+  "name": "Duran Duran - New Wave Drum Machine",
+  "category": "Drums",
+  "artistStyle": "Duran Duran",
+  "tags": [
+    "drums"
+  ],
+  "description": "Gated, punchy 80s machine. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 4.0,
+        "attack": 5.0,
+        "release": 80.0,
+        "makeup": 4.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.gated",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.3,
+        "dry": 1.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -3.0,
+      "pad36.decay": 0.8,
+      "pad38.tone": 0.65,
+      "pad38.decay": 1.1,
+      "pad48.tune": 7.0,
+      "pad39.level": -4.0
+    }
+  },
+  "beatStyle": "new-wave",
+  "tempo": 120
+}

@@ -1,0 +1,44 @@
+{
+  "id": "clean-vocal-starter",
+  "name": "Clean Vocal Starter",
+  "category": "Vocal",
+  "artistStyle": "",
+  "tags": [
+    "starter"
+  ],
+  "description": "Neutral vocal chain: low cut, gentle compression, plate. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowCut": 90.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 3.0,
+        "attack": 10.0,
+        "release": 120.0,
+        "makeup": 3.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.plate",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.15,
+        "dry": 1.0,
+        "decay": 1.5
+      }
+    }
+  ]
+}

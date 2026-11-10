@@ -1,0 +1,66 @@
+{
+  "id": "the-smashing-pumpkins-big-muff-wall-guitar",
+  "name": "The Smashing Pumpkins - Big Muff Wall Guitar",
+  "category": "Guitar",
+  "artistStyle": "The Smashing Pumpkins",
+  "tags": [
+    "guitar"
+  ],
+  "description": "Thick, sustaining fuzz wall, doubled wide. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 2.0,
+        "drive": 30.0,
+        "tone": 3000.0,
+        "preHPF": 60.0,
+        "output": -16.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 1.0,
+        "gain": 5.0,
+        "bass": 6.0,
+        "mid": 4.0,
+        "treble": 6.0,
+        "presence": 5.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 90.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 3.0,
+        "mic": 0.35,
+        "lowCut": 70.0,
+        "highCut": 11000.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "doubler",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "delayL": 15.0,
+        "delayR": 25.0,
+        "detune": 6.0,
+        "width": 1.0,
+        "wet": 0.6
+      }
+    }
+  ],
+  "tempo": 112
+}

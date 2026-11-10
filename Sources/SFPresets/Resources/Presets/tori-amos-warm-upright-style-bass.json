@@ -1,0 +1,36 @@
+{
+  "id": "tori-amos-warm-upright-style-bass",
+  "name": "Tori Amos - Warm Upright-style Bass",
+  "category": "Bass",
+  "artistStyle": "Tori Amos",
+  "tags": [
+    "bass"
+  ],
+  "description": "Round, warm, soft bass. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -18.0,
+        "ratio": 3.0,
+        "attack": 20.0,
+        "release": 200.0,
+        "makeup": 3.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "eq",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "lowShelfGain": 2.0,
+        "highCut": 4000.0
+      }
+    }
+  ],
+  "tempo": 90
+}

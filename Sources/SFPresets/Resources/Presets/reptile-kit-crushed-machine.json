@@ -1,0 +1,63 @@
+{
+  "id": "reptile-kit-crushed-machine",
+  "name": "Reptile Kit - Crushed Machine",
+  "category": "Drums",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "kit",
+    "beat"
+  ],
+  "description": "Grinding, bitcrushed drum machine with metallic hits. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "bitcrusher",
+      "mix": 0.5,
+      "bypassed": false,
+      "params": {
+        "bits": 10.0,
+        "downsample": 3.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 8.0,
+        "attack": 3.0,
+        "release": 80.0,
+        "makeup": 6.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.gated",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.15,
+        "dry": 1.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -3.0,
+      "pad36.tune": -2.0,
+      "pad36.decay": 1.1,
+      "pad36.drive": 0.6,
+      "pad38.tune": 2.0,
+      "pad38.snap": 0.9,
+      "pad38.drive": 0.5,
+      "pad75.level": -2.0,
+      "pad75.decay": 1.2
+    }
+  },
+  "beatStyle": "nin-reptile",
+  "tempo": 100
+}

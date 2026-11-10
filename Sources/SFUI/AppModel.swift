@@ -1,0 +1,271 @@
+#if os(macOS)
+import Foundation
+import SwiftUI
+import AppKit
+import SFCore
+import SFEngine
+import SFProject
+import SFPresets
+import SFBeatGen
+import SFSeparation
+import SFExport
+
+/// Main-thread document + engine model shared by all views.
+public final class AppModel: ObservableObject {
+    @Published public private(set) var project: Project
+    @Published public var packageURL: URL?
+    @Published public var selectedTrackID: UUID? { didSet { engine.selectedTrackID = selectedTrackID } }
+    @Published public var isDirty = false
+    @Published public var status = "Ready"
+    @Published public var position: Double = 0
+    @Published public var isPlaying = false
+    @Published public var isRecording = false
+    @Published public var cpu: Float = 0
+    @Published public var masterPeak: Float = 0
+    @Published public var zoom: Double = 60          // pixels per second
+    @Published public var showOnboarding = false
+    /// First-launch welcome (folders + microphone permission). Shown before the onboarding tour.
+    @Published public var showWelcome = false
+    @Published public var showSetup = false
+    public let permissions = PermissionsModel()
+    @Published public var audioConfig = CoreAudioIO.Configuration()
+
+    public let io = CoreAudioIO()
+    public let engine: EngineController
+    public let presets = PresetLibrary.shared
+    public let beatStyles = BeatStyleLibrary.shared
+    private var undo = UndoStack()
+    private var midi: MIDIInputManager?
+    private var timer: Timer?
+    private var autosave: AutosaveController?
+
+    public init() {
+        AppleAudioDecoding.register()
+        project = ProjectTemplates.vocals.makeProject(name: "Untitled")
+        engine = EngineController(io: io)
+        engine.load(project: project, packageURL: nil)
+        if FirstRunSetup.isNeeded { FirstRunSetup.run() }
+        permissions.refresh()
+        permissions.onAuthorized = { [weak self] in self?.restartAudio() }
+        if permissions.mic == .authorized {
+            restartAudio()
+        } else if permissions.mic == .notDetermined || !UserDefaults.standard.bool(forKey: "SFWelcomeDone") {
+            // Ask with an explanation screen first instead of a bare system prompt.
+            showWelcome = true
+        } else {
+            restartAudio()   // output-only until input access is granted in System Settings
+        }
+        showOnboarding = !showWelcome && !UserDefaults.standard.bool(forKey: "SFOnboardingDone")
+        let m = MIDIInputManager(queue: engine.core.midiQueue)
+        try? m.start()
+        midi = m
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0 / 30, repeats: true) { [weak self] _ in
+            self?.tick()
+        }
+        // AutosaveController invokes these closures on the main thread.
+        let a = AutosaveController(currentProject: { [weak self] in self?.project },
+                                   packageURL: { [weak self] in self?.packageURL },
+                                   isDirty: { [weak self] in self?.isDirty ?? false })
+        a.start()
+        autosave = a
+    }
+
+    // MARK: Audio
+
+    public func restartAudio() {
+        io.configuration = audioConfig
+        engine.startAudio()
+        midi?.retarget(engine.core.midiQueue)
+        status = engine.lastError ?? io.statusMessage
+    }
+
+    private func tick() {
+        position = engine.positionSeconds
+        isPlaying = engine.isPlaying
+        isRecording = engine.isRecording
+        let m = engine.readMeters()
+        cpu = m.cpu
+        masterPeak = max(m.masterL, m.masterR)
+        engine.collectGarbage()
+    }
+
+    // MARK: Document editing (every change is undoable)
+
+    public func edit(_ label: String, _ change: (inout Project) -> Void) {
+        let before = project
+        var p = project
+        change(&p)
+        guard p != before else { return }
+        undo.record(before, label: label)
+        p.modifiedAt = Date()
+        project = p
+        isDirty = true
+        engine.update(project: p)
+    }
+
+    public var canUndo: Bool { undo.canUndo }
+    public var canRedo: Bool { undo.canRedo }
+    public func undoAction() { if let p = undo.undo(current: project) { project = p; engine.update(project: p); isDirty = true } }
+    public func redoAction() { if let p = undo.redo(current: project) { project = p; engine.update(project: p); isDirty = true } }
+
+    public func binding<T>(track id: UUID, _ kp: WritableKeyPath<Track, T>, label: String) -> Binding<T>? where T: Equatable {
+        guard let i = project.trackIndex(id) else { return nil }
+        let fallback = project.tracks[i][keyPath: kp]
+        return Binding(get: { [weak self] in self?.project.tracks[safe: i]?[keyPath: kp] ?? fallback },
+                       set: { [weak self] v in self?.edit(label) { p in if i < p.tracks.count { p.tracks[i][keyPath: kp] = v } } })
+    }
+
+    // MARK: Transport
+
+    public func togglePlay() {
+        if engine.isPlaying { stop() } else { engine.play() }
+    }
+    public func stop() {
+        let takes = engine.stop()
+        if !takes.isEmpty { edit("Record") { p in p = engine.applyTakes(takes, to: p) } }
+        if let e = engine.lastError { status = e }
+    }
+    public func record() { if !engine.record() { status = engine.lastError ?? "Cannot record" } }
+    public func rewind() { engine.seek(seconds: 0) }
+
+    // MARK: Projects
+
+    public func newProject(from template: ProjectTemplate) {
+        var p = template.makeProject(name: "Untitled", sampleRate: engine.sampleRate)
+        presets.applyReferencedPresets(to: &p)
+        if let styleID = template.beatStyle, let style = beatStyles.style(id: styleID),
+           let drums = p.tracks.firstIndex(where: { $0.kind == .drums }) {
+            var s = BeatSettings(tempo: p.tempo, bars: 8)
+            s.swing = style.defaultSwing
+            let beat = BeatGenerator().generate(style: style, settings: s)
+            p.tracks[drums].midiClips = [MIDIClip(name: style.name, startBeat: 0, lengthBeats: beat.lengthBeats, notes: beat.notes)]
+        }
+        undo.clear()
+        project = p; packageURL = nil; isDirty = false
+        engine.load(project: p, packageURL: nil)
+    }
+
+    public func open(_ url: URL) {
+        do {
+            let p = ProjectPackage.newerAutosave(in: url) ?? (try ProjectPackage.load(from: url))
+            undo.clear(); project = p; packageURL = url; isDirty = false
+            engine.load(project: p, packageURL: url)
+            RecentProjects.shared.add(url)
+        } catch { status = "Open failed: \(error.localizedDescription)" }
+    }
+
+    public func save(as url: URL? = nil) {
+        guard let target = url ?? packageURL ?? askSaveURL() else { return }
+        do {
+            try ProjectPackage.save(project, to: target)
+            if packageURL != target {
+                // Copy recordings/imports that lived outside the package into it.
+                var p = project
+                for ti in p.tracks.indices {
+                    for ci in p.tracks[ti].audioClips.indices where p.tracks[ti].audioClips[ci].file.hasPrefix("/") {
+                        let src = URL(fileURLWithPath: p.tracks[ti].audioClips[ci].file)
+                        if let rel = try? ProjectPackage.importAudio(src, into: target) { p.tracks[ti].audioClips[ci].file = rel }
+                    }
+                }
+                project = p
+                try ProjectPackage.save(p, to: target)
+                packageURL = target
+                engine.load(project: p, packageURL: target)
+            }
+            RecentProjects.shared.add(target)
+            isDirty = false
+            status = "Saved \(target.lastPathComponent)"
+        } catch { status = "Save failed: \(error.localizedDescription)" }
+    }
+
+    private func askSaveURL() -> URL? {
+        let panel = NSSavePanel()
+        panel.nameFieldStringValue = "\(project.name).\(ProjectPackage.fileExtension)"
+        panel.directoryURL = AppPaths.defaultProjectsFolder
+        return panel.runModal() == .OK ? panel.url : nil
+    }
+
+    // MARK: Import / tracks
+
+    public func importAudio(_ urls: [URL], at time: Double = 0) {
+        for url in urls {
+            do {
+                let audio = try AudioDecoding.decode(url)
+                var file = url.path
+                if let pkg = packageURL { file = try ProjectPackage.importAudio(url, into: pkg) }
+                edit("Import Audio") { p in
+                    let id = p.addTrack(kind: .audio, name: url.deletingPathExtension().lastPathComponent)
+                    if let i = p.trackIndex(id) {
+                        p.tracks[i].audioClips.append(AudioClip(name: url.lastPathComponent, file: file, start: time, duration: audio.duration))
+                    }
+                }
+            } catch { status = "Import failed: \(error.localizedDescription)" }
+        }
+    }
+
+    public func addTrack(_ kind: TrackKind) { edit("Add Track") { p in selectedTrackID = p.addTrack(kind: kind) } }
+
+    public func splitAtPlayhead() { edit("Split") { p in p.splitClips(at: position) } }
+
+    public func apply(preset: Preset, to trackID: UUID) {
+        edit("Apply Preset \(preset.name)") { p in if let i = p.trackIndex(trackID) { preset.apply(to: &p.tracks[i]) } }
+    }
+
+    public func setParameter(track: UUID, effect: UUID, id: String, value: Float) {
+        engine.setParameter(track: track, slot: effect, id: id, value: value)
+        edit("Change \(id)") { p in
+            if let ti = p.trackIndex(track), let ei = p.tracks[ti].effects.firstIndex(where: { $0.id == effect }) {
+                p.tracks[ti].effects[ei].params[id] = value
+            }
+        }
+    }
+
+    // MARK: Beat generator
+
+    public func insertBeat(style: BeatStyle, settings: BeatSettings, at beat: Double = 0) {
+        let g = BeatGenerator().generate(style: style, settings: settings)
+        edit("Generate Beat") { p in
+            var ti = p.tracks.firstIndex { $0.kind == .drums } ?? -1
+            if ti < 0 { let id = p.addTrack(kind: .drums, name: "Beat"); ti = p.trackIndex(id) ?? 0 }
+            p.tracks[ti].midiClips.append(MIDIClip(name: style.name, startBeat: beat, lengthBeats: g.lengthBeats, notes: g.notes))
+            if let kit = style.kitPreset, let pr = presets.preset(id: kit) { pr.apply(to: &p.tracks[ti]) }
+        }
+    }
+
+    /// Analyses the selected (or first) audio track's clips and drops a matching beat.
+    public func matchBeat(styleHint: String?) {
+        guard let t = project.tracks.first(where: { $0.id == selectedTrackID && $0.kind == .audio }) ?? project.tracks.first(where: { $0.kind == .audio && !$0.audioClips.isEmpty }),
+              let clip = t.audioClips.first else { status = "Record or import audio first."; return }
+        let url = ProjectPackage.resolve(clip.file, in: packageURL)
+        let styles = beatStyles.styles
+        status = "Analysing \(clip.name)…"
+        DispatchQueue.global(qos: .userInitiated).async {
+            let result = (try? AudioDecoding.decode(url)).flatMap { BeatMatcher().match(audio: $0, styles: styles, genreHint: styleHint) }
+            DispatchQueue.main.async {
+                guard let r = result else { self.status = "Could not analyse the recording."; return }
+                self.edit("Set Tempo") { $0.tempo = r.analysis.bpm.rounded() }
+                self.insertBeat(style: r.beat.style, settings: r.beat.settings, at: max(0, clip.start / self.project.secondsPerBeat + r.startOffsetBeats))
+                self.status = String(format: "Matched %.1f BPM, key %@ — style %@", r.analysis.bpm, r.analysis.key, r.beat.style.name)
+            }
+        }
+    }
+
+    public func finishWelcome() {
+        UserDefaults.standard.set(true, forKey: "SFWelcomeDone")
+        showWelcome = false
+        if permissions.mic != .authorized { restartAudio() }
+        if !UserDefaults.standard.bool(forKey: "SFOnboardingDone") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in self?.showOnboarding = true }
+        }
+    }
+
+    public func completeOnboarding() {
+        UserDefaults.standard.set(true, forKey: "SFOnboardingDone")
+        showOnboarding = false
+    }
+}
+
+extension Array {
+    subscript(safe i: Int) -> Element? { indices.contains(i) ? self[i] : nil }
+}
+#endif

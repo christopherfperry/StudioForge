@@ -1,0 +1,66 @@
+{
+  "id": "type-o-negative-green-flanged-doom-guitar",
+  "name": "Type O Negative - Green Flanged Doom Guitar",
+  "category": "Guitar",
+  "artistStyle": "Type O Negative",
+  "tags": [
+    "guitar"
+  ],
+  "description": "Fuzzy, sludgy, flanged doom guitar. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 2.0,
+        "drive": 18.0,
+        "tone": 3000.0,
+        "preHPF": 70.0,
+        "output": -12.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 1.0,
+        "gain": 6.0,
+        "bass": 7.0,
+        "mid": 5.0,
+        "treble": 4.5,
+        "presence": 5.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 90.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 3.0,
+        "mic": 0.45,
+        "lowCut": 70.0,
+        "highCut": 11000.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "flanger",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.12,
+        "depth": 0.6,
+        "delay": 3.0,
+        "feedback": 0.5,
+        "wet": 0.35
+      }
+    }
+  ],
+  "tempo": 72
+}

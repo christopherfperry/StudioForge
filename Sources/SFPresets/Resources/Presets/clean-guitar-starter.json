@@ -1,0 +1,40 @@
+{
+  "id": "clean-guitar-starter",
+  "name": "Clean Guitar Starter",
+  "category": "Guitar",
+  "artistStyle": "",
+  "tags": [
+    "starter"
+  ],
+  "description": "Simple clean amp and cab. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 0.0,
+        "gain": 3.0,
+        "bass": 5.0,
+        "mid": 5.0,
+        "treble": 6.0,
+        "presence": 5.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 90.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 1.0,
+        "mic": 0.3,
+        "lowCut": 70.0,
+        "highCut": 11000.0,
+        "output": 0.0
+      }
+    }
+  ]
+}

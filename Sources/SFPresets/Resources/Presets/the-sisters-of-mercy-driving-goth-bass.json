@@ -1,0 +1,69 @@
+{
+  "id": "the-sisters-of-mercy-driving-goth-bass",
+  "name": "The Sisters of Mercy - Driving Goth Bass",
+  "category": "Bass",
+  "artistStyle": "The Sisters of Mercy",
+  "tags": [
+    "bass"
+  ],
+  "description": "Pick bass with chorus, upfront. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 4.0,
+        "attack": 15.0,
+        "release": 150.0,
+        "makeup": 4.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "amp",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 5.0,
+        "gain": 4.0,
+        "bass": 6.0,
+        "mid": 5.0,
+        "treble": 5.0,
+        "presence": 4.0,
+        "master": -14.0,
+        "sag": 0.3,
+        "tight": 40.0
+      }
+    },
+    {
+      "type": "cabinet",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "model": 5.0,
+        "mic": 0.3,
+        "lowCut": 35.0,
+        "highCut": 6000.0,
+        "output": 0.0
+      }
+    },
+    {
+      "type": "chorus",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "rate": 0.6,
+        "depth": 4.0,
+        "delay": 12.0,
+        "voices": 2.0,
+        "feedback": 0.1,
+        "spread": 0.6,
+        "wet": 0.35
+      }
+    }
+  ],
+  "tempo": 132
+}

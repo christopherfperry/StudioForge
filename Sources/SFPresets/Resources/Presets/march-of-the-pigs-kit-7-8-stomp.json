@@ -1,0 +1,66 @@
+{
+  "id": "march-of-the-pigs-kit-7-8-stomp",
+  "name": "March of the Pigs Kit - 7/8 Stomp",
+  "category": "Drums",
+  "artistStyle": "Nine Inch Nails",
+  "tags": [
+    "industrial",
+    "kit",
+    "beat"
+  ],
+  "description": "Overdriven stomping kit for a frantic 7/8 feel. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "distortion",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "mode": 1.0,
+        "drive": 14.0,
+        "tone": 7000.0,
+        "preHPF": 30.0,
+        "output": -12.0,
+        "bias": 0.0
+      }
+    },
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -22.0,
+        "ratio": 8.0,
+        "attack": 2.0,
+        "release": 70.0,
+        "makeup": 6.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "limiter",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "ceiling": -0.8,
+        "input": 3.0,
+        "release": 60.0
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -3.0,
+      "pad36.decay": 0.9,
+      "pad36.drive": 0.7,
+      "pad36.snap": 0.9,
+      "pad38.drive": 0.6,
+      "pad38.snap": 0.9,
+      "pad38.tone": 0.7,
+      "pad49.decay": 1.5
+    }
+  },
+  "beatStyle": "nin-march-of-the-pigs",
+  "tempo": 134
+}

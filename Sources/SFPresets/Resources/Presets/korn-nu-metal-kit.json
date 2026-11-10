@@ -1,0 +1,49 @@
+{
+  "id": "korn-nu-metal-kit",
+  "name": "KoRn - Nu-Metal Kit",
+  "category": "Drums",
+  "artistStyle": "KoRn",
+  "tags": [
+    "drums"
+  ],
+  "description": "Ping-y, tight snare, clicky kick. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "effects": [
+    {
+      "type": "compressor",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "threshold": -20.0,
+        "ratio": 5.0,
+        "attack": 5.0,
+        "release": 80.0,
+        "makeup": 5.0,
+        "knee": 6.0,
+        "sidechainHPF": 20.0
+      }
+    },
+    {
+      "type": "reverb.room",
+      "mix": 1.0,
+      "bypassed": false,
+      "params": {
+        "wet": 0.12,
+        "dry": 1.0,
+        "decay": 0.7
+      }
+    }
+  ],
+  "instrument": {
+    "type": "drums",
+    "params": {
+      "master": -3.0,
+      "pad36.snap": 1.0,
+      "pad36.tone": 0.7,
+      "pad38.tune": 4.0,
+      "pad38.tone": 0.75,
+      "pad38.decay": 0.7
+    }
+  },
+  "beatStyle": "nu-metal",
+  "tempo": 98
+}
