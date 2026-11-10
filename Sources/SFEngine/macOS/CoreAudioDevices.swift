@@ -42,7 +42,7 @@ public enum CoreAudioDevices {
     @discardableResult
     static func setValue<T>(_ object: AudioObjectID, _ selector: AudioObjectPropertySelector,
                             _ scope: AudioObjectPropertyScope = AudioObjectPropertyScope(kAudioObjectPropertyScopeGlobal),
-                            _ value: T) -> Bool {
+                            value: T) -> Bool {
         var addr = address(selector, scope)
         var v = value
         let status = withUnsafeMutablePointer(to: &v) { ptr in
@@ -117,7 +117,7 @@ public enum CoreAudioDevices {
     /// Requests a hardware buffer size; the device clamps to its supported range.
     @discardableResult
     public static func setBufferFrameSize(_ id: AudioDeviceID, frames: Int) -> Bool {
-        setValue(id, AudioObjectPropertySelector(kAudioDevicePropertyBufferFrameSize), UInt32(frames))
+        setValue(id, AudioObjectPropertySelector(kAudioDevicePropertyBufferFrameSize), value: UInt32(frames))
     }
 
     public static func nominalSampleRate(_ id: AudioDeviceID) -> Double {
@@ -126,7 +126,7 @@ public enum CoreAudioDevices {
 
     @discardableResult
     public static func setNominalSampleRate(_ id: AudioDeviceID, _ rate: Double) -> Bool {
-        setValue(id, AudioObjectPropertySelector(kAudioDevicePropertyNominalSampleRate), Float64(rate))
+        setValue(id, AudioObjectPropertySelector(kAudioDevicePropertyNominalSampleRate), value: Float64(rate))
     }
 
     public static func availableSampleRates(_ id: AudioDeviceID) -> [Double] {
