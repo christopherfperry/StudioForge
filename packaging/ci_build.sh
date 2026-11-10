@@ -28,3 +28,11 @@ fi
 rm -f dist/*.iso
 ls -la dist
 test -f dist/Install-StudioForge.pkg
+
+# Publish to the permanent "latest" download page (needs GH_TOKEN from the workflow).
+if [ -n "${GH_TOKEN:-}" ] && command -v gh >/dev/null; then
+  echo "== Publishing release 'latest' =="
+  gh release delete latest --yes --cleanup-tag 2>/dev/null || true
+  gh release create latest dist/* --title "StudioForge (latest build)" --latest \
+    --notes "Download Install-StudioForge.pkg and double-click it. First time only: Control-click it and choose Open."
+fi
