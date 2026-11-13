@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.6.1 — 2026-11-13
+- **Fixed: mute (and solo / arm) buttons often did nothing.** Only the letter inside the button took clicks; clicks on the rest of the coloured box fell through to the header and only selected the track. The whole box is now clickable, in the track headers and the mixer. Toggles read the current project state.
+- **Muted tracks are now visible:** muted tracks, and tracks silenced by another track's solo, are dimmed and labelled *MUTED* / *SOLO-OFF*. Muted clips are dimmed and struck through.
+- New: right-click *Mute / Solo / Clear All Mute & Solo* on tracks; Edit › *Mute / Unmute Selected Track* (⌃⌘M), *Solo / Unsolo Selected Track* (⌃⌘S), *Clear All Mute & Solo*; *Mute Clip* for MIDI clips.
+- **Fixed: exports leaked tracks silenced by solo** (and briefly ignored pan) for the first ~20 ms of a master bounce. Live playback and export now share one gain calculation.
+- Fixed: the installer checksum file is now named `Install-FitzroviaRecordsDAW.pkg.sha256`, matching the download.
+- 3 new tests (42 total on Linux).
+
 ## 0.6.0 — 2026-11-13
 - **Delete tracks and stems:** trash button in every track header and mixer strip, right-click *Delete Track / Delete Stem*, ⌘⌫ for the selected track, *Delete All Stems From This Split*, and Edit › Delete All Stems. Undoable. Stem tracks are tagged (saved in the project; older projects load unchanged).
 - **Easier volume:** per-track volume slider and dB readout in each header; redesigned mixer faders with 0 dB mark, double-click reset and mute/solo; *Volume & pan* box at the top of the inspector with −/+ 1 dB and 0 dB buttons; right-click *Volume* presets; ⌥⌘↑/↓ shortcuts; fader drags are a single undo step. The mixer button is now labelled *Mixer*.

@@ -291,15 +291,7 @@ public final class EngineCore: @unchecked Sendable {
             }
 
             // 6. Fader, pan (constant-power, 0 dB at centre), mute/solo.
-            let audible = !c.mute.value && (!anySolo || c.solo.value)
-            var gl: Float = 0, gr: Float = 0
-            if audible {
-                let v = c.volume.value
-                let angle = (c.pan.value + 1) * Float.pi / 4
-                gl = v * cosf(angle) * Float(2).squareRoot()
-                gr = v * sinf(angle) * Float(2).squareRoot()
-                gl = min(gl, v); gr = min(gr, v) // never boost a side above the fader gain
-            }
+            let (gl, gr) = c.targetGains(anySolo: anySolo)
             let sl = node.lastGainL, sr = node.lastGainR
             let dl = (gl - sl) / Float(m), dr = (gr - sr) / Float(m)
             var pkL: Float = 0, pkR: Float = 0

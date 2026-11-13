@@ -361,6 +361,28 @@ public final class AppModel: ObservableObject {
     // MARK: Track volume
 
     public static let volumeRange: ClosedRange<Float> = -60...6
+
+    // MARK: Mute / solo / arm (read the live document, never a captured view copy)
+
+    public func toggleMute(_ id: UUID) {
+        let on = !(project.tracks.first { $0.id == id }?.mute ?? false)
+        edit(on ? "Mute" : "Unmute") { $0.toggleMute(id) }
+    }
+    public func toggleSolo(_ id: UUID) {
+        let on = !(project.tracks.first { $0.id == id }?.solo ?? false)
+        edit(on ? "Solo" : "Unsolo") { $0.toggleSolo(id) }
+    }
+    public func toggleArm(_ id: UUID) { edit("Arm") { $0.toggleArm(id) } }
+    public func toggleMuteSelected() {
+        if let id = selectedTrackID { toggleMute(id) } else { status = "Select a track to mute." }
+    }
+    public func toggleSoloSelected() {
+        if let id = selectedTrackID { toggleSolo(id) } else { status = "Select a track to solo." }
+    }
+    public func clearAllMuteSolo() {
+        edit("Clear Mute & Solo") { p in for i in p.tracks.indices { p.tracks[i].mute = false; p.tracks[i].solo = false } }
+    }
+
     public func setVolume(_ id: UUID, _ db: Float) {
         let v = min(Self.volumeRange.upperBound, max(Self.volumeRange.lowerBound, db))
         edit("Volume", coalesce: true) { p in if let i = p.trackIndex(id) { p.tracks[i].volumeDB = v } }

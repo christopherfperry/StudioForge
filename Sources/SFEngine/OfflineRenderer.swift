@@ -66,10 +66,11 @@ public struct OfflineRenderer {
         }
         let graph = builder.build(project: project, controls: { controls[$0] ?? TrackControls() }, cache: cache,
                                   mode: .synchronous, previous: nil)
-        // Start smoothing at the target gains (no fade-in at the bounce start).
+        // Start smoothing at the exact target gains (pan, mute and solo included) so the first block
+        // of a bounce doesn't leak non-soloed tracks or ramp the pan.
+        let anySolo = graph.tracks.contains { $0.controls.solo.value }
         for n in graph.tracks {
-            let v = n.controls.mute.value ? 0 : n.controls.volume.value
-            n.lastGainL = v; n.lastGainR = v
+            (n.lastGainL, n.lastGainR) = n.controls.targetGains(anySolo: anySolo)
         }
         core.masterVolume.value = dbToGain(project.master.volumeDB)
         graph.lastMasterGain = core.masterVolume.value

@@ -167,6 +167,9 @@ struct TrackLane: View {
     @ObservedObject var model: AppModel
     let track: Track
 
+    /// "Muted" / "Silenced by solo" when this track can't be heard right now.
+    var silence: String? { model.project.silenceReason(track.id) }
+
     var body: some View {
         HStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 3) {
@@ -182,10 +185,16 @@ struct TrackLane: View {
                         .help(track.isStem ? "Delete this stem (⌘⌫, undo with ⌘Z)" : "Delete this track (⌘⌫, undo with ⌘Z)")
                 }
                 HStack(spacing: 4) {
-                    flag("M", track.mute, .yellow) { v in model.edit("Mute") { p in if let i = p.trackIndex(track.id) { p.tracks[i].mute = v } } }
-                    flag("S", track.solo, .green) { v in model.edit("Solo") { p in if let i = p.trackIndex(track.id) { p.tracks[i].solo = v } } }
+                    ChipToggle(title: "M", isOn: track.mute, color: .yellow,
+                               help: track.mute ? "Unmute this track (⌃⌘M)" : "Mute this track (⌃⌘M)") { model.toggleMute(track.id) }
+                    ChipToggle(title: "S", isOn: track.solo, color: .green,
+                               help: track.solo ? "Unsolo this track (⌃⌘S)" : "Solo: hear only soloed tracks (⌃⌘S)") { model.toggleSolo(track.id) }
                     if track.kind == .audio || track.instrument != nil {
-                        flag("R", track.arm, .red) { v in model.edit("Arm") { p in if let i = p.trackIndex(track.id) { p.tracks[i].arm = v } } }
+                        ChipToggle(title: "R", isOn: track.arm, color: .red, help: "Arm for recording") { model.toggleArm(track.id) }
+                    }
+                    if let why = silence {
+                        Text(why == "Muted" ? "MUTED" : "SOLO-OFF").font(.system(size: 9, weight: .bold))
+                            .foregroundColor(.secondary).help(why)
                     }
                     if model.showNotes {
                         // Fixed slot so the header does not jump as notes start and stop.
@@ -203,7 +212,9 @@ struct TrackLane: View {
             }
             .frame(width: 162, alignment: .leading).padding(4)
             .background(model.selectedTrackID == track.id ? Color.accentColor.opacity(0.25) : Color(nsColor: .controlBackgroundColor))
-            .onTapGesture { model.selectedTrackID = track.id }
+            .contentShape(Rectangle())
+            // Simultaneous so selecting never swallows clicks meant for the M / S / R buttons.
+            .simultaneousGesture(TapGesture().onEnded { model.selectedTrackID = track.id })
             .contextMenu { TrackMenuItems(model: model, track: track) }
             ZStack(alignment: .topLeading) {
                 Color(nsColor: .textBackgroundColor).opacity(0.15)
@@ -215,6 +226,9 @@ struct TrackLane: View {
                 ForEach(track.midiClips) { clip in
                     MIDIClipView(clip: clip)
                         .contextMenu {
+                            Button(clip.muted ? "Unmute Clip" : "Mute Clip") {
+                                model.edit(clip.muted ? "Unmute Clip" : "Mute Clip") { $0.toggleClipMute(clip.id) }
+                            }
                             Button("Delete Clip", role: .destructive) { model.edit("Delete Clip") { $0.deleteClip(clip.id) } }
                             Divider()
                             TrackMenuItems(model: model, track: track)
@@ -234,15 +248,37 @@ struct TrackLane: View {
                 }
             }
             .frame(height: track.height)
+            .opacity(silence == nil ? 1 : 0.4)   // silent tracks are visibly dimmed
             .contentShape(Rectangle())
             .onTapGesture { model.selectedTrackID = track.id }
         }
     }
+}
 
-    func flag(_ title: String, _ on: Bool, _ color: Color, _ set: @escaping (Bool) -> Void) -> some View {
-        Button(title) { set(!on) }
-            .buttonStyle(.plain).frame(width: 22, height: 18)
-            .background(on ? color : Color.gray.opacity(0.3)).foregroundColor(on ? .black : .primary).cornerRadius(3)
+/// Mute / solo / arm chip. The whole coloured box is clickable: with a plain button style only the
+/// letter itself received clicks, so most clicks on the box fell through to the header and only
+/// selected the track instead of toggling mute.
+struct ChipToggle: View {
+    let title: String
+    let isOn: Bool
+    let color: Color
+    var width: CGFloat = 22
+    var height: CGFloat = 18
+    var help: String = ""
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(title).font(.caption.bold())
+                .frame(width: width, height: height)
+                .foregroundColor(isOn ? .black : .primary)
+                .background(RoundedRectangle(cornerRadius: 3).fill(isOn ? color : Color.gray.opacity(0.3)))
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(help)
+        .accessibilityLabel(Text(title == "M" ? "Mute" : title == "S" ? "Solo" : "Record arm"))
+        .accessibilityValue(Text(isOn ? "On" : "Off"))
     }
 }
 
@@ -269,7 +305,8 @@ struct ClipView: View {
                         ctx.stroke(path, with: .color(.white.opacity(0.8)), lineWidth: 1)
                     }
                 }
-                Text(clip.name).font(.caption2).padding(3).lineLimit(1)
+                Text(clip.muted ? "\(clip.name) (muted)" : clip.name).font(.caption2).padding(3).lineLimit(1)
+                    .strikethrough(clip.muted)
                 // Trim handles
                 HStack {
                     handle { dx in model.edit("Trim Start") { p in
@@ -279,6 +316,7 @@ struct ClipView: View {
                         if let (t, c) = p.locateAudioClip(clip.id) { p.tracks[t].audioClips[c] = ClipEditing.trimEnd(clip, to: clip.end + dx / model.zoom) } } }
                 }
             }
+            .opacity(clip.muted ? 0.35 : 1)
             .offset(x: drag)
             .gesture(DragGesture(minimumDistance: 3)
                 .onChanged { drag = $0.translation.width }
@@ -294,8 +332,7 @@ struct ClipView: View {
                 Button("Split at Playhead") { model.edit("Split") { p in p.splitClips(at: model.position, trackIDs: [trackID]) } }
                 Button("Fade In 50 ms") { setFades(fadeIn: 0.05) }
                 Button("Fade Out 500 ms") { setFades(fadeOut: 0.5) }
-                Button(clip.muted ? "Unmute Clip" : "Mute Clip") { model.edit("Mute Clip") { p in
-                    if let (t, c) = p.locateAudioClip(clip.id) { p.tracks[t].audioClips[c].muted.toggle() } } }
+                Button(clip.muted ? "Unmute Clip" : "Mute Clip") { model.edit(clip.muted ? "Unmute Clip" : "Mute Clip") { $0.toggleClipMute(clip.id) } }
                 Divider()
                 SynthMenuItems(model: model, trackID: trackID)
                 Divider()
@@ -339,8 +376,9 @@ struct MIDIClipView: View {
                     ctx.fill(Path(CGRect(x: x, y: y, width: max(2, CGFloat(n.durationBeats / clip.lengthBeats) * size.width), height: 2)), with: .color(.white))
                 }
             }
-            Text(clip.name).font(.caption2).padding(3)
+            Text(clip.muted ? "\(clip.name) (muted)" : clip.name).font(.caption2).padding(3).strikethrough(clip.muted)
         }
+        .opacity(clip.muted ? 0.35 : 1)
     }
 }
 
@@ -538,14 +576,18 @@ struct MixerView: View {
                             .help("Volume — drag, scroll, or double-click for 0 dB")
                         Text(VolumeControl.dbText(t.volumeDB)).font(.caption2.monospacedDigit())
                         HStack(spacing: 3) {
-                            mini("M", t.mute, .yellow) { model.edit("Mute") { p in if let i = p.trackIndex(t.id) { p.tracks[i].mute.toggle() } } }
-                            mini("S", t.solo, .green) { model.edit("Solo") { p in if let i = p.trackIndex(t.id) { p.tracks[i].solo.toggle() } } }
+                            ChipToggle(title: "M", isOn: t.mute, color: .yellow, width: 20, height: 16,
+                                       help: t.mute ? "Unmute" : "Mute") { model.toggleMute(t.id) }
+                            ChipToggle(title: "S", isOn: t.solo, color: .green, width: 20, height: 16,
+                                       help: t.solo ? "Unsolo" : "Solo") { model.toggleSolo(t.id) }
                             Button { model.deleteTrack(t.id) } label: { Image(systemName: "trash").font(.caption2) }
                                 .buttonStyle(.borderless).help(t.isStem ? "Delete stem" : "Delete track")
                         }
                     }
                     .padding(4).background(model.selectedTrackID == t.id ? Color.accentColor.opacity(0.2) : Color.clear).cornerRadius(4)
-                    .onTapGesture { model.selectedTrackID = t.id }
+                    .opacity(model.project.silenceReason(t.id) == nil ? 1 : 0.55)
+                    .contentShape(Rectangle())
+                    .simultaneousGesture(TapGesture().onEnded { model.selectedTrackID = t.id })
                     .contextMenu { TrackMenuItems(model: model, track: t) }
                 }
                 Divider()
@@ -557,11 +599,6 @@ struct MixerView: View {
                 }
             }.padding(8)
         }
-    }
-
-    func mini(_ title: String, _ on: Bool, _ color: Color, _ action: @escaping () -> Void) -> some View {
-        Button(title, action: action).buttonStyle(.plain).frame(width: 20, height: 16)
-            .background(on ? color : Color.gray.opacity(0.3)).foregroundColor(on ? .black : .primary).cornerRadius(3)
     }
 }
 
@@ -636,6 +673,12 @@ struct TrackMenuItems: View {
     @ObservedObject var model: AppModel
     let track: Track
     var body: some View {
+        Button(track.mute ? "Unmute" : "Mute") { model.toggleMute(track.id) }
+        Button(track.solo ? "Unsolo" : "Solo") { model.toggleSolo(track.id) }
+        if model.project.tracks.contains(where: { $0.mute || $0.solo }) {
+            Button("Clear All Mute & Solo") { model.clearAllMuteSolo() }
+        }
+        Divider()
         Menu("Volume") {
             ForEach([6, 3, 0, -3, -6, -12, -18], id: \.self) { (db: Int) in
                 Button(db == 0 ? "0 dB (reset)" : String(format: "%+d dB", db)) { model.setVolume(track.id, Float(db)) }

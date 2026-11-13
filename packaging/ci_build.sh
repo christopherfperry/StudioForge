@@ -23,7 +23,9 @@ echo "== Build app, installer package and DMG =="
 # Space-free name so the GitHub download link is clean.
 if [ -f "dist/Install Fitzrovia Records DAW.pkg" ]; then
   cp "dist/Install Fitzrovia Records DAW.pkg" dist/Install-FitzroviaRecordsDAW.pkg
-  rm -f "dist/Install Fitzrovia Records DAW.pkg"
+  rm -f "dist/Install Fitzrovia Records DAW.pkg" "dist/Install Fitzrovia Records DAW.pkg.sha256"
+  # Checksum file named after the file people actually download.
+  ( cd dist && shasum -a 256 Install-FitzroviaRecordsDAW.pkg > Install-FitzroviaRecordsDAW.pkg.sha256 )
 fi
 rm -f dist/*.iso
 ls -la dist

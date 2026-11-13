@@ -124,6 +124,25 @@ extension Project {
         else if let (t, c) = locateMIDIClip(id) { tracks[t].midiClips.remove(at: c) }
     }
 
+    /// Flips mute / solo / arm from the *current* document state (never from a stale UI copy).
+    public mutating func toggleMute(_ id: UUID) { if let i = trackIndex(id) { tracks[i].mute.toggle() } }
+    public mutating func toggleSolo(_ id: UUID) { if let i = trackIndex(id) { tracks[i].solo.toggle() } }
+    public mutating func toggleArm(_ id: UUID) { if let i = trackIndex(id) { tracks[i].arm.toggle() } }
+
+    /// Mutes or unmutes a clip (audio or MIDI).
+    public mutating func toggleClipMute(_ id: UUID) {
+        if let (t, c) = locateAudioClip(id) { tracks[t].audioClips[c].muted.toggle() }
+        else if let (t, c) = locateMIDIClip(id) { tracks[t].midiClips[c].muted.toggle() }
+    }
+
+    /// Why a track is silent right now, if it is: its own mute, or another track's solo.
+    public func silenceReason(_ id: UUID) -> String? {
+        guard let t = tracks.first(where: { $0.id == id }) else { return nil }
+        if t.mute { return "Muted" }
+        if anySolo && !t.solo { return "Silenced by solo" }
+        return nil
+    }
+
     /// Removes tracks by id. Returns how many were removed.
     @discardableResult
     public mutating func deleteTracks(_ ids: Set<UUID>) -> Int {

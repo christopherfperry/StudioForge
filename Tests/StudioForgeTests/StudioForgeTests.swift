@@ -758,4 +758,73 @@ final class TrackDeletionTests: XCTestCase {
         let old = try JSONDecoder().decode(Track.self, from: #"{"name":"Old","kind":"audio"}"#.data(using: .utf8)!)
         XCTAssertNil(old.stemGroup)
     }
+
+    /// Live engine: muting / soloing through `update(project:)` must silence the track while playing.
+    func testLiveMuteAndSoloSilenceTracks() {
+        let engine = EngineController(io: NullAudioIO(sampleRate: 48_000), maxFrames: 512)
+        var p = Project(name: "Mute", tempo: 120)
+        let a = p.addTrack(kind: .instrument), b = p.addTrack(kind: .instrument)
+        for id in [a, b] {
+            p.tracks[p.trackIndex(id)!].midiClips.append(MIDIClip(name: "n", startBeat: 0, lengthBeats: 64,
+                notes: [MIDINote(pitch: 60, velocity: 110, startBeat: 0, durationBeats: 64)]))
+        }
+        engine.load(project: p, packageURL: nil)
+        engine.play()
+        var l = [Float](repeating: 0, count: 512), r = l
+        func block(_ n: Int = 8) -> Float {
+            var pk: Float = 0
+            for _ in 0..<n {
+                l.withUnsafeMutableBufferPointer { lb in r.withUnsafeMutableBufferPointer { rb in
+                    engine.core.render(inputChannelCount: 0, left: lb.baseAddress!, right: rb.baseAddress!, frames: 512) } }
+                pk = max(pk, l.map(abs).max() ?? 0, r.map(abs).max() ?? 0)
+            }
+            return pk
+        }
+        XCTAssertGreaterThan(block(), 0.001, "unmuted tracks should sound")
+        for id in [a, b] { p.tracks[p.trackIndex(id)!].mute = true }
+        engine.update(project: p)
+        _ = block(2)                                   // gain ramp + effect tails
+        XCTAssertLessThan(block(), 1e-4, "muted tracks must be silent")
+        for id in [a, b] { p.tracks[p.trackIndex(id)!].mute = false }
+        p.tracks[p.trackIndex(b)!].solo = true
+        p.tracks[p.trackIndex(b)!].mute = true          // soloed but muted: mute wins
+        engine.update(project: p)
+        _ = block(2)
+        XCTAssertLessThan(block(), 1e-4, "solo on a muted track keeps everything else silent")
+        p.tracks[p.trackIndex(b)!].mute = false
+        engine.update(project: p)
+        _ = block(2)
+        XCTAssertGreaterThan(block(), 0.001, "unmuting the soloed track brings it back")
+    }
+
+    func testProjectToggleHelpersAndSilenceReason() {
+        var p = Project(name: "T", tempo: 120)
+        let a = p.addTrack(kind: .audio), b = p.addTrack(kind: .audio)
+        XCTAssertNil(p.silenceReason(a))
+        p.toggleMute(a)
+        XCTAssertTrue(p.tracks[0].mute); XCTAssertEqual(p.silenceReason(a), "Muted")
+        p.toggleMute(a); XCTAssertFalse(p.tracks[0].mute)
+        p.toggleSolo(b)
+        XCTAssertEqual(p.silenceReason(a), "Silenced by solo"); XCTAssertNil(p.silenceReason(b))
+        p.tracks[1].midiClips.append(MIDIClip(name: "m", startBeat: 0, lengthBeats: 4, notes: []))
+        let clipID = p.tracks[1].midiClips[0].id
+        p.toggleClipMute(clipID); XCTAssertTrue(p.tracks[1].midiClips[0].muted)
+        p.toggleClipMute(clipID); XCTAssertFalse(p.tracks[1].midiClips[0].muted)
+    }
+
+    /// Master bounce: a track silenced by another track's solo must not leak in the first block.
+    func testOfflineBounceRespectsSoloFromFirstSample() throws {
+        var p = Project(name: "Solo", tempo: 120)
+        let quiet = p.addTrack(kind: .instrument), loud = p.addTrack(kind: .instrument)
+        p.tracks[p.trackIndex(loud)!].midiClips.append(MIDIClip(name: "n", startBeat: 0, lengthBeats: 4,
+            notes: [MIDINote(pitch: 60, velocity: 120, startBeat: 0, durationBeats: 4)]))
+        var opts = OfflineRenderer.Options()
+        opts.sampleRate = 48_000; opts.tail = 0; opts.end = 0.5
+        XCTAssertGreaterThan(try OfflineRenderer().renderMaster(project: p, packageURL: nil, options: opts).peak, 0.01)
+        p.tracks[p.trackIndex(quiet)!].solo = true
+        XCTAssertLessThan(try OfflineRenderer().renderMaster(project: p, packageURL: nil, options: opts).peak, 1e-5)
+        p.tracks[p.trackIndex(quiet)!].solo = false
+        p.tracks[p.trackIndex(loud)!].mute = true
+        XCTAssertLessThan(try OfflineRenderer().renderMaster(project: p, packageURL: nil, options: opts).peak, 1e-5)
+    }
 }

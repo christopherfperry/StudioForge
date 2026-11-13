@@ -80,6 +80,15 @@ struct StudioForgeApp: App {
                 Button("Delete All Stems") { model.deleteAllStems() }
                     .disabled(!model.hasStems)
                 Divider()
+                Button("Mute / Unmute Selected Track") { model.toggleMuteSelected() }
+                    .keyboardShortcut("m", modifiers: [.command, .control])
+                    .disabled(model.selectedTrackID == nil)
+                Button("Solo / Unsolo Selected Track") { model.toggleSoloSelected() }
+                    .keyboardShortcut("s", modifiers: [.command, .control])
+                    .disabled(model.selectedTrackID == nil)
+                Button("Clear All Mute & Solo") { model.clearAllMuteSolo() }
+                    .disabled(!model.project.tracks.contains { $0.mute || $0.solo })
+                Divider()
                 Button("Selected Track Volume Up 1 dB") { if let id = model.selectedTrackID { model.nudgeVolume(id, by: 1) } }
                     .keyboardShortcut(.upArrow, modifiers: [.command, .option])
                 Button("Selected Track Volume Down 1 dB") { if let id = model.selectedTrackID { model.nudgeVolume(id, by: -1) } }

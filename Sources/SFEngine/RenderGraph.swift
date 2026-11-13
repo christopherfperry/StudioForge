@@ -31,6 +31,17 @@ public final class TrackControls: @unchecked Sendable {
         inputFirst.value = max(0, t.input.firstChannel)
         inputCount.value = t.input.channelCount == 2 ? 2 : 1
     }
+
+    /// Target fader gains (left, right): constant-power pan, 0 dB at centre, zero when muted or
+    /// silenced by another track's solo. Shared by the live engine and offline bounces.
+    @inline(__always) public func targetGains(anySolo: Bool) -> (Float, Float) {
+        guard !mute.value && (!anySolo || solo.value) else { return (0, 0) }
+        let v = volume.value
+        let angle = (pan.value + 1) * Float.pi / 4
+        let gl = v * cosf(angle) * Float(2).squareRoot()
+        let gr = v * sinf(angle) * Float(2).squareRoot()
+        return (min(gl, v), min(gr, v)) // never boost a side above the fader gain
+    }
 }
 
 /// One audio region prepared for rendering (frames at engine rate).
