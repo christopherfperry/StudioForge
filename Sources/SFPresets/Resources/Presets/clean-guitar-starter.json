@@ -6,7 +6,7 @@
   "tags": [
     "starter"
   ],
-  "description": "Simple clean amp and cab. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Simple clean amp and cab. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "amp",

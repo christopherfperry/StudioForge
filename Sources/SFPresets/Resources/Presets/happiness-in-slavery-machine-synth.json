@@ -8,7 +8,7 @@
     "Happiness in Slavery",
     "mechanical"
   ],
-  "description": "Mechanical, ring-modulated metallic sequence synth (Happiness in Slavery-style). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Mechanical, ring-modulated metallic sequence synth (Happiness in Slavery-style). Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "ringmod",

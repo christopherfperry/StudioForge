@@ -7,7 +7,7 @@
     "starter",
     "synth"
   ],
-  "description": "Init bass synth. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Init bass synth. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [],
   "instrument": {
     "type": "synth.bass",

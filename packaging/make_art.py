@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generates StudioForge artwork with Pillow (pip install pillow):
+"""Generates Fitzrovia Records DAW artwork with Pillow (pip install pillow):
   Resources/StudioForge.icns + Resources/StudioForge.png   app / document / volume icon
   packaging/assets/dmg_background.png (+ @2x)              DMG window background with drag arrow
 Run from anywhere: python3 packaging/make_art.py
@@ -65,9 +65,9 @@ def background(scale):
     y = 330 * scale
     d.line([(235 * scale, y), (390 * scale, y)], fill=(255, 150, 70, 255), width=6 * scale)
     d.polygon([(405 * scale, y), (380 * scale, y - 16 * scale), (380 * scale, y + 16 * scale)], fill=(255, 150, 70, 255))
-    texts = (("Install StudioForge", font(24 * scale), 16, (255, 255, 255)),
-             ("Recommended: double-click \u201cInstall StudioForge.pkg\u201d", font(14 * scale), 250, (255, 190, 140)),
-             ("Or drag StudioForge onto Applications", font(13 * scale, False), 405, (210, 210, 220)),
+    texts = (("Install Fitzrovia Records DAW", font(24 * scale), 16, (255, 255, 255)),
+             ("Recommended: double-click \u201cInstall Fitzrovia Records DAW.pkg\u201d", font(14 * scale), 250, (255, 190, 140)),
+             ("Or drag Fitzrovia Records DAW onto Applications", font(13 * scale, False), 405, (210, 210, 220)),
              ("Unsigned build? Control-click the item \u203a Open \u203a Open", font(12 * scale, False), 440, (160, 160, 175)))
     for text, fnt, yy, col in texts:
         tw = d.textlength(text, font=fnt)

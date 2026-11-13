@@ -8,7 +8,7 @@
     "Pinion",
     "drone"
   ],
-  "description": "Ominous, slowly-opening drone that rises in pitch and grit (Pinion-style intro). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Ominous, slowly-opening drone that rises in pitch and grit (Pinion-style intro). Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "filter",

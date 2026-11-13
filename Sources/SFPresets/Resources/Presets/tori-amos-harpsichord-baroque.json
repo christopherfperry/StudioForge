@@ -6,7 +6,7 @@
   "tags": [
     "synth"
   ],
-  "description": "Bright harpsichord for baroque colours. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Bright harpsichord for baroque colours. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "reverb.chamber",

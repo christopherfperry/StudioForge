@@ -6,7 +6,7 @@
   "tags": [
     "keys"
   ],
-  "description": "Dark tremolo Rhodes. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Dark tremolo Rhodes. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "tremolo",

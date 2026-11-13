@@ -106,7 +106,7 @@ struct TonePickerSheet: View {
         let picker = TonePicker(library: model.presets)
         let artists = picker.artists(for: category)
         SheetFrame(title: "Tone Picker", close: close) {
-            Text("Choose an instrument and an artist style — StudioForge loads a matching preset on the selected track.").foregroundColor(.secondary)
+            Text("Choose an instrument and an artist style — Fitzrovia Records DAW loads a matching preset on the selected track.").foregroundColor(.secondary)
             Picker("Instrument", selection: $category) { ForEach(PresetCategory.allCases) { Text($0.rawValue).tag($0) } }.pickerStyle(.segmented)
             Picker("Artist style", selection: $artist) { ForEach(artists, id: \.self) { Text($0).tag($0) } }
             let options = picker.candidates(artist: artist, category: category)
@@ -348,11 +348,11 @@ struct OnboardingView: View {
     @ObservedObject var model: AppModel
     @State private var page = 0
     let pages: [(String, String, String)] = [
-        ("waveform", "Welcome to StudioForge", "A simple multi-track studio. Click New Song and pick Vocals, Guitar, Band or Beat + Synth."),
-        ("mic", "Record", "Arm a track (R button), pick its input in the Inspector, press R or the record button. StudioForge always records the clean, dry signal — effects stay editable later."),
+        ("waveform", "Welcome to Fitzrovia Records DAW", "A simple multi-track studio. Click New Song and pick Vocals, Guitar, Band or Beat + Synth."),
+        ("mic", "Record", "Arm a track (R button), pick its input in the Inspector, press R or the record button. Fitzrovia Records DAW always records the clean, dry signal — effects stay editable later."),
         ("slider.horizontal.3", "Low latency", "Open Audio Settings to choose your interface and a buffer of 32–128 samples while recording. Turn Monitor off to use your interface's direct monitoring."),
-        ("paintpalette", "Tone Picker", "Choose an artist style and instrument, and StudioForge loads a matching preset. Every preset is editable and saved as JSON."),
-        ("metronome", "Beats & stems", "Generate drum beats by style, or let StudioForge match a beat to your recording. Split any song into stems from the Stems button."),
+        ("paintpalette", "Tone Picker", "Choose an artist style and instrument, and Fitzrovia Records DAW loads a matching preset. Every preset is editable and saved as JSON."),
+        ("metronome", "Beats & stems", "Generate drum beats by style, or let Fitzrovia Records DAW match a beat to your recording. Split any song into stems from the Stems button."),
         ("square.and.arrow.up", "Export", "Bounce to WAV, AIFF, FLAC, AAC, ALAC, CAF (MP3/OGG with ffmpeg), export stems and MIDI."),
     ]
     var body: some View {

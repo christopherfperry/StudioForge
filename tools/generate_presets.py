@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Generates StudioForge's factory preset library (one JSON file per preset) into
+Generates Fitzrovia Records DAW's factory preset library (one JSON file per preset) into
 Sources/SFPresets/Resources/Presets.
 
-All presets are ORIGINAL settings for StudioForge's own DSP. Artist names describe the general
+All presets are ORIGINAL settings for Fitzrovia Records DAW's own DSP. Artist names describe the general
 tonal territory ("in the style of"); nothing is copied from any recording or proprietary plugin.
 
 You never need to run this to use the app: the generated JSON files are committed. Edit this
@@ -108,7 +108,7 @@ def add(name, category, artist, desc, effects, instrument=None, tags=(), beat=No
     PRESETS.append({
         "id": pid or re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-"),
         "name": name, "category": category, "artistStyle": artist, "tags": list(tags),
-        "description": desc + " Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+        "description": desc + " Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
         "effects": effects, **({"instrument": instrument} if instrument else {}),
         **({"beatStyle": beat} if beat else {}), **({"tempo": tempo} if tempo else {}),
     })

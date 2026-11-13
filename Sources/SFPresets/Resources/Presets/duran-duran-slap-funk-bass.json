@@ -6,7 +6,7 @@
   "tags": [
     "bass"
   ],
-  "description": "Bright punchy fretless/slap-style tone. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Bright punchy fretless/slap-style tone. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "compressor",

@@ -1,7 +1,7 @@
 import Foundation
 import SFCore
 
-/// Creates the user library (~/Music/StudioForge/...) and Application Support folder, and copies
+/// Creates the user library (~/Music/Fitzrovia Records DAW/...) and Application Support folder, and copies
 /// the bundled factory presets into `Presets/Factory` so users can browse and duplicate them in
 /// Finder. Idempotent: existing files are never overwritten. Portable (unit-tested on Linux).
 public enum FirstRunSetup {
@@ -53,7 +53,7 @@ public enum FirstRunSetup {
         let readme = root.appendingPathComponent("README.txt")
         if !fm.fileExists(atPath: readme.path) {
             let text = """
-            StudioForge library
+            Fitzrovia Records DAW library
             Projects/          your songs (.sfproj)
             Recordings/        recordings made before a project was saved
             Exports/           bounces, stems and MIDI exports

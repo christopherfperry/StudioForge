@@ -118,17 +118,19 @@ public struct DrumPartSplitter {
             low[f] = bandEnergy(f, 30, 140); lowMid[f] = bandEnergy(f, 140, 500)
             mid[f] = bandEnergy(f, 500, 4000); high[f] = bandEnergy(f, 6000, 16000)
         }
-        // Sustain of the high band: slow follower / fast follower. Cymbals ring, hats are short.
+        // Sustain of the high band = smoothed energy / recent peak. A short hi-hat burst leaves the
+        // ~0.3 s average far below its peak (low sustain); a ringing cymbal keeps them close.
+        // (Previously the ratio was current/peak, which is 1 at every fresh hit, so hats were
+        // classified as cymbals.)
         let frameRate = Float(sampleRate) / Float(hop)
-        let slowCoef = expf(-1 / (0.35 * frameRate))
-        var slow: Float = 0
+        let avgCoef = expf(-1 / (0.3 * frameRate)), peakCoef = expf(-1 / (0.6 * frameRate))
+        var avg: Float = 0, peak: Float = 0
         var sustain = [Float](repeating: 0, count: frames)
         for f in 0..<frames {
             let x = high[f]
-            slow = max(x, slow * slowCoef)
-            // Ratio near 1 when energy persists, small when only a short burst occurred recently.
-            let s = slow > 1e-12 ? min(1, (high[f] + 1e-12) / slow) : 0
-            sustain[f] = s
+            avg = avgCoef * avg + (1 - avgCoef) * x
+            peak = max(x, peak * peakCoef)
+            sustain[f] = peak > 1e-12 ? min(1, 3 * avg / peak) : 0
         }
         // Onset strength per band (half-wave rectified difference) to emphasise transients.
         func onset(_ e: [Float]) -> [Float] {
@@ -144,7 +146,10 @@ public struct DrumPartSplitter {
             return o.map { x in v = max(x, v * c); return v }
         }
         let kickF = hold(lowOn, seconds: 0.25)
-        let tomF = hold(zip(lowMidOn, midOn).map { max(0, $0 - 0.5 * $1) }, seconds: 0.35)
+        // Toms: low-mid onsets that are neither a kick (low band) nor a snare (broadband mid).
+        var tomOn = [Float](repeating: 0, count: frames)
+        for f in 0..<frames { tomOn[f] = max(0, lowMidOn[f] - 0.5 * midOn[f] - 0.8 * lowOn[f]) }
+        let tomF = hold(tomOn, seconds: 0.35)
         let snareF = hold(midOn, seconds: 0.18)
 
         var out: [Stem: [Float]] = [:]
@@ -155,7 +160,7 @@ public struct DrumPartSplitter {
             for b in 0..<bins {
                 let hz = Float(b) * binHz
                 let wk = Self.band(hz, 20, 40, 110, 180) * (0.15 + kickF[f])
-                let wt = Self.band(hz, 60, 90, 350, 700) * (0.05 + tomF[f])
+                let wt = Self.band(hz, 60, 90, 350, 700) * (0.02 + tomF[f]) * (1 - 0.8 * kickF[f])
                 let ws = Self.band(hz, 150, 220, 3500, 8000) * (0.1 + snareF[f])
                 let wh = Self.band(hz, 4000, 7000, 20000, 24000) * (1.05 - sustain[f])
                 let wc = Self.band(hz, 2500, 5000, 20000, 24000) * (0.05 + sustain[f])
@@ -226,8 +231,11 @@ public struct DSPStemSeparator: StemSeparator {
         progress(0.5, "Building stem masks")
 
         let binHz = Float(sr / Double(frameSize))
+        let wantGuitar = options.stems.contains(.guitar)
+        let wantPiano = options.stems.contains(.piano)
+        let wantOther = options.stems.contains(.other)
         var bassMask = [Float](repeating: 0, count: midMag.count)
-        var vocalMask = bassMask, otherMask = bassMask
+        var vocalMask = bassMask, guitarMask = bassMask, pianoMask = bassMask, otherMask = bassMask
         for f in 0..<frames {
             let base = f * bins
             for b in 0..<bins {
@@ -239,24 +247,38 @@ public struct DSPStemSeparator: StemSeparator {
                 // Centre-ness: 2|L||R|cosΔφ / (|L|²+|R|²) ≈ 1 for centre-panned, in-phase sources.
                 let lr = specs[0].re[i] * specs[1].re[i] + specs[0].im[i] * specs[1].im[i]
                 let pw = mags[0][i] * mags[0][i] + mags[1][i] * mags[1][i]
-                let centre: Float = pw > 1e-12 ? max(0, 2 * lr / pw) : 0
+                let centre: Float = pw > 1e-12 ? min(1, max(0, 2 * lr / pw)) : 0
                 let vocalBand = DrumPartSplitter.band(hz, 150, 250, 6000, 9000)
                 let vW = powf(centre, 6) * vocalBand * (1 - bassW)
                 bassMask[i] = h * bassW
                 vocalMask[i] = h * vW
-                otherMask[i] = max(0, h - bassMask[i] - vocalMask[i])
+                let residual = max(0, h - bassMask[i] - vocalMask[i])
+                // Residual harmonic content is shared between guitar / piano-keys / other with soft
+                // band + stereo-width weights (guitars tend to sit wide in the mids, keys span the
+                // low-mids and are more centred, pads/strings/synth air sit higher). Heuristic only.
+                let side = 1 - centre
+                let gW = wantGuitar ? DrumPartSplitter.band(hz, 80, 200, 2500, 5000) * (0.35 + side) : 0
+                let pW = wantPiano ? DrumPartSplitter.band(hz, 27, 60, 1500, 4500) * (0.35 + centre) : 0
+                let oW: Float = DrumPartSplitter.band(hz, 2000, 5000, 20000, 24000) + 0.25
+                let sum = gW + pW + oW
+                if wantOther {
+                    // "Other" absorbs everything that isn't assigned to a requested stem.
+                    guitarMask[i] = residual * gW / sum
+                    pianoMask[i] = residual * pW / sum
+                    otherMask[i] = max(0, residual - guitarMask[i] - pianoMask[i])
+                } else if gW + pW > 1e-9 {
+                    guitarMask[i] = residual * gW / (gW + pW)
+                    pianoMask[i] = residual * pW / (gW + pW)
+                }
             }
         }
         var masks: [Stem: [Float]] = [:]
         let wantDrums = options.stems.contains(.drums) || options.splitDrums
         if options.stems.contains(.bass) { masks[.bass] = bassMask }
         if options.stems.contains(.vocals) { masks[.vocals] = vocalMask }
-        if options.stems.contains(.guitar) { masks[.guitar] = otherMask }
-        if options.stems.contains(.other) || options.stems.contains(.piano) {
-            // Without a model, guitar/keys/other cannot be told apart: "other" carries the same residual
-            // when guitar isn't requested, otherwise it is left empty to avoid duplication.
-            masks[.other] = options.stems.contains(.guitar) ? [Float](repeating: 0, count: otherMask.count) : otherMask
-        }
+        if wantGuitar { masks[.guitar] = guitarMask }
+        if wantPiano { masks[.piano] = pianoMask }
+        if wantOther { masks[.other] = otherMask }
         if wantDrums { masks[.drums] = pMask }
 
         var result: [Stem: AudioData] = [:]

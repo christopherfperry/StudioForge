@@ -7,7 +7,7 @@
     "industrial",
     "March of the Pigs"
   ],
-  "description": "Short, nasty fuzz-saturated synth stabs for frantic 7/8 stomps (March of the Pigs-style). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Short, nasty fuzz-saturated synth stabs for frantic 7/8 stomps (March of the Pigs-style). Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "distortion",

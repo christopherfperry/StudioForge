@@ -6,7 +6,7 @@
   "tags": [
     "keys"
   ],
-  "description": "Detuned, lo-fi piano with bitcrush and room. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Detuned, lo-fi piano with bitcrush and room. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "bitcrusher",

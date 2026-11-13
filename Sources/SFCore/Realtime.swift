@@ -2,7 +2,7 @@ import Foundation
 import Atomics
 
 // MARK: - Lock-free primitives used to communicate with the real-time audio thread.
-// Rule of thumb in StudioForge: the audio thread never allocates, never locks, never does I/O.
+// Rule of thumb in Fitzrovia Records DAW: the audio thread never allocates, never locks, never does I/O.
 // Everything it needs is pre-allocated on the main thread and published through these types.
 
 /// A Float that can be written from the UI thread and read from the audio thread without locks.

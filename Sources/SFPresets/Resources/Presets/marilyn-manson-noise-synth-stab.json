@@ -6,7 +6,7 @@
   "tags": [
     "synth"
   ],
-  "description": "Ring-modulated noise stab. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Ring-modulated noise stab. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "ringmod",

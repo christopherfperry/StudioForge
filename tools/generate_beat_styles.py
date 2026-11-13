@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Generates StudioForge's bundled beat styles into Sources/SFBeatGen/Resources/BeatStyles.
+Generates Fitzrovia Records DAW's bundled beat styles into Sources/SFBeatGen/Resources/BeatStyles.
 Each style is a plain JSON file you can edit by hand. Step-string legend:
   X accent   x hit   o ghost   ? optional (plays with probability = complexity)   . rest   | and spaces ignored
-These are original patterns written for StudioForge "in the style of" a genre/artist.
+These are original patterns written for Fitzrovia Records DAW "in the style of" a genre/artist.
 """
 import json
 import os

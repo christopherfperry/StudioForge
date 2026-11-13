@@ -314,7 +314,7 @@ struct InspectorView: View {
                                 Text("Off (direct monitoring)").tag(MonitorMode.off); Text("Auto").tag(MonitorMode.auto); Text("On").tag(MonitorMode.on)
                             }
                             Toggle("Record clean (dry) — always on", isOn: .constant(true)).disabled(true)
-                                .help("StudioForge always records the dry input; effects are only applied on playback")
+                                .help("Fitzrovia Records DAW always records the dry input; effects are only applied on playback")
                             Toggle("Also capture wet (with effects)", isOn: model.binding(track: id, \.captureWet, label: "Capture Wet")!)
                         }
                     }

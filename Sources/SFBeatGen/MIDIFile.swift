@@ -22,7 +22,7 @@ public enum MIDIFile {
 
         // Conductor track: tempo + time signature.
         var t0 = Data()
-        t0.append(vlq(0)); t0.append(contentsOf: [0xFF, 0x03]); appendText(&t0, "StudioForge")
+        t0.append(vlq(0)); t0.append(contentsOf: [0xFF, 0x03]); appendText(&t0, "Fitzrovia Records DAW")
         let usPerQuarter = UInt32(max(1, min(16_777_215, (60_000_000 / max(1, tempo)).rounded())))
         t0.append(vlq(0)); t0.append(contentsOf: [0xFF, 0x51, 0x03, UInt8((usPerQuarter >> 16) & 0xFF), UInt8((usPerQuarter >> 8) & 0xFF), UInt8(usPerQuarter & 0xFF)])
         let dd = UInt8(max(0, Int(log2(Double(max(1, timeSignature.denominator))).rounded())))

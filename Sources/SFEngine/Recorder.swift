@@ -104,7 +104,7 @@ public final class Recorder: @unchecked Sendable {
         session = s
         running.value = true
         let t = Thread { [weak self] in self?.diskLoop() }
-        t.name = "StudioForge Disk Writer"
+        t.name = "Fitzrovia Records DAW Disk Writer"
         t.qualityOfService = .userInitiated
         thread = t
         t.start()

@@ -13,7 +13,7 @@ import SFCore
 ///  1. **Download** from a URL you configure (Settings ▸ Stem Separation ▸ Model URL) — a .zip
 ///     containing `htdemucs_6s.mlpackage` or `htdemucs_6s.mlmodelc`;
 ///  2. **Import** a model you converted yourself with `tools/convert_demucs_to_coreml.py`.
-/// StudioForge does not ship or hard-code a third-party download location.
+/// Fitzrovia Records DAW does not ship or hard-code a third-party download location.
 public final class SeparationModelManager: NSObject {
     public enum State: Equatable {
         case notInstalled

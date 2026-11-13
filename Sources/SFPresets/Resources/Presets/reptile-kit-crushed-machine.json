@@ -8,7 +8,7 @@
     "kit",
     "beat"
   ],
-  "description": "Grinding, bitcrushed drum machine with metallic hits. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Grinding, bitcrushed drum machine with metallic hits. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "bitcrusher",

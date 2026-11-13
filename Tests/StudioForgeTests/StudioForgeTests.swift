@@ -186,6 +186,65 @@ final class SeparationTests: XCTestCase {
         for s in [Stem.vocals, .bass, .drums, .other] { XCTAssertNotNil(stems[s], "missing \(s)") }
         XCTAssertNotNil(stems[.kick])
     }
+
+    func energy(_ a: AudioData?) -> Float { (a?.channels ?? []).reduce(0) { $0 + $1.reduce(0) { $0 + $1 * $1 } } }
+
+    /// Synthetic mix: centred 220 Hz "vocal" + 55 Hz bass + hard-left 660 Hz "guitar" + 70 Hz kick and
+    /// noisy hi-hat bursts. Every requested stem must be returned, finite, and the obvious sources must
+    /// land in the right place.
+    func testFullSplitRoutesSourcesAndReturnsAllStems() throws {
+        let sr = 44_100.0, n = Int(sr * 3)
+        var l = [Float](repeating: 0, count: n), r = l
+        var rng = SystemRandomNumberGenerator()
+        for i in 0..<n {
+            let t = Double(i) / sr
+            let vocal = Float(0.2 * sin(2 * .pi * 220 * t) + 0.1 * sin(2 * .pi * 440 * t))
+            let bass = Float(0.3 * sin(2 * .pi * 55 * t))
+            let guitar = Float(0.2 * sin(2 * .pi * 660 * t))
+            l[i] = vocal + bass + guitar; r[i] = vocal + bass
+        }
+        let beat = Int(sr / 2)
+        for s in stride(from: 0, to: n, by: beat) {
+            for k in 0..<4000 where s + k < n {
+                let kick = Float(0.9 * exp(-Double(k) / 1500) * sin(2 * .pi * 70 * Double(k) / sr))
+                l[s + k] += kick; r[s + k] += kick
+            }
+            let h = s + beat / 2
+            for k in 0..<600 where h + k < n {
+                let v = Float.random(in: -0.4...0.4, using: &rng) * expf(-Float(k) / 150)
+                l[h + k] += v; r[h + k] += v
+            }
+        }
+        let opts = SeparationOptions.full
+        let stems = try DSPStemSeparator().separate(AudioData(channels: [l, r], sampleRate: sr),
+                                                    options: opts, progress: { _, _ in }, isCancelled: { false })
+        for s in opts.expectedStems {
+            XCTAssertNotNil(stems[s], "missing \(s)")
+            XCTAssertTrue(stems[s]?.channels.allSatisfy { $0.allSatisfy(\.isFinite) } ?? false, "\(s) not finite")
+            XCTAssertEqual(stems[s]?.frameCount, n)
+        }
+        XCTAssertEqual(opts.expectedStems.count, 11)
+        XCTAssertGreaterThan(energy(stems[.guitar]), 0, "guitar empty")
+        XCTAssertGreaterThan(energy(stems[.piano]), 0, "piano empty")
+        XCTAssertGreaterThan(energy(stems[.other]), 0, "other empty")
+        XCTAssertGreaterThan(energy(stems[.bass]), energy(stems[.vocals]) * 0.5)
+        XCTAssertGreaterThan(energy(stems[.kick]), energy(stems[.hihat]), "kick should dominate the low drum hits")
+        XCTAssertGreaterThan(energy(stems[.hihat]), energy(stems[.toms]), "short noise bursts are hi-hats")
+        XCTAssertGreaterThan(energy(stems[.hihat]), energy(stems[.cymbals]), "short bursts must not be read as cymbals")
+    }
+
+    func testDrumsOnlyPresetAndStemWriterNeverOverwrites() throws {
+        XCTAssertEqual(SeparationOptions.drumsOnly.expectedStems, Stem.drumParts)
+        XCTAssertTrue(SeparationOptions(stems: [], splitDrums: false).isEmpty)
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("sf-stems-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let a = AudioData(channels: [[Float](repeating: 0.1, count: 100)], sampleRate: 44_100)
+        let first = try StemWriter.write([.drums: a, .piano: a], baseName: "Song: 1", to: dir)
+        let second = try StemWriter.write([.drums: a], baseName: "Song: 1", to: dir)
+        XCTAssertEqual(first[.drums]?.lastPathComponent, "Song- 1 - Drums full.wav")
+        XCTAssertEqual(first[.piano]?.lastPathComponent, "Song- 1 - Piano - Keys.wav")
+        XCTAssertNotEqual(first[.drums], second[.drums])
+    }
 }
 
 final class ProjectTests: XCTestCase {
@@ -270,7 +329,7 @@ final class SetupTests: XCTestCase {
         let fm = FileManager.default
         let base = fm.temporaryDirectory.appendingPathComponent("sf-setup-\(UUID())")
         defer { try? fm.removeItem(at: base) }
-        let root = base.appendingPathComponent("Music/StudioForge"), support = base.appendingPathComponent("Support")
+        let root = base.appendingPathComponent("Music/Fitzrovia Records DAW"), support = base.appendingPathComponent("Support")
         let r1 = FirstRunSetup.run(root: root, support: support, markComplete: false)
         XCTAssertTrue(r1.ok, "\(r1.errors)")
         for f in ["Projects", "Recordings", "Exports", "Presets/User", "ImpulseResponses", "Models", "Samples"] {
@@ -282,6 +341,6 @@ final class SetupTests: XCTestCase {
         let r2 = FirstRunSetup.run(root: root, support: support, markComplete: false)
         XCTAssertEqual(r2.copiedPresets, 0); XCTAssertTrue(r2.createdFolders.isEmpty)
         XCTAssertEqual(ProjectPackage.fileExtension, "sfproj")
-        XCTAssertTrue(AppPaths.defaultProjectsFolder.path.hasSuffix("StudioForge/Projects"))
+        XCTAssertTrue(AppPaths.defaultProjectsFolder.path.hasSuffix("Fitzrovia Records DAW/Projects"))
     }
 }

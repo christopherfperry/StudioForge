@@ -7,7 +7,7 @@
     "starter",
     "brass"
   ],
-  "description": "Plain open trumpet. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Plain open trumpet. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "reverb.room",

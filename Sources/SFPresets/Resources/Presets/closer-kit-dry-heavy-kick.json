@@ -8,7 +8,7 @@
     "kit",
     "beat"
   ],
-  "description": "Huge dry, compressed kick, tight snappy snare, crunchy hats; industrial-funk groove at ~92 BPM. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Huge dry, compressed kick, tight snappy snare, crunchy hats; industrial-funk groove at ~92 BPM. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "compressor",

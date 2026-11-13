@@ -112,7 +112,7 @@ public struct Track: Codable, Hashable, Identifiable {
     public var arm = false
     public var monitor: MonitorMode = .auto
     /// "Record clean": always true in practice — the dry input is always captured. Kept explicit
-    /// so the UI can show it; when false StudioForge still records dry (never only-wet).
+    /// so the UI can show it; when false Fitzrovia Records DAW still records dry (never only-wet).
     public var recordClean = true
     /// Additionally capture the processed (wet) signal to a second, linked file.
     public var captureWet = false

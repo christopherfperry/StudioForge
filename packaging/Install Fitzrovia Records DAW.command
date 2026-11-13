@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # First time: Control-click > Open > Open (macOS blocks unsigned downloaded scripts on a plain double-click).
-# Double-click in Finder to build and install StudioForge from source.
+# Double-click in Finder to build and install Fitzrovia Records DAW from source.
 # Works from the source disk image (read-only) or an unzipped source folder.
 #
 #   DRY_RUN=1         print what would happen, change nothing (also works on Linux)
@@ -12,7 +12,7 @@ set -euo pipefail
 DRY_RUN="${DRY_RUN:-0}"
 ASSUME_YES="${ASSUME_YES:-0}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
-LOG="${TMPDIR:-/tmp}/StudioForge-install.log"
+LOG="${TMPDIR:-/tmp}/FitzroviaRecordsDAW-install.log"
 
 say()  { printf '\n\033[1;35m==>\033[0m %s\n' "$*"; }
 run()  { echo "+ $*"; if [[ "$DRY_RUN" != "1" ]]; then "$@"; fi; }
@@ -27,7 +27,7 @@ confirm() {
   [[ -z "$reply" || "$reply" =~ ^[Yy] ]]
 }
 
-# Locate the source tree: next to this script, or in a "StudioForge" / "mac_daw" subfolder.
+# Locate the source tree: next to this script, or in a "Fitzrovia Records DAW" / "mac_daw" subfolder.
 find_source() {
   local c
   for c in "$HERE" "$HERE/StudioForge" "$HERE/mac_daw" "$HERE/.." "/Volumes/StudioForge Installer/StudioForge"; do
@@ -39,7 +39,7 @@ find_source() {
 library_folders=(Projects Recordings Exports "Presets/User" "Presets/Factory" ImpulseResponses Models Samples)
 
 main() {
-  echo "StudioForge installer — builds the app from source on this Mac."
+  echo "Fitzrovia Records DAW installer — builds the app from source on this Mac."
   echo "Log file: $LOG"
 
   local src; src="$(find_source)" || fail "could not find Package.swift next to this script."
@@ -50,7 +50,7 @@ main() {
     echo "(Not macOS: dry run only.)"
   else
     local major; major="$(sw_vers -productVersion | cut -d. -f1)"
-    (( major >= 13 )) || fail "StudioForge needs macOS 13 Ventura or later (found $(sw_vers -productVersion))."
+    (( major >= 13 )) || fail "Fitzrovia Records DAW needs macOS 13 Ventura or later (found $(sw_vers -productVersion))."
   fi
 
   # 1. Xcode command line tools / Swift
@@ -58,7 +58,7 @@ main() {
   if [[ "$DRY_RUN" == "1" ]]; then
     echo "+ xcode-select -p && swift --version"
   elif ! xcode-select -p >/dev/null 2>&1 || ! xcrun --find swift >/dev/null 2>&1; then
-    echo "The Xcode Command Line Tools (free, about 1–2 GB) are required to build StudioForge."
+    echo "The Xcode Command Line Tools (free, about 1–2 GB) are required to build Fitzrovia Records DAW."
     if confirm "Install them now?"; then
       xcode-select --install || true
       echo "Follow the dialog that just opened. When the installation has finished, double-click this installer again."
@@ -74,15 +74,15 @@ main() {
   fi
 
   # 2. Build in a writable copy (the disk image is read-only)
-  local work="$HOME/Library/Caches/StudioForge/source"
-  say "Building StudioForge (first build takes a few minutes)"
+  local work="$HOME/Library/Caches/Fitzrovia Records DAW/source"
+  say "Building Fitzrovia Records DAW (first build takes a few minutes)"
   run mkdir -p "$work"
   run rsync -a --delete --exclude /.build --exclude /build --exclude /dist --exclude /.git "$src/" "$work/"
   if [[ "$DRY_RUN" == "1" ]]; then
     echo "+ (cd $work && CONFIG=release ./build.sh)"
   else
     (cd "$work" && CONFIG=release ./build.sh) 2>&1 | tee "$LOG" || fail "build failed (see log)."
-    [[ "${PIPESTATUS[0]}" == "0" && -d "$work/build/StudioForge.app" ]] || fail "build failed (see log)."
+    [[ "${PIPESTATUS[0]}" == "0" && -d "$work/build/Fitzrovia Records DAW.app" ]] || fail "build failed (see log)."
   fi
 
   # 3. Install
@@ -97,30 +97,30 @@ main() {
   else
     SUDO=""
   fi
-  say "Installing to $dest/StudioForge.app"
+  say "Installing to $dest/Fitzrovia Records DAW.app"
   if [[ "$DRY_RUN" != "1" ]]; then
-    pkill -x StudioForge 2>/dev/null || true
+    pkill -x Fitzrovia Records DAW 2>/dev/null || true
     mkdir -p "$dest" 2>/dev/null || $SUDO mkdir -p "$dest"
   fi
-  run ${SUDO:+$SUDO} rm -rf "$dest/StudioForge.app"
-  run ${SUDO:+$SUDO} ditto "$work/build/StudioForge.app" "$dest/StudioForge.app"
+  run ${SUDO:+$SUDO} rm -rf "$dest/Fitzrovia Records DAW.app"
+  run ${SUDO:+$SUDO} ditto "$work/build/Fitzrovia Records DAW.app" "$dest/Fitzrovia Records DAW.app"
   # Built locally, so normally not quarantined — clear it anyway (e.g. source copied from a download).
-  run ${SUDO:+$SUDO} xattr -dr com.apple.quarantine "$dest/StudioForge.app" || true
-  # Register the app so .sfproj projects open with StudioForge on double-click.
+  run ${SUDO:+$SUDO} xattr -dr com.apple.quarantine "$dest/Fitzrovia Records DAW.app" || true
+  # Register the app so .sfproj projects open with Fitzrovia Records DAW on double-click.
   local lsreg="/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister"
-  if [[ -x "$lsreg" || "$DRY_RUN" == "1" ]]; then run "$lsreg" -f "$dest/StudioForge.app" || true; fi
+  if [[ -x "$lsreg" || "$DRY_RUN" == "1" ]]; then run "$lsreg" -f "$dest/Fitzrovia Records DAW.app" || true; fi
 
   # 4. Library folders (the app also creates these on first launch)
-  say "Creating your library in ~/Music/StudioForge"
+  say "Creating your library in ~/Music/Fitzrovia Records DAW"
   local f
-  for f in "${library_folders[@]}"; do run mkdir -p "$HOME/Music/StudioForge/$f"; done
-  run mkdir -p "$HOME/Library/Application Support/StudioForge"
+  for f in "${library_folders[@]}"; do run mkdir -p "$HOME/Music/Fitzrovia Records DAW/$f"; done
+  run mkdir -p "$HOME/Library/Application Support/Fitzrovia Records DAW"
 
   # 5. Launch
-  say "StudioForge is installed."
-  echo "On first launch StudioForge explains and then asks for microphone / audio-input access."
+  say "Fitzrovia Records DAW is installed."
+  echo "On first launch Fitzrovia Records DAW explains and then asks for microphone / audio-input access."
   echo "You can review permissions any time under Help > Setup & Permissions."
-  if [[ "${NO_LAUNCH:-0}" != "1" ]]; then run open "$dest/StudioForge.app"; fi
+  if [[ "${NO_LAUNCH:-0}" != "1" ]]; then run open "$dest/Fitzrovia Records DAW.app"; fi
   pause_exit 0
 }
 

@@ -7,7 +7,7 @@
     "convolution",
     "ir"
   ],
-  "description": "Vocal through the convolution reverb (load your own IR in the effect). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Vocal through the convolution reverb (load your own IR in the effect). Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "compressor",

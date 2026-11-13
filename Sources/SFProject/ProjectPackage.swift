@@ -51,11 +51,11 @@ public enum ProjectPackage {
     public static func load(from url: URL) throws -> Project {
         let manifest = url.appendingPathComponent(manifestName)
         guard FileManager.default.fileExists(atPath: manifest.path) else {
-            throw StudioForgeError.io("\(url.lastPathComponent) is not a StudioForge project (missing project.json).")
+            throw StudioForgeError.io("\(url.lastPathComponent) is not a Fitzrovia Records DAW project (missing project.json).")
         }
         let p = try decoder().decode(Project.self, from: Data(contentsOf: manifest))
         if p.version > Project.currentVersion {
-            throw StudioForgeError.invalid("This project was saved by a newer version of StudioForge.")
+            throw StudioForgeError.invalid("This project was saved by a newer version of Fitzrovia Records DAW.")
         }
         return p
     }
@@ -187,7 +187,7 @@ public final class AutosaveController {
             try ProjectPackage.writeAutosave(p, to: url)
             DispatchQueue.main.async { self.didAutosave?(url) }
         } catch {
-            NSLog("StudioForge autosave failed: \(error.localizedDescription)")
+            NSLog("Fitzrovia Records DAW autosave failed: \(error.localizedDescription)")
         }
     }
 

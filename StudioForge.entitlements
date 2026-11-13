@@ -6,7 +6,7 @@
     <key>com.apple.security.device.audio-input</key><true/>
     <!-- Allow loading third-party plug-ins / bundled ffmpeg signed by other teams. -->
     <key>com.apple.security.cs.disable-library-validation</key><true/>
-    <!-- The app is NOT sandboxed (it needs ~/Music/StudioForge and arbitrary audio files).
+    <!-- The app is NOT sandboxed (it needs ~/Music/Fitzrovia Records DAW and arbitrary audio files).
          The keys below only take effect if com.apple.security.app-sandbox is enabled later;
          they document what a sandboxed build would need. -->
     <key>com.apple.security.files.user-selected.read-write</key><true/>

@@ -29,7 +29,7 @@ struct StudioForgeApp: App {
     }
 
     var body: some Scene {
-        WindowGroup("StudioForge") {
+        WindowGroup("Fitzrovia Records DAW") {
             MainView(model: model).frame(minWidth: 1100, minHeight: 700)
                 .onAppear { openPending() }
                 .onReceive(NotificationCenter.default.publisher(for: .sfOpenDocuments)) { _ in openPending() }
@@ -62,6 +62,6 @@ struct StudioForgeApp: App {
 
 StudioForgeApp.main()
 #else
-print("StudioForge is a macOS application (SwiftUI + CoreAudio). Build it on macOS 13+ with ./build.sh.")
+print("Fitzrovia Records DAW is a macOS application (SwiftUI + CoreAudio). Build it on macOS 13+ with ./build.sh.")
 print("On this platform you can run the portable unit tests with: swift test")
 #endif

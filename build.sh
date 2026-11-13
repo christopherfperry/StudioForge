@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Builds StudioForge.app on macOS 13+ (Xcode 15+ / Swift 5.9+ command line tools required).
+# Builds Fitzrovia Records DAW.app on macOS 13+ (Xcode 15+ / Swift 5.9+ command line tools required).
 set -euo pipefail
 cd "$(dirname "$0")"
 CONFIG="${CONFIG:-release}"
-APP="build/StudioForge.app"
+APP="build/Fitzrovia Records DAW.app"
 
 if [[ "$(uname)" != "Darwin" ]]; then
-  echo "StudioForge.app can only be built on macOS. Running the portable unit tests instead."
+  echo "Fitzrovia Records DAW.app can only be built on macOS. Running the portable unit tests instead."
   exec swift test
 fi
 

@@ -8,7 +8,7 @@
     "Closer",
     "funk"
   ],
-  "description": "Round, slightly squelchy mono bass synth for an industrial-funk groove (Closer-style). Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Round, slightly squelchy mono bass synth for an industrial-funk groove (Closer-style). Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "compressor",

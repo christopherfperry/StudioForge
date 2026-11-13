@@ -1,7 +1,7 @@
 import Foundation
 import SFCore
 
-/// Stems that StudioForge can produce.
+/// Stems that Fitzrovia Records DAW can produce.
 public enum Stem: String, CaseIterable, Codable, Identifiable, Hashable {
     case vocals, bass, drums, guitar, piano, other
     case kick, snare, toms, hihat, cymbals
@@ -17,6 +17,10 @@ public enum Stem: String, CaseIterable, Codable, Identifiable, Hashable {
     }
     public static let drumParts: [Stem] = [.kick, .snare, .toms, .hihat, .cymbals]
     public var isDrumPart: Bool { Stem.drumParts.contains(self) }
+    /// Main (non drum-part) stems in display order.
+    public static let mainStems: [Stem] = [.vocals, .drums, .bass, .guitar, .piano, .other]
+    /// Stable ordering for track creation (vocals first, drum parts after the full drum stem).
+    public var sortIndex: Int { Stem.allCases.firstIndex(of: self) ?? 0 }
 }
 
 public struct SeparationOptions {
@@ -26,6 +30,20 @@ public struct SeparationOptions {
     public init(stems: Set<Stem> = [.vocals, .bass, .drums, .guitar, .other], splitDrums: Bool = true) {
         self.stems = stems; self.splitDrums = splitDrums
     }
+    /// Vocals + instrumental-style 4 stems.
+    public static let fourStem = SeparationOptions(stems: [.vocals, .drums, .bass, .other], splitDrums: false)
+    /// Everything: 6 instrument stems plus kick / snare / toms / hi-hat / cymbals.
+    public static let full = SeparationOptions(stems: Set(Stem.mainStems), splitDrums: true)
+    /// Drum kit only: kick / snare / toms / hi-hat / cymbals.
+    public static let drumsOnly = SeparationOptions(stems: [], splitDrums: true)
+
+    /// The stems a separator is expected to return for these options.
+    public var expectedStems: [Stem] {
+        var out = stems.filter { !$0.isDrumPart }
+        if splitDrums { out.formUnion(Stem.drumParts) }
+        return out.sorted { $0.sortIndex < $1.sortIndex }
+    }
+    public var isEmpty: Bool { stems.filter { !$0.isDrumPart }.isEmpty && !splitDrums }
 }
 
 /// Progress callback: fraction 0...1 and a human-readable stage. Called from the worker thread.
@@ -45,8 +63,18 @@ public enum StemWriter {
     public static func write(_ stems: [Stem: AudioData], baseName: String, to folder: URL) throws -> [Stem: URL] {
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         var out: [Stem: URL] = [:]
-        for (stem, audio) in stems {
-            let url = folder.appendingPathComponent("\(baseName) - \(stem.displayName.replacingOccurrences(of: "/", with: "-")).wav")
+        let fm = FileManager.default
+        let safeBase = baseName.replacingOccurrences(of: "/", with: "-").replacingOccurrences(of: ":", with: "-")
+        for (stem, audio) in stems.sorted(by: { $0.key.sortIndex < $1.key.sortIndex }) {
+            let label = stem.displayName.replacingOccurrences(of: "/", with: "-")
+                .replacingOccurrences(of: "(", with: "").replacingOccurrences(of: ")", with: "")
+                .trimmingCharacters(in: .whitespaces)
+            var url = folder.appendingPathComponent("\(safeBase) - \(label).wav")
+            var n = 2
+            // Never overwrite a previous split of the same file (older tracks may still reference it).
+            while fm.fileExists(atPath: url.path) {
+                url = folder.appendingPathComponent("\(safeBase) - \(label) \(n).wav"); n += 1
+            }
             try AudioFileIO.writeWAV(audio, to: url, format: .int24)
             out[stem] = url
         }

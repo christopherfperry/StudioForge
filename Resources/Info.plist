@@ -2,31 +2,31 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleName</key><string>StudioForge</string>
-    <key>CFBundleDisplayName</key><string>StudioForge</string>
+    <key>CFBundleName</key><string>Fitzrovia Records DAW</string>
+    <key>CFBundleDisplayName</key><string>Fitzrovia Records DAW</string>
     <key>CFBundleIdentifier</key><string>com.studioforge.daw</string>
     <key>CFBundleExecutable</key><string>StudioForge</string>
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleIconFile</key><string>StudioForge</string>
-    <key>CFBundleShortVersionString</key><string>0.2.1</string>
-    <key>CFBundleVersion</key><string>3</string>
+    <key>CFBundleShortVersionString</key><string>0.3.0</string>
+    <key>CFBundleVersion</key><string>4</string>
     <key>LSMinimumSystemVersion</key><string>13.0</string>
     <key>NSHighResolutionCapable</key><true/>
     <key>NSPrincipalClass</key><string>NSApplication</string>
     <key>LSApplicationCategoryType</key><string>public.app-category.music</string>
     <key>NSHumanReadableCopyright</key><string>Copyright © 2026 Christopher Perry. MIT License.</string>
-    <key>NSMicrophoneUsageDescription</key><string>StudioForge needs audio input access to record your microphone, instrument or audio interface. Audio stays on your Mac.</string>
-    <key>NSBluetoothAlwaysUsageDescription</key><string>StudioForge uses Bluetooth to connect to Bluetooth MIDI instruments.</string>
-    <key>NSAppleEventsUsageDescription</key><string>StudioForge uses Apple Events to reveal your library in Finder and open System Settings panes.</string>
-    <key>NSMusicFolderUsageDescription</key><string>StudioForge stores your projects, recordings, exports and presets in Music › StudioForge.</string>
-    <key>NSDocumentsFolderUsageDescription</key><string>StudioForge can open and save projects and audio files in your Documents folder.</string>
-    <key>NSDownloadsFolderUsageDescription</key><string>StudioForge can import audio files and models from your Downloads folder.</string>
-    <key>NSDesktopFolderUsageDescription</key><string>StudioForge can import audio files from your Desktop.</string>
-    <key>NSRemovableVolumesUsageDescription</key><string>StudioForge can import and export audio on external drives.</string>
+    <key>NSMicrophoneUsageDescription</key><string>Fitzrovia Records DAW needs audio input access to record your microphone, instrument or audio interface. Audio stays on your Mac.</string>
+    <key>NSBluetoothAlwaysUsageDescription</key><string>Fitzrovia Records DAW uses Bluetooth to connect to Bluetooth MIDI instruments.</string>
+    <key>NSAppleEventsUsageDescription</key><string>Fitzrovia Records DAW uses Apple Events to reveal your library in Finder and open System Settings panes.</string>
+    <key>NSMusicFolderUsageDescription</key><string>Fitzrovia Records DAW stores your projects, recordings, exports and presets in Music › Fitzrovia Records DAW.</string>
+    <key>NSDocumentsFolderUsageDescription</key><string>Fitzrovia Records DAW can open and save projects and audio files in your Documents folder.</string>
+    <key>NSDownloadsFolderUsageDescription</key><string>Fitzrovia Records DAW can import audio files and models from your Downloads folder.</string>
+    <key>NSDesktopFolderUsageDescription</key><string>Fitzrovia Records DAW can import audio files from your Desktop.</string>
+    <key>NSRemovableVolumesUsageDescription</key><string>Fitzrovia Records DAW can import and export audio on external drives.</string>
     <key>CFBundleDocumentTypes</key>
     <array>
         <dict>
-            <key>CFBundleTypeName</key><string>StudioForge Project</string>
+            <key>CFBundleTypeName</key><string>Fitzrovia Records DAW Project</string>
             <key>CFBundleTypeRole</key><string>Editor</string>
             <key>CFBundleTypeIconFile</key><string>StudioForge</string>
             <key>LSHandlerRank</key><string>Owner</string>
@@ -39,7 +39,7 @@
     <array>
         <dict>
             <key>UTTypeIdentifier</key><string>com.studioforge.project</string>
-            <key>UTTypeDescription</key><string>StudioForge Project</string>
+            <key>UTTypeDescription</key><string>Fitzrovia Records DAW Project</string>
             <key>UTTypeIconFile</key><string>StudioForge</string>
             <key>UTTypeConformsTo</key>
             <array><string>com.apple.package</string><string>public.composite-content</string></array>

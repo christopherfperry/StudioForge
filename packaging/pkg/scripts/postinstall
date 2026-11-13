@@ -6,8 +6,8 @@ set -u
 
 TARGET_VOL="${3:-/}"
 [[ "$TARGET_VOL" == "/" ]] && TARGET_VOL=""
-APP="${SF_APP_PATH:-$TARGET_VOL/Applications/StudioForge.app}"
-log() { echo "StudioForge postinstall: $*"; }
+APP="${SF_APP_PATH:-$TARGET_VOL/Applications/Fitzrovia Records DAW.app}"
+log() { echo "Fitzrovia Records DAW postinstall: $*"; }
 
 if [[ "${SF_DRY_RUN:-0}" == "1" ]]; then
   run() { echo "+ $*"; }
@@ -23,9 +23,15 @@ else
   USER_HOME="${SF_USER_HOME:-$(dscl . -read "/Users/$CONSOLE_USER" NFSHomeDirectory 2>/dev/null | awk '{print $2}')}"
   [[ -z "$USER_HOME" ]] && USER_HOME="/Users/$CONSOLE_USER"
   USER_GROUP="$(id -gn "$CONSOLE_USER" 2>/dev/null || echo staff)"
-  LIB="$USER_HOME/Music/StudioForge"
-  SUPPORT="$USER_HOME/Library/Application Support/StudioForge"
+  LIB="$USER_HOME/Music/Fitzrovia Records DAW"
+  SUPPORT="$USER_HOME/Library/Application Support/Fitzrovia Records DAW"
   log "setting up $LIB for $CONSOLE_USER"
+
+  # 1b. Rename: carry an existing StudioForge library/settings over to the new folder names once.
+  OLD_LIB="$USER_HOME/Music/StudioForge"
+  OLD_SUPPORT="$USER_HOME/Library/Application Support/StudioForge"
+  if [[ -d "$OLD_LIB" && ! -e "$LIB" ]]; then run mv "$OLD_LIB" "$LIB"; fi
+  if [[ -d "$OLD_SUPPORT" && ! -e "$SUPPORT" ]]; then run mv "$OLD_SUPPORT" "$SUPPORT"; fi
 
   for f in Projects Recordings Exports Presets/User Presets/Factory ImpulseResponses Models Samples; do
     run mkdir -p "$LIB/$f"
@@ -49,6 +55,14 @@ else
   run chown -R "$CONSOLE_USER:$USER_GROUP" "$LIB" "$SUPPORT"
   # ~/Music and ~/Library/Application Support may have been created just now by mkdir -p
   run chown "$CONSOLE_USER:$USER_GROUP" "$USER_HOME/Music"
+fi
+
+# 3b. The app was renamed from StudioForge (same bundle id): remove the old copy so Finder,
+# Launchpad and .sfproj double-clicks only see one app.
+OLD_APP="$TARGET_VOL/Applications/StudioForge.app"
+if [[ -d "$OLD_APP" && "$OLD_APP" != "$APP" ]]; then
+  log "removing the old StudioForge.app (renamed to Fitzrovia Records DAW)"
+  run rm -rf "$OLD_APP"
 fi
 
 # 4. Quarantine + LaunchServices (.sfproj double-click, icon)

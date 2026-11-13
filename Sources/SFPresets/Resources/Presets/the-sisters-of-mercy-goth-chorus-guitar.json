@@ -6,7 +6,7 @@
   "tags": [
     "guitar"
   ],
-  "description": "Clean-ish guitar drenched in chorus and delay. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Clean-ish guitar drenched in chorus and delay. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "compressor",

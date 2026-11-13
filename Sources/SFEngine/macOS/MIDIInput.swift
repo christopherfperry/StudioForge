@@ -27,13 +27,13 @@ public final class MIDIInputManager {
 
     public func start() throws {
         guard !isStarted else { return }
-        var status = MIDIClientCreateWithBlock("StudioForge" as CFString, &client) { [weak self] notification in
+        var status = MIDIClientCreateWithBlock("Fitzrovia Records DAW" as CFString, &client) { [weak self] notification in
             if notification.pointee.messageID == .msgSetupChanged {
                 DispatchQueue.main.async { self?.connectAllSources() }
             }
         }
         guard status == noErr else { throw StudioForgeError.io("CoreMIDI client could not be created (\(status)).") }
-        status = MIDIInputPortCreateWithBlock(client, "StudioForge Input" as CFString, &port) { [weak self] packetList, _ in
+        status = MIDIInputPortCreateWithBlock(client, "Fitzrovia Records DAW Input" as CFString, &port) { [weak self] packetList, _ in
             self?.handle(packetList)
         }
         guard status == noErr else { throw StudioForgeError.io("CoreMIDI input port could not be created (\(status)).") }

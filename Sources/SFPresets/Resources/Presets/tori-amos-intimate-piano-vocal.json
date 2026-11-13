@@ -6,7 +6,7 @@
   "tags": [
     "vocal"
   ],
-  "description": "Natural, close, airy vocal with chamber reverb. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Natural, close, airy vocal with chamber reverb. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "compressor",

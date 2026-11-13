@@ -6,7 +6,7 @@
   "tags": [
     "synth"
   ],
-  "description": "Creepy wobbly lead. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Creepy wobbly lead. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "reverb.hall",

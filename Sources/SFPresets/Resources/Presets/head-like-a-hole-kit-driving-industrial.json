@@ -8,7 +8,7 @@
     "kit",
     "beat"
   ],
-  "description": "Driving, punchy machine kit with clap-layered snare and tight hats. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Driving, punchy machine kit with clap-layered snare and tight hats. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "compressor",

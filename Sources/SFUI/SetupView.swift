@@ -69,14 +69,14 @@ struct WelcomePermissionView: View {
             HStack(spacing: 12) {
                 Image(systemName: "mic.circle.fill").font(.system(size: 44)).foregroundColor(.accentColor)
                 VStack(alignment: .leading) {
-                    Text("Welcome to StudioForge").font(.title.bold())
+                    Text("Welcome to Fitzrovia Records DAW").font(.title.bold())
                     Text("Two quick steps and you're ready to record.").foregroundColor(.secondary)
                 }
             }
             GroupBox {
                 VStack(alignment: .leading, spacing: 8) {
                     Label("Your library", systemImage: "folder").font(.headline)
-                    Text("StudioForge keeps projects, recordings, exports, presets, impulse responses, models and samples in Music › StudioForge. These folders have been created for you.")
+                    Text("Fitzrovia Records DAW keeps projects, recordings, exports, presets, impulse responses, models and samples in Music › Fitzrovia Records DAW. These folders have been created for you.")
                     StatusRow(ok: permissions.folders.allSatisfy { $0.exists && $0.writable },
                               text: permissions.folders.allSatisfy { $0.exists } ? "Folders ready" : "Some folders are missing")
                 }.frame(maxWidth: .infinity, alignment: .leading)
@@ -84,7 +84,7 @@ struct WelcomePermissionView: View {
             GroupBox {
                 VStack(alignment: .leading, spacing: 8) {
                     Label("Microphone & audio input", systemImage: "waveform").font(.headline)
-                    Text("macOS asks once whether StudioForge may use audio input. This covers your microphone, guitar and any audio interface. Audio is only processed on your Mac and never uploaded.")
+                    Text("macOS asks once whether Fitzrovia Records DAW may use audio input. This covers your microphone, guitar and any audio interface. Audio is only processed on your Mac and never uploaded.")
                     HStack {
                         StatusRow(ok: permissions.mic == .authorized, text: "Status: \(permissions.mic.rawValue)")
                         Spacer()
@@ -95,7 +95,7 @@ struct WelcomePermissionView: View {
                         }
                     }
                     if permissions.mic == .denied {
-                        Text("Access was denied. Turn on StudioForge in System Settings › Privacy & Security › Microphone, then restart audio from Audio Settings.")
+                        Text("Access was denied. Turn on Fitzrovia Records DAW in System Settings › Privacy & Security › Microphone, then restart audio from Audio Settings.")
                             .font(.caption).foregroundColor(.orange)
                     }
                 }.frame(maxWidth: .infinity, alignment: .leading)
@@ -127,7 +127,7 @@ public struct SetupPermissionsView: View {
                     Button("Open Microphone Privacy") { PermissionsModel.openSettings("Privacy_Microphone") }
                 }
             }
-            Section("Library folders (Music › StudioForge)") {
+            Section("Library folders (Music › Fitzrovia Records DAW)") {
                 ForEach(permissions.folders.indices, id: \.self) { i in
                     let f = permissions.folders[i]
                     StatusRow(ok: f.exists && f.writable, text: f.name + (f.exists ? (f.writable ? "" : " — not writable") : " — missing"))
@@ -149,7 +149,7 @@ public struct SetupPermissionsView: View {
                     Button("Sound Settings") { PermissionsModel.openSoundSettings() }
                     Button("Audio MIDI Setup") { PermissionsModel.openAudioMIDISetup() }
                 }
-                Text("Unsigned build blocked by Gatekeeper? In Finder, Control-click StudioForge.app › Open, or allow it under Privacy & Security.")
+                Text("Unsigned build blocked by Gatekeeper? In Finder, Control-click Fitzrovia Records DAW.app › Open, or allow it under Privacy & Security.")
                     .font(.caption).foregroundColor(.secondary)
             }
         }

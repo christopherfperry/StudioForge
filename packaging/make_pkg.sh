@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Builds "dist/Install StudioForge.pkg": a double-click macOS Installer package that puts
-# StudioForge.app into /Applications and runs packaging/pkg/scripts/postinstall
+# Builds "dist/Install Fitzrovia Records DAW.pkg": a double-click macOS Installer package that puts
+# Fitzrovia Records DAW.app into /Applications and runs packaging/pkg/scripts/postinstall
 # (library folders for the logged-in user, presets, quarantine removal, LaunchServices).
 # Run on macOS 13+ (pkgbuild/productbuild ship with the Xcode Command Line Tools).
 #
 # Environment variables (all optional):
-#   SKIP_BUILD=1            use an existing build/StudioForge.app (make_dmg.sh sets this)
+#   SKIP_BUILD=1            use an existing build/Fitzrovia Records DAW.app (make_dmg.sh sets this)
 #   UNIVERSAL=1|0           passed to build.sh when building (default 1, falls back to native)
 #   SIGN_IDENTITY=...       "Developer ID Application: ..." for the app (default "-", ad-hoc)
 #   INSTALLER_IDENTITY=...  "Developer ID Installer: Name (TEAMID)" to productsign the .pkg
@@ -16,9 +16,9 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-APP="build/StudioForge.app"
+APP="build/Fitzrovia Records DAW.app"
 DIST="dist"
-PKG="$DIST/Install StudioForge.pkg"
+PKG="$DIST/Install Fitzrovia Records DAW.pkg"
 IDENTIFIER="com.studioforge.daw.pkg"
 DRY_RUN="${DRY_RUN:-0}"
 SIGN_IDENTITY="${SIGN_IDENTITY:--}"
@@ -27,7 +27,7 @@ run() { echo "+ $*"; if [[ "$DRY_RUN" != "1" ]]; then "$@"; fi; }
 die() { echo "error: $*" >&2; exit 1; }
 
 VERSION="${VERSION:-$(python3 -c "import plistlib;print(plistlib.load(open('Resources/Info.plist','rb'))['CFBundleShortVersionString'])")}"
-echo "==> Install StudioForge.pkg $VERSION"
+echo "==> Install Fitzrovia Records DAW.pkg $VERSION"
 
 if [[ "$(uname)" != "Darwin" && "$DRY_RUN" != "1" ]]; then
   die "make_pkg.sh needs macOS (pkgbuild, productbuild). Use DRY_RUN=1 to review the steps, or the GitHub Actions workflow."
@@ -48,11 +48,11 @@ if [[ "${SKIP_BUILD:-0}" != "1" ]]; then
 fi
 [[ "$DRY_RUN" == "1" || -d "$APP" ]] || die "$APP not found"
 
-# 2. Stage payload: <root>/Applications/StudioForge.app
+# 2. Stage payload: <root>/Applications/Fitzrovia Records DAW.app
 STAGE="$(mktemp -d "${TMPDIR:-/tmp}/sf-pkg.XXXXXX")"
 trap 'rm -rf "$STAGE"' EXIT
 run mkdir -p "$STAGE/root/Applications" "$STAGE/scripts" "$DIST"
-run ditto "$APP" "$STAGE/root/Applications/StudioForge.app"
+run ditto "$APP" "$STAGE/root/Applications/Fitzrovia Records DAW.app"
 run cp packaging/pkg/scripts/postinstall "$STAGE/scripts/postinstall"
 run chmod 755 "$STAGE/scripts/postinstall"
 
@@ -62,7 +62,7 @@ cat > "$COMPONENT_PLIST" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><array><dict>
-  <key>RootRelativeBundlePath</key><string>Applications/StudioForge.app</string>
+  <key>RootRelativeBundlePath</key><string>Applications/Fitzrovia Records DAW.app</string>
   <key>BundleIsRelocatable</key><false/>
   <key>BundleIsVersionChecked</key><false/>
   <key>BundleHasStrictIdentifier</key><true/>
@@ -72,7 +72,7 @@ EOF
 
 # 3. Component package
 run pkgbuild --root "$STAGE/root" --component-plist "$COMPONENT_PLIST" --scripts "$STAGE/scripts" \
-  --identifier "$IDENTIFIER" --version "$VERSION" --install-location / "$STAGE/StudioForge-component.pkg"
+  --identifier "$IDENTIFIER" --version "$VERSION" --install-location / "$STAGE/FitzroviaRecordsDAW-component.pkg"
 
 # 4. Product archive with welcome / readme / conclusion pages
 sed "s/@VERSION@/$VERSION/g" packaging/pkg/distribution.xml > "$STAGE/distribution.xml"
@@ -90,7 +90,7 @@ if [[ -n "${INSTALLER_IDENTITY:-}" ]]; then
   run pkgutil --check-signature "$PKG"
 else
   run cp "$UNSIGNED" "$PKG"
-  echo "Note: unsigned package. On first open: Control-click 'Install StudioForge.pkg' > Open > Open."
+  echo "Note: unsigned package. On first open: Control-click 'Install Fitzrovia Records DAW.pkg' > Open > Open."
 fi
 
 # 6. Notarize

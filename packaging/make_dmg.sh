@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds StudioForge.app (Release) and packages it as dist/StudioForge-<version>.dmg.
+# Builds Fitzrovia Records DAW.app (Release) and packages it as dist/FitzroviaRecordsDAW-<version>.dmg.
 # Run on macOS 13+ with Xcode 15+ (or Command Line Tools; universal builds need full Xcode).
 #
 # Environment variables (all optional):
@@ -8,8 +8,8 @@
 #   NOTARIZE=1             notarize + staple (needs Developer ID and one of the credentials below)
 #   NOTARY_PROFILE=name    keychain profile from `xcrun notarytool store-credentials`
 #   APPLE_ID / APPLE_TEAM_ID / APPLE_APP_PASSWORD             alternative notary credentials
-#   SKIP_BUILD=1           package an existing build/StudioForge.app
-#   SKIP_PKG=1             do not build/include Install StudioForge.pkg
+#   SKIP_BUILD=1           package an existing build/Fitzrovia Records DAW.app
+#   SKIP_PKG=1             do not build/include Install Fitzrovia Records DAW.pkg
 #   INSTALLER_IDENTITY=... "Developer ID Installer: ..." used by make_pkg.sh to sign the .pkg
 #   USE_CREATE_DMG=0       ignore create-dmg even if installed
 #   DRY_RUN=1              print the steps without executing them (works on Linux for review)
@@ -17,9 +17,9 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-APP="build/StudioForge.app"
+APP="build/Fitzrovia Records DAW.app"
 DIST="dist"
-VOLNAME="StudioForge"
+VOLNAME="Fitzrovia Records DAW"
 SIGN_IDENTITY="${SIGN_IDENTITY:--}"
 UNIVERSAL="${UNIVERSAL:-1}"
 DRY_RUN="${DRY_RUN:-0}"
@@ -35,8 +35,8 @@ plist_version() {
   fi
 }
 VERSION="${VERSION:-$(plist_version)}"
-DMG="$DIST/StudioForge-$VERSION.dmg"
-echo "==> StudioForge $VERSION -> $DMG (signing identity: $SIGN_IDENTITY)"
+DMG="$DIST/FitzroviaRecordsDAW-$VERSION.dmg"
+echo "==> Fitzrovia Records DAW $VERSION -> $DMG (signing identity: $SIGN_IDENTITY)"
 
 if [[ "$(uname)" != "Darwin" && "$DRY_RUN" != "1" ]]; then
   die "make_dmg.sh needs macOS (hdiutil, codesign). Use DRY_RUN=1 to review the steps, or the GitHub Actions workflow."
@@ -69,14 +69,14 @@ run codesign "${SIGN_FLAGS[@]}" "$APP"
 run codesign --verify --deep --strict --verbose=2 "$APP"
 
 # 4. Installer package (main item of the DMG): reuses the signed app above.
-PKG="$DIST/Install StudioForge.pkg"
+PKG="$DIST/Install Fitzrovia Records DAW.pkg"
 if [[ "${SKIP_PKG:-0}" != "1" ]]; then
   run env SKIP_BUILD=1 DRY_RUN="$DRY_RUN" NOTARIZE="${NOTARIZE:-0}" ./packaging/make_pkg.sh
 fi
 [[ "$DRY_RUN" == "1" || "${SKIP_PKG:-0}" == "1" || -f "$PKG" ]] || die "$PKG not found"
 
-# 5. Disk image. Layout (640x480 window): Install StudioForge.pkg top centre (320,140);
-# alternative drag-install row below: StudioForge.app (160,330) -> Applications (480,330).
+# 5. Disk image. Layout (640x480 window): Install Fitzrovia Records DAW.pkg top centre (320,140);
+# alternative drag-install row below: Fitzrovia Records DAW.app (160,330) -> Applications (480,330).
 # Finder uses one icon size per window, so the package is emphasised by position and the background.
 run mkdir -p "$DIST"
 run rm -f "$DMG"
@@ -89,8 +89,8 @@ if [[ "${USE_CREATE_DMG:-1}" == "1" ]] && command -v create-dmg >/dev/null 2>&1;
   if [[ -f "$PKG" ]]; then run cp "$PKG" "$STAGE/"; fi
   run create-dmg --volname "$VOLNAME" --volicon Resources/StudioForge.icns \
     --background packaging/assets/dmg_background.png --window-pos 200 120 --window-size 640 480 \
-    --icon-size 112 --icon "Install StudioForge.pkg" 320 140 --icon "StudioForge.app" 160 330 \
-    --hide-extension "StudioForge.app" --app-drop-link 480 330 --no-internet-enable "$DMG" "$STAGE"
+    --icon-size 112 --icon "Install Fitzrovia Records DAW.pkg" 320 140 --icon "Fitzrovia Records DAW.app" 160 330 \
+    --hide-extension "Fitzrovia Records DAW.app" --app-drop-link 480 330 --no-internet-enable "$DMG" "$STAGE"
 else
   echo "==> Using hdiutil + AppleScript layout"
   RW="$STAGE/rw.dmg"
@@ -124,9 +124,9 @@ tell application "Finder"
     set text size of opts to 13
     set background picture of opts to file ".background:background.png"
     try
-      set position of item "Install StudioForge.pkg" of container window to {320, 140}
+      set position of item "Install Fitzrovia Records DAW.pkg" of container window to {320, 140}
     end try
-    set position of item "StudioForge.app" of container window to {160, 330}
+    set position of item "Fitzrovia Records DAW.app" of container window to {160, 330}
     set position of item "Applications" of container window to {480, 330}
     close
     open
@@ -164,5 +164,5 @@ if [[ "$DRY_RUN" != "1" ]]; then
   shasum -a 256 "$DMG" | tee "$DMG.sha256"
 fi
 echo "Done: $DMG"
-[[ "$SIGN_IDENTITY" == "-" ]] && echo "Note: ad-hoc signed. On first launch, Control-click StudioForge.app > Open (Gatekeeper)."
+[[ "$SIGN_IDENTITY" == "-" ]] && echo "Note: ad-hoc signed. On first launch, Control-click Fitzrovia Records DAW.app > Open (Gatekeeper)."
 exit 0

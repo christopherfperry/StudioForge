@@ -10,7 +10,7 @@
     "doubling",
     "Hallows Eve"
   ],
-  "description": "Deep, cavernous baritone: warm low-mid EQ, slow chorus, octave-down doubling and a long dark gothic reverb. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Deep, cavernous baritone: warm low-mid EQ, slow chorus, octave-down doubling and a long dark gothic reverb. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "eq",

@@ -6,7 +6,7 @@
   "tags": [
     "synth"
   ],
-  "description": "Dark detuned brass-like synth. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Dark detuned brass-like synth. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "reverb.hall",

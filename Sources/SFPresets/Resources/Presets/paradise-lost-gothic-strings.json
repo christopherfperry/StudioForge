@@ -6,7 +6,7 @@
   "tags": [
     "synth"
   ],
-  "description": "Melancholic string machine pad. Original StudioForge DSP approximation of the general tonal character; not a copy of any recording or plugin.",
+  "description": "Melancholic string machine pad. Original Fitzrovia Records DAW DSP approximation of the general tonal character; not a copy of any recording or plugin.",
   "effects": [
     {
       "type": "chorus",

@@ -183,7 +183,7 @@ public final class EffectRegistry: @unchecked Sendable {
         var slots: [EffectSlot] = []
         for s in states {
             guard let fx = make(from: s) else {
-                print("[StudioForge] Unknown effect type '\(s.type)' skipped")
+                print("[Fitzrovia Records DAW] Unknown effect type '\(s.type)' skipped")
                 continue
             }
             fx.prepare(sampleRate: sampleRate, maxFrames: maxFrames)

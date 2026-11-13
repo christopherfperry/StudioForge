@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Convert Demucs v4 "htdemucs_6s" (6 stems: drums, bass, other, vocals, guitar, piano) to Core ML
-for StudioForge's on-device stem separation.
+for Fitzrovia Records DAW's on-device stem separation.
 
 Run this on a Mac (Apple Silicon recommended), ideally in a fresh virtualenv:
 
@@ -10,7 +10,7 @@ Run this on a Mac (Apple Silicon recommended), ideally in a fresh virtualenv:
     python3 tools/convert_demucs_to_coreml.py --out ~/Desktop/htdemucs_6s.mlpackage
 
 The first run downloads the pretrained PyTorch weights (via the demucs package). Then, in
-StudioForge: Separate Stems ▸ Model ▸ Import… and pick the produced .mlpackage (or zip it and host
+Fitzrovia Records DAW: Separate Stems ▸ Model ▸ Import… and pick the produced .mlpackage (or zip it and host
 it yourself, then set Settings ▸ Stem Separation ▸ Model URL to use the in-app downloader).
 
 Why the patching below?
@@ -21,7 +21,7 @@ Why the patching below?
     hann window, center=True, reflect padding and normalized=True (as used by demucs.spec).
   * PyTorch's fused multi-head-attention fast path is disabled so the transformer traces into
     primitive ops.
-  * The model is traced with a fixed segment length (7.8 s @ 44.1 kHz). StudioForge runs the
+  * The model is traced with a fixed segment length (7.8 s @ 44.1 kHz). Fitzrovia Records DAW runs the
     model over overlapping segments with cross-fades.
 
 The script verifies the patched PyTorch model against the original before converting
@@ -231,7 +231,7 @@ def main():
         convert_to="mlprogram",
     )
     mlmodel.short_description = "Demucs htdemucs_6s source separation (drums, bass, other, vocals, guitar, piano)"
-    mlmodel.author = "Converted for StudioForge from facebookresearch/demucs (MIT)"
+    mlmodel.author = "Converted for Fitzrovia Records DAW from facebookresearch/demucs (MIT)"
     mlmodel.user_defined_metadata["sampleRate"] = str(SAMPLE_RATE)
     mlmodel.user_defined_metadata["segment"] = str(SEGMENT)
     mlmodel.user_defined_metadata["sources"] = "drums,bass,other,vocals,guitar,piano"
@@ -244,7 +244,7 @@ def main():
         with torch.no_grad():
             ref = wrapper(example).numpy()
         print("  Core ML vs PyTorch max abs diff:", float(np.abs(out - ref).max()))
-    print("Done. Import the .mlpackage in StudioForge ▸ Separate Stems ▸ Model ▸ Import…")
+    print("Done. Import the .mlpackage in Fitzrovia Records DAW ▸ Separate Stems ▸ Model ▸ Import…")
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Called by the GitHub Actions workflow on a macOS runner. All build logic lives here so the
-# workflow file itself never needs editing. Produces dist/Install-StudioForge.pkg and the DMG.
+# workflow file itself never needs editing. Produces dist/Install-FitzroviaRecordsDAW.pkg and the DMG.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -21,18 +21,18 @@ echo "== Build app, installer package and DMG =="
 ./packaging/make_dmg.sh
 
 # Space-free name so the GitHub download link is clean.
-if [ -f "dist/Install StudioForge.pkg" ]; then
-  cp "dist/Install StudioForge.pkg" dist/Install-StudioForge.pkg
-  rm -f "dist/Install StudioForge.pkg"
+if [ -f "dist/Install Fitzrovia Records DAW.pkg" ]; then
+  cp "dist/Install Fitzrovia Records DAW.pkg" dist/Install-FitzroviaRecordsDAW.pkg
+  rm -f "dist/Install Fitzrovia Records DAW.pkg"
 fi
 rm -f dist/*.iso
 ls -la dist
-test -f dist/Install-StudioForge.pkg
+test -f dist/Install-FitzroviaRecordsDAW.pkg
 
 # Publish to the permanent "latest" download page (needs GH_TOKEN from the workflow).
 if [ -n "${GH_TOKEN:-}" ] && command -v gh >/dev/null; then
   echo "== Publishing release 'latest' =="
   gh release delete latest --yes --cleanup-tag 2>/dev/null || true
-  gh release create latest dist/* --title "StudioForge (latest build)" --latest \
-    --notes "Download Install-StudioForge.pkg and double-click it. First time only: Control-click it and choose Open."
+  gh release create latest dist/* --title "Fitzrovia Records DAW (latest build)" --latest \
+    --notes "Download Install-FitzroviaRecordsDAW.pkg and double-click it. First time only: Control-click it and choose Open."
 fi

@@ -148,7 +148,8 @@ public enum AppPaths {
         let fm = FileManager.default
         #if os(macOS)
         let base = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let url = base.appendingPathComponent("StudioForge", isDirectory: true)
+        let url = base.appendingPathComponent(appFolderName, isDirectory: true)
+        migrateLegacyFolder(base.appendingPathComponent(legacyFolderName, isDirectory: true), to: url)
         #else
         let url = fm.homeDirectoryForCurrentUser.appendingPathComponent(".studioforge", isDirectory: true)
         #endif
@@ -160,12 +161,25 @@ public enum AppPaths {
         try? FileManager.default.createDirectory(at: u, withIntermediateDirectories: true)
         return u
     }
-    /// User-visible library root: ~/Music/StudioForge (created by first-run setup / installer).
+    /// Folder name used for the user library and Application Support.
+    public static let appFolderName = "Fitzrovia Records DAW"
+    /// Folder name used before the app was renamed (StudioForge); migrated on first access.
+    public static let legacyFolderName = "StudioForge"
+
+    /// Moves a pre-rename folder to its new name once, so projects/recordings/presets carry over.
+    static func migrateLegacyFolder(_ old: URL, to new: URL) {
+        let fm = FileManager.default
+        guard !fm.fileExists(atPath: new.path), fm.fileExists(atPath: old.path) else { return }
+        try? fm.moveItem(at: old, to: new)
+    }
+
+    /// User-visible library root: ~/Music/Fitzrovia Records DAW (created by first-run setup / installer).
     public static var musicRoot: URL {
         let fm = FileManager.default
         let music = fm.urls(for: .musicDirectory, in: .userDomainMask).first
             ?? fm.homeDirectoryForCurrentUser.appendingPathComponent("Music", isDirectory: true)
-        let url = music.appendingPathComponent("StudioForge", isDirectory: true)
+        let url = music.appendingPathComponent(appFolderName, isDirectory: true)
+        migrateLegacyFolder(music.appendingPathComponent(legacyFolderName, isDirectory: true), to: url)
         try? fm.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }
@@ -191,7 +205,7 @@ public enum AppPaths {
 }
 
 /// Finds SwiftPM resource bundles inside a distributed .app. SwiftPM's generated `Bundle.module`
-/// only looks next to the .app (StudioForge.app/X.bundle, which breaks code signing) and at the
+/// only looks next to the .app (Fitzrovia Records DAW.app/X.bundle, which breaks code signing) and at the
 /// absolute build path, and calls fatalError otherwise. build.sh copies the bundles into
 /// Contents/Resources, so look there first; callers fall back to `Bundle.module` for
 /// `swift run` / `swift test`.

@@ -1,4 +1,4 @@
-# StudioForge
+# Fitzrovia Records DAW
 
 A personal multi-track DAW for macOS 13+ (SwiftUI + CoreAudio). It records audio and instruments with low latency, includes its own effects and instruments, ships JSON presets (with artist-style tones), generates drum beats, separates stems, and exports to common audio formats.
 
@@ -8,30 +8,30 @@ A personal multi-track DAW for macOS 13+ (SwiftUI + CoreAudio). It records audio
 
 Opening a disk image never installs anything by itself, because macOS does not auto-run software from a DMG. Use one of the following (macOS 13 Ventura or later).
 
-### Recommended: `Install StudioForge.pkg`
+### Recommended: `Install Fitzrovia Records DAW.pkg`
 A normal macOS Installer package: double-click it and click through.
-- It installs StudioForge.app into /Applications.
-- It creates `~/Music/StudioForge/...` and `~/Library/Application Support/StudioForge` for the logged-in user.
+- It installs Fitzrovia Records DAW.app into /Applications.
+- It creates `~/Music/Fitzrovia Records DAW/...` and `~/Library/Application Support/Fitzrovia Records DAW` for the logged-in user.
 - It copies the factory presets, removes quarantine and registers the app with LaunchServices.
 - Its last page explains the microphone prompt that appears on first launch. No installer can grant microphone access in advance.
 
 To get the package:
-- **GitHub Actions** (no Xcode needed): push the repository and download the **StudioForge-installers** artifact from the Actions tab (section A below). It contains `Install StudioForge.pkg` and `StudioForge-<version>.dmg`.
-- **On a Mac:** run `./packaging/make_pkg.sh`, which writes `dist/Install StudioForge.pkg`. `./packaging/make_dmg.sh` builds the package as well and puts it in the DMG.
+- **GitHub Actions** (no Xcode needed): push the repository and download the **Fitzrovia Records DAW-installers** artifact from the Actions tab (section A below). It contains `Install Fitzrovia Records DAW.pkg` and `FitzroviaRecordsDAW-<version>.dmg`.
+- **On a Mac:** run `./packaging/make_pkg.sh`, which writes `dist/Install Fitzrovia Records DAW.pkg`. `./packaging/make_dmg.sh` builds the package as well and puts it in the DMG.
 - **Signing:** set `INSTALLER_IDENTITY="Developer ID Installer: Name (TEAMID)"` to sign the package with `productsign`. Add `NOTARIZE=1` plus `NOTARY_PROFILE` (or `APPLE_ID`/`APPLE_TEAM_ID`/`APPLE_APP_PASSWORD`) to notarize it.
 - **Unsigned package:** Control-click it › **Open** › **Open**.
 
-The DMG shows **Install StudioForge.pkg** as the main item at the top. Below it is the alternative: drag StudioForge onto Applications.
+The DMG shows **Install Fitzrovia Records DAW.pkg** as the main item at the top. Below it is the alternative: drag Fitzrovia Records DAW onto Applications.
 
 ### A. Prebuilt DMG from GitHub Actions (no Xcode on your Mac)
-1. Push this folder to a GitHub repository (private is fine). `.github/workflows/release.yml` runs on a `macos-14` runner: it runs the tests, builds a universal (arm64 + x86_64) app and creates `StudioForge-<version>.dmg`.
-2. Open the repository's **Actions** tab, then **Release DMG**, then the latest run, and download the **StudioForge-installers** artifact (the `.pkg` and the DMG). You can also start a build with **Run workflow**. Pushing a tag such as `v0.2.1` attaches the package and DMG to a GitHub Release as well.
-3. Double-click the DMG and drag **StudioForge** onto **Applications**.
+1. Push this folder to a GitHub repository (private is fine). `.github/workflows/release.yml` runs on a `macos-14` runner: it runs the tests, builds a universal (arm64 + x86_64) app and creates `FitzroviaRecordsDAW-<version>.dmg`.
+2. Open the repository's **Actions** tab, then **Release DMG**, then the latest run, and download the **Fitzrovia Records DAW-installers** artifact (the `.pkg` and the DMG). You can also start a build with **Run workflow**. Pushing a tag such as `v0.2.1` attaches the package and DMG to a GitHub Release as well.
+3. Double-click the DMG and drag **Fitzrovia Records DAW** onto **Applications**.
 4. Optional: add the secrets `MACOS_INSTALLER_IDENTITY`, `MACOS_CERT_P12_BASE64`, `MACOS_CERT_PASSWORD`, `MACOS_SIGN_IDENTITY`, `APPLE_ID`, `APPLE_TEAM_ID` and `APPLE_APP_PASSWORD` to get a Developer ID signed, notarized DMG. Without them the DMG is ad-hoc signed.
 
 ### B. Build the DMG yourself
 ```bash
-./packaging/make_dmg.sh            # -> dist/Install StudioForge.pkg + dist/StudioForge-0.2.1.dmg
+./packaging/make_dmg.sh            # -> dist/Install Fitzrovia Records DAW.pkg + dist/FitzroviaRecordsDAW-0.2.1.dmg
 ```
 The script builds the Release app (universal when full Xcode is installed, otherwise your Mac's architecture), signs it ad hoc with the entitlements, and creates a compressed DMG. The DMG contains the app, an Applications shortcut, a background image with an arrow, a volume icon and an arranged Finder window. It uses `create-dmg` if that is installed (`brew install create-dmg`). Otherwise it uses `hdiutil` plus AppleScript.
 
@@ -42,7 +42,7 @@ SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" NOTARIZE=1 NOTARY_P
 Run `DRY_RUN=1 ./packaging/make_dmg.sh` to print every step without running anything.
 
 ### C. Source installer (builds on your Mac)
-Open `StudioForge-Source-Installer.dmg` and read **START HERE.txt**. **Control-click** **Install StudioForge.command** › **Open** › **Open**. A plain double-click is blocked because the script is unsigned. If it is still blocked, copy it to the Desktop and run `xattr -dr com.apple.quarantine ~/Desktop/"Install StudioForge.command"`. The Xcode Command Line Tools are required (the script offers to install them). It does the following:
+Open `FitzroviaRecordsDAW-Source-Installer.dmg` and read **START HERE.txt**. **Control-click** **Install Fitzrovia Records DAW.command** › **Open** › **Open**. A plain double-click is blocked because the script is unsigned. If it is still blocked, copy it to the Desktop and run `xattr -dr com.apple.quarantine ~/Desktop/"Install Fitzrovia Records DAW.command"`. The Xcode Command Line Tools are required (the script offers to install them). It does the following:
 1. Checks for the Xcode Command Line Tools and offers to install them.
 2. Builds the app.
 3. Installs it to `/Applications`, or to `~/Applications` if you decline to use an admin password.
@@ -52,16 +52,16 @@ Open `StudioForge-Source-Installer.dmg` and read **START HERE.txt**. **Control-c
 This image is an ISO 9660 disk image (Rock Ridge + Joliet), not a UDIF DMG; macOS mounts it on double-click. Rebuild it with `packaging/build_source_image.sh`, which runs on Linux or macOS.
 
 ### Gatekeeper (unsigned / ad-hoc builds)
-Builds that are not notarized trigger "StudioForge can't be opened because Apple cannot check it for malicious software". To open it the first time:
-- **Control-click** (or right-click) StudioForge.app (or `Install StudioForge.command`) and choose **Open**, then **Open** again.
+Builds that are not notarized trigger "Fitzrovia Records DAW can't be opened because Apple cannot check it for malicious software". To open it the first time:
+- **Control-click** (or right-click) Fitzrovia Records DAW.app (or `Install Fitzrovia Records DAW.command`) and choose **Open**, then **Open** again.
 - Or go to **System Settings › Privacy & Security** and click **Open Anyway**.
-- Or run `xattr -dr com.apple.quarantine /Applications/StudioForge.app`.
+- Or run `xattr -dr com.apple.quarantine /Applications/Fitzrovia Records DAW.app`.
 
 ### What first launch sets up
-- Library folders: `~/Music/StudioForge/{Projects, Recordings, Exports, Presets/User, Presets/Factory, ImpulseResponses, Models, Samples}` and `~/Library/Application Support/StudioForge`. The factory presets are copied to `Presets/Factory` for browsing. Projects save to `Projects`, recordings made before the first save go to `Recordings`, and models download to `Models`.
+- Library folders: `~/Music/Fitzrovia Records DAW/{Projects, Recordings, Exports, Presets/User, Presets/Factory, ImpulseResponses, Models, Samples}` and `~/Library/Application Support/Fitzrovia Records DAW`. The factory presets are copied to `Presets/Factory` for browsing. Projects save to `Projects`, recordings made before the first save go to `Recordings`, and models download to `Models`.
 - A welcome screen explains microphone and audio-input access, then asks for it.
 - **Help › Setup & Permissions** shows microphone status and folder status. It has buttons to create missing folders and to open the Microphone, Files & Folders and Bluetooth privacy panes, Sound settings and Audio MIDI Setup.
-- Projects are `.sfproj` packages (`com.studioforge.project`). Double-clicking one in Finder opens StudioForge. Older `.sforge` projects still open.
+- Projects are `.sfproj` packages (`com.studioforge.project`). Double-clicking one in Finder opens Fitzrovia Records DAW. Older `.sforge` projects still open.
 
 ## Build and run (on your Mac)
 
@@ -69,12 +69,12 @@ Requirements: macOS 13 or later, and Xcode 15+ (or its Command Line Tools with S
 
 ```bash
 unzip StudioForge.zip && cd mac_daw
-./build.sh                 # builds release, assembles build/StudioForge.app, ad-hoc signs it
-open build/StudioForge.app
+./build.sh                 # builds release, assembles build/Fitzrovia Records DAW.app, ad-hoc signs it
+open build/Fitzrovia Records DAW.app
 ```
 
 Other ways to build:
-* **Xcode:** `open Package.swift`, choose the `StudioForge` scheme, then Run.
+* **Xcode:** `open Package.swift`, choose the `Fitzrovia Records DAW` scheme, then Run.
 * **XcodeGen:** `brew install xcodegen && xcodegen generate && open StudioForge.xcodeproj`. This uses `project.yml`, `Resources/Info.plist` and `StudioForge.entitlements`.
 * **Tests:** `swift test` (also works on Linux).
 
@@ -91,7 +91,7 @@ To bundle ffmpeg for MP3/OGG export: `FFMPEG=$(which ffmpeg) ./build.sh`.
 | Record clean | The dry input is **always** recorded. "Also capture wet" writes a second, linked, muted clip with the effects printed. |
 | Effects (33) | Parametric EQ, filters, auto-wah, formant; compressor, limiter, gate; overdrive/distortion/fuzz (8 modes), bitcrusher, waveshaper, amp (8 models) plus cabinet IR (9 synthesized cabs, or your own IR); chorus, flanger, phaser, tremolo, ring mod, vocoder-style; delay, pitch shift and octaver; reverbs: room, hall, plate, spring, chamber, cathedral, shimmer, reverse, gated, ambient/huge, and convolution with user IR loading. Every effect has bypass and mix. |
 | Instruments | Subtractive synth (multi-osc, unison, filter, envelopes, LFO, FM, noise), bass synth, keys (piano, EP, Rhodes, organ, harpsichord, string machine), trumpet/brass with mutes, and a drum machine (synth voices plus sample pads). CoreMIDI input from all sources, plus an on-screen keyboard. |
-| Presets | 111 factory presets as JSON (`Sources/SFPresets/Resources/Presets`). User presets live in `~/Library/Application Support/StudioForge/Presets` and override factory ones with the same id. Preset browser, **Tone Picker** (artist + instrument), save-as-preset. |
+| Presets | 111 factory presets as JSON (`Sources/SFPresets/Resources/Presets`). User presets live in `~/Library/Application Support/Fitzrovia Records DAW/Presets` and override factory ones with the same id. Preset browser, **Tone Picker** (artist + instrument), save-as-preset. |
 | Beat generator | 27 styles (industrial, doom, grunge, goth, nu-metal, new wave, alt-rock, plus artist-style templates such as NIN "Closer" at 92 BPM and "March of the Pigs" in 7/8). Controls for tempo, swing, humanize, complexity and fills. **Match to recording** estimates tempo, beats, key, energy and swing, then drops a fitting beat. MIDI export. |
 | Stem separation | Demucs **htdemucs_6s** via Core ML (vocals, drums, bass, guitar, piano, other), with a model manager (download, import, delete, progress). DSP fallback with no model (HPSS plus band masks). Drum-part splitter: kick, snare, toms, hi-hat, cymbals. |
 | Projects | `.sfproj` package (legacy `.sforge` still opens): `project.json` plus `Audio/`, `Peaks/`, `Bounces/`. Autosave (`autosave.json`, offered when newer), recent projects, built-in and user templates. |
@@ -114,19 +114,19 @@ The Core ML model is **not bundled** (it is large, and Demucs weights have their
    The conversion script is **untested**. coremltools has no `istft`, so the script uses a matrix iDFT plus overlap-add. Check its output against PyTorch before relying on it.
 2. **Host your converted model** (a zipped `.mlpackage` or `.mlmodelc`) and paste its URL into the Stems sheet. The URL is stored in UserDefaults under `SFSeparationModelURL`. You then get a download progress bar.
 
-Without the model, StudioForge uses the DSP separator automatically. It is lower quality but always available.
+Without the model, Fitzrovia Records DAW uses the DSP separator automatically. It is lower quality but always available.
 
 ## MP3 / OGG
 
-Apple provides no MP3 or Vorbis encoder. StudioForge calls **ffmpeg** (`brew install ffmpeg`). It looks in the app bundle, `/opt/homebrew/bin`, `/usr/local/bin`, `$PATH`, or the path stored in UserDefaults under `SFFFmpegPath`. A LAME-based encoder can be added by registering an `AudioEncoder` (see docs/EXTENDING.md).
+Apple provides no MP3 or Vorbis encoder. Fitzrovia Records DAW calls **ffmpeg** (`brew install ffmpeg`). It looks in the app bundle, `/opt/homebrew/bin`, `/usr/local/bin`, `$PATH`, or the path stored in UserDefaults under `SFFFmpegPath`. A LAME-based encoder can be added by registering an `AudioEncoder` (see docs/EXTENDING.md).
 
 ## Artist presets: disclaimer
 
-Artist-named presets and beat styles (NIN, Killing Joke, Type O Negative, Deftones and others) are **original DSP approximations of a general tonal character**. They are built only from StudioForge's own effects and instruments. They are not copies of any recording, sample, proprietary plugin or preset, and they do not imply any affiliation.
+Artist-named presets and beat styles (NIN, Killing Joke, Type O Negative, Deftones and others) are **original DSP approximations of a general tonal character**. They are built only from Fitzrovia Records DAW's own effects and instruments. They are not copies of any recording, sample, proprietary plugin or preset, and they do not imply any affiliation.
 
 ## rea.tools
 
-As you suggested, https://rea.tools/ ("REA – Reverse Engineer Anything", an MIT-licensed agent toolkit for inspecting binaries, JavaScript and runtimes) was consulted only as a reference for how software can be studied. **No proprietary code was inspected, decompiled or copied.** All StudioForge code is original.
+As you suggested, https://rea.tools/ ("REA – Reverse Engineer Anything", an MIT-licensed agent toolkit for inspecting binaries, JavaScript and runtimes) was consulted only as a reference for how software can be studied. **No proprietary code was inspected, decompiled or copied.** All Fitzrovia Records DAW code is original.
 
 ## Known gaps / next steps
 
