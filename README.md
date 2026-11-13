@@ -6,7 +6,7 @@ A personal multi-track DAW for macOS 13 Ventura through macOS 27 (the latest rel
 
 ## Install
 
-Opening a disk image never installs anything by itself, because macOS does not auto-run software from a DMG. Use one of the following (macOS 13 Ventura or later; tested on macOS 15, 26 and 27).
+Opening a disk image never installs anything by itself, because macOS does not auto-run software from a DMG. Use one of the following (macOS 13 Ventura or later, including macOS 27).
 
 ### Quickest: one Terminal command (no security prompts)
 ```bash
@@ -15,7 +15,9 @@ curl -L -o /tmp/FitzroviaRecordsDAW.pkg https://github.com/christopherfperry/Stu
 Files downloaded with `curl` are not quarantined, so Gatekeeper does not block them. Then open **Fitzrovia Records DAW** from Applications or Launchpad.
 
 ### Tested on every build
-CI builds with the newest Xcode on **macOS 27**, then `packaging/smoke_test.sh` installs the package with `installer`, verifies the code signature and architecture, launches the app and checks it stays running with no crash report. The same test runs on **macOS 26 Tahoe** and **macOS 15 Sequoia**. The release is published only if all three pass. The release notes list the exact versions tested.
+After building, CI runs `packaging/smoke_test.sh`: it installs the package with `installer`, verifies the code signature and architecture, launches the app and checks it stays running with no crash report. The release is published only if it passes, and the release notes list the macOS version tested. The current workflow runs on `macos-latest` (macOS 26 Tahoe).
+
+To also build with Xcode 27 on **macOS 27** and smoke-test on **macOS 26** and **macOS 15**, replace `.github/workflows/release.yml` with `packaging/release-workflow-macos27.yml` (GitHub web editor › paste › commit). The automation account cannot change workflow files, so this step has to be done by you.
 
 ### Recommended: `Install Fitzrovia Records DAW.pkg`
 A normal macOS Installer package: double-click it and click through.
@@ -33,8 +35,8 @@ To get the package:
 The DMG shows **Install Fitzrovia Records DAW.pkg** as the main item at the top. Below it is the alternative: drag Fitzrovia Records DAW onto Applications.
 
 ### A. Prebuilt DMG from GitHub Actions (no Xcode on your Mac)
-1. Every push runs `.github/workflows/release.yml`: it builds a universal (arm64 + x86_64) app with Xcode 27 on macOS 27, runs the tests, builds `Install-FitzroviaRecordsDAW.pkg` and `FitzroviaRecordsDAW-<version>.dmg`, and smoke-tests install + launch on macOS 27, 26 and 15.
-2. If every smoke test passes, the files replace the release **latest** (Releases page). The **dist** and **smoke-*** artifacts of each run hold the files, screenshots and logs.
+1. Every push runs `.github/workflows/release.yml` (`packaging/ci_build.sh`): it runs the tests, builds a universal (arm64 + x86_64) app, `Install-FitzroviaRecordsDAW.pkg` and `FitzroviaRecordsDAW-<version>.dmg`, then smoke-tests install + launch.
+2. If the smoke test passes, the files replace the release **latest** (Releases page).
 3. Double-click the DMG and drag **Fitzrovia Records DAW** onto **Applications**.
 4. Optional: add the secrets `MACOS_INSTALLER_IDENTITY`, `MACOS_CERT_P12_BASE64`, `MACOS_CERT_PASSWORD`, `MACOS_SIGN_IDENTITY`, `APPLE_ID`, `APPLE_TEAM_ID` and `APPLE_APP_PASSWORD` to get a Developer ID signed, notarized DMG. Without them the DMG is ad-hoc signed.
 
