@@ -11,6 +11,19 @@ swift --version
 echo "== Unit tests (non-blocking) =="
 swift test || echo "::warning::Unit tests failed - continuing with packaging"
 
+# The AI separation model the app downloads: check it loads in Core ML and matches PyTorch.
+echo "== AI model check (Core ML vs PyTorch) =="
+MODELS=https://github.com/christopherfperry/StudioForge/releases/download/models-v1
+CHK="${RUNNER_TEMP:-/tmp}/sfmodel"; mkdir -p "$CHK"
+if curl -fsSL -o "$CHK/m.zip" "$MODELS/htdemucs_6s.mlpackage.zip" && curl -fsSL -o "$CHK/check.bin" "$MODELS/coreml_check.bin"; then
+  ditto -x -k "$CHK/m.zip" "$CHK"
+  SF_COREML_MODEL="$CHK/htdemucs_6s.mlpackage" SF_COREML_CHECK="$CHK/check.bin" \
+    swift test --filter testCoreMLModelMatchesPyTorch 2>&1 | grep -E "Core ML vs PyTorch|error|passed|failed|skipped" \
+    || echo "::warning::AI model check failed"
+else
+  echo "::warning::Could not download the AI model for the check"
+fi
+
 python3 -m pip install --quiet --break-system-packages pillow 2>/dev/null \
   || python3 -m pip install --quiet pillow 2>/dev/null || true
 

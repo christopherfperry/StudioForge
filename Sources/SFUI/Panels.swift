@@ -24,37 +24,96 @@ struct SheetFrame<Content: View>: View {
 
 // MARK: New song
 
-struct NewSongSheet: View {
+/// File › New Project… (⌘N), toolbar "New Project", and the start window at launch.
+struct NewProjectSheet: View {
     @ObservedObject var model: AppModel
     let close: () -> Void
+    @State private var templates: [ProjectTemplate] = ProjectTemplates.builtIn + ProjectTemplates.userTemplates()
+    @State private var templateID = ProjectTemplates.empty.id
+    @State private var name = "Untitled"
+    @State private var tempo: Double = 120
+    @State private var signature = TimeSignature(4, 4)
+    @State private var folder = AppPaths.defaultProjectsFolder
+    @AppStorage("SFSaveNewProjectImmediately") private var saveNow = true
+
+    private var template: ProjectTemplate { templates.first { $0.id == templateID } ?? ProjectTemplates.empty }
+
+    private func pick(_ t: ProjectTemplate) {
+        templateID = t.id; tempo = t.tempo; signature = t.timeSignature
+    }
+
+    private func create() {
+        let s = NewProjectSettings(name: name, tempo: tempo, timeSignature: signature)
+        if model.newProject(from: template, settings: s, saveIn: saveNow ? folder : nil) { close() }
+    }
+
     var body: some View {
-        SheetFrame(title: "New Song", close: close) {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 150))], spacing: 12) {
-                ForEach(ProjectTemplates.builtIn + ProjectTemplates.userTemplates()) { t in
-                    Button { model.newProject(from: t); close() } label: {
-                        VStack(spacing: 6) {
-                            Image(systemName: t.symbol).font(.largeTitle)
+        SheetFrame(title: "New Project", close: close) {
+            Text("Pick a starting point, name your project and press Create.").foregroundColor(.secondary)
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 140))], spacing: 10) {
+                ForEach(templates) { t in
+                    let selected = t.id == templateID
+                    Button { pick(t) } label: {
+                        VStack(spacing: 5) {
+                            Image(systemName: t.symbol).font(.title)
                             Text(t.name).font(.headline)
-                            Text(t.summary).font(.caption).multilineTextAlignment(.center).foregroundColor(.secondary)
-                        }.frame(width: 150, height: 120)
-                    }.buttonStyle(.bordered)
+                            Text(t.summary).font(.caption).multilineTextAlignment(.center).foregroundColor(.secondary).lineLimit(3)
+                        }
+                        .frame(width: 140, height: 105).padding(4)
+                        .background(RoundedRectangle(cornerRadius: 8).fill(selected ? Color.accentColor.opacity(0.25) : Color.gray.opacity(0.12)))
+                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(selected ? Color.accentColor : .clear, lineWidth: 2))
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selected ? .isSelected : [])
+                    .help(t.summary)
                 }
+            }
+            Form {
+                TextField("Project name", text: $name)
+                HStack {
+                    TextField("Tempo (BPM)", value: $tempo, format: .number.precision(.fractionLength(0...2))).frame(maxWidth: 200)
+                    Stepper("", value: $tempo, in: 30...300, step: 1).labelsHidden()
+                    Picker("Time signature", selection: $signature) {
+                        ForEach(NewProjectSettings.timeSignatures, id: \.self) { Text($0.description).tag($0) }
+                    }.frame(maxWidth: 220)
+                }
+                HStack {
+                    Toggle("Save to", isOn: $saveNow)
+                    Text(folder.path.replacingOccurrences(of: NSHomeDirectory(), with: "~"))
+                        .font(.caption).foregroundColor(.secondary).lineLimit(1).truncationMode(.middle)
+                    Button("Choose…") {
+                        let p = NSOpenPanel(); p.canChooseDirectories = true; p.canChooseFiles = false
+                        p.canCreateDirectories = true; p.directoryURL = folder; p.prompt = "Choose"
+                        if p.runModal() == .OK, let u = p.url { folder = u; saveNow = true }
+                    }.controlSize(.small)
+                }
+                .help("Saves the project as “\(NewProjectSettings(name: name).cleanName).sfproj” straight away so recordings go inside it")
             }
             HStack {
                 Button("Open Project…") {
                     let panel = NSOpenPanel(); panel.canChooseDirectories = true; panel.canChooseFiles = true
                     panel.treatsFilePackagesAsDirectories = false
-                    if panel.runModal() == .OK, let url = panel.url { model.open(url); close() }
+                    panel.directoryURL = AppPaths.projects
+                    if panel.runModal() == .OK, let url = panel.url { model.open(url); if model.packageURL == url { close() } }
                 }
-                Menu("Recent") {
+                Menu("Open Recent") {
                     if RecentProjects.shared.urls.isEmpty { Text("No recent projects") }
-                    ForEach(RecentProjects.shared.urls, id: \.self) { u in Button(u.deletingPathExtension().lastPathComponent) { model.open(u); close() } }
-                }
+                    ForEach(RecentProjects.shared.urls, id: \.self) { u in
+                        Button(u.deletingPathExtension().lastPathComponent) { model.open(u); if model.packageURL == u { close() } }
+                    }
+                }.frame(maxWidth: 160)
+                Toggle("Show at launch", isOn: $model.showNewProjectAtLaunch).controlSize(.small)
+                Spacer()
+                Button("Create") { create() }.keyboardShortcut(.defaultAction)
+            }
+            HStack {
                 Spacer()
                 Button("Save Current as Template") {
                     do {
                         try ProjectTemplates.saveAsTemplate(model.project, name: model.project.name)
                         model.status = "Saved “\(model.project.name)” as a template"
+                        templates = ProjectTemplates.builtIn + ProjectTemplates.userTemplates()
                     } catch { model.status = "Could not save template: \(error.localizedDescription)" }
                 }
             }
@@ -200,7 +259,6 @@ struct StemSeparatorSheet: View {
     @State private var drumParts: Set<Stem> = Set(Stem.drumParts)
     @State private var addToProject = true
     @State private var muteSource = true
-    @State private var downloadURL = SeparationModelManager.shared.configuredDownloadURL?.absoluteString ?? ""
     @AppStorage("SFSplitQuality") private var quality = SeparationQuality.high.rawValue
     @AppStorage("SFReduceArtefacts") private var reduceArtefacts = true
     @AppStorage("SFArtefactStrength") private var artefactStrength = 0.5
@@ -220,32 +278,50 @@ struct StemSeparatorSheet: View {
                 set: { on in if on { set.wrappedValue.insert(s) } else { set.wrappedValue.remove(s) } })
     }
 
+    /// Explanation + one-click download, shown while only the basic separator is available.
+    @ViewBuilder private var installAIModel: some View {
+        Text("Using the basic built-in separator, which only roughly isolates instruments. For clean vocals, drums, bass, guitar and piano, download the AI model once (\(SeparationModelManager.approximateDownloadSize); it runs on your Mac, no internet needed afterwards).")
+            .font(.caption).foregroundColor(.secondary).fixedSize(horizontal: false, vertical: true)
+        HStack {
+            Button { SeparationModelManager.shared.startDownload() } label: {
+                Label("Download AI Model", systemImage: "arrow.down.circle")
+            }.buttonStyle(.borderedProminent)
+            Button("Import Model File...") {
+                let p = NSOpenPanel(); p.canChooseDirectories = true; p.canChooseFiles = true
+                if p.runModal() == .OK, let u = p.url {
+                    SeparationModelManager.shared.importModelInBackground(from: u) { err in
+                        if let e = err { model.status = "Model import failed: \(e.localizedDescription)" }
+                    }
+                }
+            }.help("Install a model .zip / .mlpackage made with tools/convert_htdemucs_core.py")
+        }
+    }
+
     var body: some View {
         SheetFrame(title: "Import & Split Audio", close: close) {
             GroupBox("Separation engine") {
                 VStack(alignment: .leading, spacing: 6) {
                     switch job.modelState {
-                    case .installed: Text("Demucs htdemucs_6s installed — high-quality ML separation.")
-                    case .notInstalled: Text("Built-in DSP separator (no download). For higher quality, import a Demucs Core ML model (\(SeparationModelManager.approximateDownloadSize)).")
-                            .font(.caption).foregroundColor(.secondary)
-                    case .downloading(let p): ProgressView("Downloading model…", value: p)
-                    case .installing: ProgressView("Installing model…")
-                    case .failed(let e): Text(e).foregroundColor(.orange)
+                    case .installed:
+                        Label("AI separation (Demucs v4, 6 stems) is installed and will be used.", systemImage: "checkmark.seal.fill")
+                            .foregroundColor(.green)
+                    case .notInstalled:
+                        installAIModel
+                    case .failed(let e):
+                        Text(e).foregroundColor(.orange).fixedSize(horizontal: false, vertical: true)
+                        installAIModel
+                    case .downloading(let p):
+                        HStack {
+                            ProgressView("Downloading AI model… \(Int(p * 100))%", value: p)
+                            Button("Cancel") { SeparationModelManager.shared.cancelDownload() }
+                        }
+                    case .installing: ProgressView("Installing AI model (this can take a minute)…")
                     }
-                    HStack {
-                        TextField("Model download URL (.mlpackage.zip / .mlmodelc.zip)", text: $downloadURL)
-                        Button("Download") {
-                            SeparationModelManager.shared.configuredDownloadURL = URL(string: downloadURL)
-                            SeparationModelManager.shared.startDownload()
-                        }.disabled(URL(string: downloadURL)?.scheme == nil)
-                        Button("Import Model…") {
-                            let p = NSOpenPanel(); p.canChooseDirectories = true; p.canChooseFiles = true
-                            if p.runModal() == .OK, let u = p.url {
-                                SeparationModelManager.shared.importModelInBackground(from: u) { err in
-                                    if let e = err { model.status = "Model import failed: \(e.localizedDescription)" }
-                                }
-                            }
-                        }.help("Import a model converted with tools/convert_demucs_to_coreml.py")
+                    if job.modelState == .installed {
+                        Button("Remove AI Model") {
+                            do { try SeparationModelManager.shared.deleteModel() }
+                            catch { model.status = "Could not remove the model: \(error.localizedDescription)" }
+                        }.controlSize(.small)
                     }
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -333,7 +409,11 @@ struct StemSeparatorSheet: View {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 let audio = try AudioDecoding.decode(source.url)
-                let sep = SeparatorFactory.best()
+                // AI model when installed; if it is installed but cannot load, say so instead of
+                // silently producing the much rougher built-in result.
+                let sep: StemSeparator
+                do { sep = try SeparatorFactory.neural() ?? DSPStemSeparator() }
+                catch { throw StudioForgeError.invalid("The AI model could not be loaded (\(error.localizedDescription)). Remove it and download it again in this window.") }
                 var stems = try sep.separate(audio, options: opts, progress: { p, m in
                     DispatchQueue.main.async { job.progress = p; job.message = "\(sep.name): \(m)" }
                 }, isCancelled: { job.cancelled })

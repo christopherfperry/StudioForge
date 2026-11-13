@@ -7,13 +7,12 @@ import CoreML
 #endif
 import SFCore
 
-/// Manages the on-device stem separation model (Demucs htdemucs_6s converted to Core ML).
+/// Manages the on-device AI stem separation model: Demucs v4 htdemucs_6s (MIT licence, Meta)
+/// converted to Core ML by tools/convert_htdemucs_core.py with the STFT outside the network.
 ///
-/// The model is ~1–2 GB uncompressed (FP32) and is not bundled with the app. It can be installed by:
-///  1. **Download** from a URL you configure (Settings ▸ Stem Separation ▸ Model URL) — a .zip
-///     containing `htdemucs_6s.mlpackage` or `htdemucs_6s.mlmodelc`;
-///  2. **Import** a model you converted yourself with `tools/convert_demucs_to_coreml.py`.
-/// Fitzrovia Records DAW does not ship or hard-code a third-party download location.
+/// The model (≈ 67 MB zipped, 147 MB installed) is not bundled with the app; it is downloaded on request from the
+/// project's GitHub "models-v1" release (or any URL configured under `SFSeparationModelURL`),
+/// or imported from a local .zip / .mlpackage / .mlmodelc.
 public final class SeparationModelManager: NSObject {
     public enum State: Equatable {
         case notInstalled
@@ -24,10 +23,12 @@ public final class SeparationModelManager: NSObject {
     }
 
     public static let shared = SeparationModelManager()
-    public static let modelName = "htdemucs_6s"
+    public static let modelName = "htdemucs_6s-core"
     public static let downloadURLDefaultsKey = "SFSeparationModelURL"
     /// Approximate size shown in the UI before download.
-    public static let approximateDownloadSize = "≈ 1–2 GB"
+    public static let approximateDownloadSize = "≈ 67 MB"
+    /// Where the app downloads the model from unless the user configured another URL.
+    public static let defaultDownloadURL = URL(string: "https://github.com/christopherfperry/StudioForge/releases/download/models-v1/htdemucs_6s.mlpackage.zip")!
 
     public private(set) var state: State = .notInstalled { didSet { notify() } }
     /// Called on the main queue whenever `state` changes.
@@ -57,8 +58,11 @@ public final class SeparationModelManager: NSObject {
     public var isInstalled: Bool { installedModelURL != nil }
 
     public var configuredDownloadURL: URL? {
-        get { UserDefaults.standard.string(forKey: Self.downloadURLDefaultsKey).flatMap { URL(string: $0) } }
-        set { UserDefaults.standard.set(newValue?.absoluteString, forKey: Self.downloadURLDefaultsKey) }
+        get { UserDefaults.standard.string(forKey: Self.downloadURLDefaultsKey).flatMap { URL(string: $0) } ?? Self.defaultDownloadURL }
+        set {
+            let v = newValue == Self.defaultDownloadURL ? nil : newValue?.absoluteString
+            UserDefaults.standard.set(v, forKey: Self.downloadURLDefaultsKey)
+        }
     }
 
     // MARK: Download
@@ -193,6 +197,10 @@ extension SeparationModelManager: URLSessionDownloadDelegate {
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         // The temporary file is deleted when this method returns, so move it first.
         let fm = FileManager.default
+        if let http = downloadTask.response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            setState(.failed("Model download failed (HTTP \(http.statusCode)). Check your internet connection and try again."))
+            return
+        }
         let ext = downloadTask.originalRequest?.url?.pathExtension.lowercased() ?? "zip"
         let dest = fm.temporaryDirectory.appendingPathComponent("sf-model-download-\(UUID().uuidString).\(ext.isEmpty ? "zip" : ext)")
         do {

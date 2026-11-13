@@ -29,6 +29,12 @@ public final class AppModel: ObservableObject {
     @Published public var showSetup = false
     /// Opens the "Import & Split Audio" sheet (menu ⇧⌘I, toolbar "Split").
     @Published public var showSplitSheet = false
+    /// Opens the New Project window (File › New Project… ⌘N, toolbar "New Project", and at launch).
+    @Published public var showNewProject = false
+    /// Show the New Project window when the app starts (checkbox in that window).
+    @Published public var showNewProjectAtLaunch = UserDefaults.standard.object(forKey: "SFShowNewProjectAtLaunch") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(showNewProjectAtLaunch, forKey: "SFShowNewProjectAtLaunch") }
+    }
     /// Mixer panel visibility (transport "Mixer" toggle, X). Persisted between launches.
     @Published public var showMixer = UserDefaults.standard.object(forKey: "SFShowMixer") as? Bool ?? true {
         didSet { UserDefaults.standard.set(showMixer, forKey: "SFShowMixer") }
@@ -76,6 +82,8 @@ public final class AppModel: ObservableObject {
             restartAudio()   // output-only until input access is granted in System Settings
         }
         showOnboarding = !showWelcome && !UserDefaults.standard.bool(forKey: "SFOnboardingDone")
+        // Start window: only when no other first-run sheet is showing (one sheet at a time).
+        showNewProject = !showWelcome && !showOnboarding && showNewProjectAtLaunch
         let m = MIDIInputManager(queue: engine.core.midiQueue)
         try? m.start()
         midi = m
@@ -290,8 +298,17 @@ public final class AppModel: ObservableObject {
     // MARK: Projects
 
     public func newProject(from template: ProjectTemplate) {
-        guard confirmDiscardChanges("start a new song") else { return }
-        var p = template.makeProject(name: "Untitled", sampleRate: engine.sampleRate)
+        newProject(from: template, settings: NewProjectSettings(name: "Untitled", tempo: template.tempo,
+                                                                timeSignature: template.timeSignature), saveIn: nil)
+    }
+
+    /// File › New Project… (⌘N). Builds the project from a template with the user's name, tempo and
+    /// time signature; with `saveIn` it is saved straight away as "<name>.sfproj" in that folder
+    /// (a unique name is chosen if one exists). Returns false if the user cancelled.
+    @discardableResult
+    public func newProject(from template: ProjectTemplate, settings: NewProjectSettings, saveIn folder: URL?) -> Bool {
+        guard confirmDiscardChanges("start a new project") else { return false }
+        var p = template.makeProject(settings: settings, sampleRate: engine.sampleRate)
         presets.applyReferencedPresets(to: &p)
         if let styleID = template.beatStyle, let style = beatStyles.style(id: styleID),
            let drums = p.tracks.firstIndex(where: { $0.kind == .drums }) {
@@ -302,8 +319,23 @@ public final class AppModel: ObservableObject {
         }
         undo.clear()
         project = p; packageURL = nil; isDirty = false
+        selectedTrackID = p.tracks.first?.id
         engine.load(project: p, packageURL: nil)
+        showNewProject = false
+        if let folder = folder {
+            do {
+                try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+                save(as: ProjectPackage.uniqueURL(in: folder, baseName: p.name, ext: ProjectPackage.fileExtension))
+            } catch { status = "Could not create the project folder: \(error.localizedDescription)" }
+            if packageURL != nil { status = "Created “\(project.name)” — saved in \(folder.lastPathComponent)" }
+        } else {
+            status = "New project “\(p.name)” — ⌘S to save"
+        }
+        return true
     }
+
+    /// Window title: project name, plus "— Edited" with unsaved changes.
+    public var windowTitle: String { project.name + (isDirty ? " — Edited" : "") }
 
     public func open(_ url: URL) {
         guard url.standardizedFileURL != packageURL?.standardizedFileURL || !isDirty else { return }
@@ -311,7 +343,10 @@ public final class AppModel: ObservableObject {
         do {
             let p = try ProjectPackage.newerAutosave(in: url) ?? ProjectPackage.load(from: url)
             undo.clear(); project = p; packageURL = url; isDirty = false
+            selectedTrackID = p.tracks.first?.id
             engine.load(project: p, packageURL: url)
+            showNewProject = false
+            status = "Opened \(url.deletingPathExtension().lastPathComponent)"
             RecentProjects.shared.add(url)
         } catch { status = "Open failed: \(error.localizedDescription)" }
     }

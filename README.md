@@ -118,28 +118,26 @@ Keyboard shortcuts: Space = play/stop, R = record, L = loop, K = metronome, S = 
 - **Import & Split › Quality:** *Standard* (fast) or *High* (two-pass HPSS, stereo-coherence vocal detection, pitch-aware bass with harmonics, Wiener mask refinement, short-window drum clean-up). High takes roughly 2–3× longer.
 - **Reduce artefacts** (with strength): smooths musical noise and warbling, gates faint bleed in quiet passages, softens harsh highs, and keeps attacks sharp. Settings are remembered.
 - **Generate matching synth track:** after a split (tick the option and pick a style), or right-click any audio clip › **Generate Matching Synth**, or **File › Generate Matching Synth**. It reads the guitar track for chords and the bass track for notes, detects the key, quantises to the project tempo, and adds an instrument track: *Pad* (follows chords), *Bass synth* (doubles the bass) or *Arpeggio*.
-- The separator is still DSP-based (no neural model), so expect some bleed on dense mixes.
+- From 0.7.0 an AI separator is available (see *AI stem separation* below).
 
 ## Deleting tracks/stems, volume, genre-matched synths (0.6.0)
 - **Delete a track or stem:** click the trash icon in its header, right-click it › *Delete Track / Delete Stem*, use the mixer's trash button, or select it and press **⌘⌫** (Edit › Delete Selected Track / Stem). Stems from one split can be removed together (*Delete All Stems From This Split*), or all at once with **Edit › Delete All Stems**. Everything is undoable with ⌘Z.
 - **Volume:** every track and stem header now has its own volume slider and dB readout (double-click the value for 0 dB). The **Mixer** button (key X) shows faders with 0 dB marks (drag, double-click to reset). The inspector has a *Volume & pan* box with −/+ 1 dB buttons and a 0 dB reset. Right-click a track › *Volume* for quick levels, or use ⌥⌘↑ / ⌥⌘↓ on the selected track. A fader drag counts as one undo step.
 - **Genre-matched synth tones:** *Generate Matching Synth* now has a **Genre** setting (Auto-detect, Rock, Metal, Pop, Funk, R&B / Soul, Hip-hop, Electronic, Ambient, Jazz, Folk / Acoustic). The genre sets the note register (the frequencies the synth plays at), chord voicing (power chords for rock/metal, diatonic sevenths for jazz/R&B/funk/hip-hop), rhythm (arpeggio speed, bass note length) and timbre (waveform, filter brightness, envelope, drive; Rhodes for jazz/R&B, string machine for folk, 808-style sine sub for hip-hop). Auto-detect guesses the genre from the guitar and bass (distortion, brightness, note density, sustain, sub-bass, tempo, chord changes); it is a rule-based guess, so pick the genre manually if it misjudges.
 
-## Stem-separation model (first-run download, about 1–2 GB)
+## AI stem separation (one-click download, ≈ 67 MB)
 
-The Core ML model is **not bundled** (it is large, and Demucs weights have their own license). There are two ways to get it:
+Open **Split** (⇧⌘I) and click **Download AI Model**. The app downloads Demucs v4 *htdemucs_6s* (MIT licence, Meta Platforms) converted to Core ML from this repository's [models-v1 release](https://github.com/christopherfperry/StudioForge/releases/tag/models-v1), installs it (≈ 147 MB on disk, in Application Support) and uses it for every split from then on. It runs on your Mac; no internet is needed after the download. The Split window shows which engine is in use. *Remove AI Model* deletes it.
 
-1. **Convert it yourself** (recommended):
-   ```bash
-   python3 -m venv .venv && source .venv/bin/activate
-   pip install torch==2.3.1 demucs==4.0.1 coremltools
-   python3 tools/convert_demucs_to_coreml.py --out htdemucs_6s.mlpackage
-   ```
-   Then use **Stems → Import…** and choose the `.mlpackage`. Model contract: input `mix` [1,2,N] at 44.1 kHz; output `sources` [1,6,2,N] in the order drums, bass, other, vocals, guitar, piano.
-   The conversion script is **untested**. coremltools has no `istft`, so the script uses a matrix iDFT plus overlap-add. Check its output against PyTorch before relying on it.
-2. **Host your converted model** (a zipped `.mlpackage` or `.mlmodelc`) and paste its URL into the Split sheet. The URL is stored in UserDefaults under `SFSeparationModelURL`. You then get a download progress bar.
+- Six AI stems: vocals, drums, bass, guitar, piano and other. Drum parts (kick, snare, hi-hats, toms, cymbals) are then split from the AI drum stem.
+- *High* quality runs two shifted passes and averages them (about twice as slow as *Standard*).
+- Without the model the basic built-in DSP separator is used. It only roughly isolates instruments (frequency bands and stereo position), so vocals, guitar and keys bleed into each other on dense mixes.
 
-Without the model, Fitzrovia Records DAW uses the DSP separator automatically. It is lower quality but always available. Expect clean results for bass, drums and drum parts. Vocals, guitar, piano/keys and other are split heuristically (frequency band + stereo position), so they bleed into each other on dense mixes. No pre-converted model is published: an attempt to convert htdemucs_6s on Linux (coremltools 8.1) failed because Core ML rejects a rank-6 reshape inside the model. Converting it on a Mac may need changes to the model code.
+To make the model yourself (needs Python, torch, demucs 4.0.1 and coremltools):
+```bash
+python3 tools/convert_htdemucs_core.py --out htdemucs_6s.mlpackage
+```
+then use **Import Model File...** in the Split window. The STFT/iSTFT are done in Swift (`DemucsSpectral`); the network takes `mix` [1,2,343980] and `spec` [1,4,2048,336] and returns `spec_out` and `wave_out`. Unit tests check the Swift spectral code and the full Swift pipeline against PyTorch, and the macOS CI build checks the published Core ML model against PyTorch.
 
 ## MP3 / OGG
 

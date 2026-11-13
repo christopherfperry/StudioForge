@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.0 — 2026-11-13
+- **New Project window (File › New Project... ⌘N, toolbar *New Project*, and at launch):** pick a template, type a project name, set tempo and time signature, and choose where to save it. The project is saved straight away as *<name>.sfproj* (a unique name is used if one exists). *Open Project...*, *Open Recent* and *Show at launch* are in the same window. File menu gains *Open Recent*. The window title shows the project name and "Edited".
+- **AI stem separation:** the Split window has a one-click **Download AI Model** button (≈ 67 MB, Demucs v4 htdemucs_6s, MIT licence). With it, vocals, drums, bass, guitar, piano and other are isolated by a neural network instead of the basic DSP separator, which only roughly isolated instruments. The window shows which engine is in use, download progress (with Cancel), and *Remove AI Model*. If an installed model cannot load, the split reports it instead of silently falling back.
+- The model was converted with a new script (tools/convert_htdemucs_core.py) that keeps the STFT outside the network, which fixes the earlier failed conversion. The old script was removed; models from it are not used.
+- New tests: New Project settings and saving, Swift STFT/iSTFT vs PyTorch, the full Swift Demucs pipeline vs PyTorch, and (macOS CI) the Core ML model vs PyTorch.
+
 ## 0.6.2 — 2026-11-13
 - **Fixed: single-key shortcuts fired while typing.** Space, R, L, K, N, X and S no longer trigger transport and editing actions while you type in a text field (for example when renaming a track). They are now ignored whenever a text field, sheet or dialog has focus. ⌘⌫ in a text field now edits the text instead of deleting the track.
 - **Fixed: a stale "Arm at least one audio track" error came back on every Stop.** Errors are now cleared when you start recording or stop.

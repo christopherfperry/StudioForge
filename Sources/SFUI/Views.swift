@@ -41,7 +41,7 @@ public struct MainView: View {
         .onAppear { model.installKeyMonitor() }
         .sheet(item: $sheet) { s in
             switch s {
-            case .newSong: NewSongSheet(model: model) { sheet = nil }
+            case .newSong: NewProjectSheet(model: model) { sheet = nil; model.showNewProject = false }
             case .presets: PresetBrowser(model: model) { sheet = nil }
             case .tonePicker: TonePickerSheet(model: model) { sheet = nil }
             case .beat: BeatGeneratorSheet(model: model) { sheet = nil }
@@ -49,6 +49,13 @@ public struct MainView: View {
             case .export: ExportSheet(model: model) { sheet = nil }
             case .audio: AudioSettingsSheet(model: model) { sheet = nil }
             }
+        }
+        .navigationTitle(model.windowTitle)
+        .onAppear { if model.showNewProject && sheet == nil { sheet = .newSong } }
+        .onChange(of: model.showNewProject) { show in
+            // File › New Project… (⌘N) / start window. Opening a project (e.g. double-clicked in
+            // Finder at launch) clears the flag and closes the start window.
+            if show { sheet = .newSong } else if sheet == .newSong { sheet = nil }
         }
         .onChange(of: model.showSplitSheet) { show in
             // Menu command "Import & Split Audio…" (⇧⌘I) routes through the model.
@@ -76,7 +83,8 @@ struct TransportBar: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            Button { sheet = .newSong } label: { Label("New Song", systemImage: "plus.square") }.help("Start a new song from a template")
+            Button { model.showNewProject = true } label: { Label("New Project", systemImage: "plus.square") }
+                .help("Create a new project: choose a template, name, tempo and where to save it (⌘N)")
             Divider().frame(height: 22)
             Button(action: model.rewind) { Image(systemName: "backward.end.fill") }.help("Go to start (Return)")
             // Single-key shortcuts (Space, Return, R, L, K, N, X, S) live in AppModel.handleKey so they

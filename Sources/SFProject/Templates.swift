@@ -25,6 +25,39 @@ public struct ProjectTemplate: Identifiable, Hashable {
     }
 }
 
+/// What the user fills in on the New Project sheet.
+public struct NewProjectSettings: Equatable {
+    public var name: String
+    public var tempo: Double
+    public var timeSignature: TimeSignature
+    public init(name: String = "Untitled", tempo: Double = 120, timeSignature: TimeSignature = TimeSignature(4, 4)) {
+        self.name = name; self.tempo = tempo; self.timeSignature = timeSignature
+    }
+    /// Common time signatures offered in the UI.
+    public static let timeSignatures: [TimeSignature] = [TimeSignature(4, 4), TimeSignature(3, 4), TimeSignature(6, 8),
+                                                         TimeSignature(2, 4), TimeSignature(5, 4), TimeSignature(7, 8),
+                                                         TimeSignature(12, 8)]
+    /// Name trimmed and safe as a file name ("Untitled" when empty).
+    public var cleanName: String {
+        let bad = CharacterSet(charactersIn: "/:\\").union(.controlCharacters)
+        let s = name.components(separatedBy: bad).joined(separator: "-").trimmingCharacters(in: .whitespacesAndNewlines)
+        let t = s.hasPrefix(".") ? String(s.drop(while: { $0 == "." })) : s
+        return t.isEmpty ? "Untitled" : String(t.prefix(120))
+    }
+    public var clampedTempo: Double { min(300, max(30, tempo.isFinite ? tempo : 120)) }
+}
+
+extension ProjectTemplate {
+    /// A project from this template with the user's name, tempo and time signature.
+    public func makeProject(settings s: NewProjectSettings, sampleRate: Double = 48_000) -> Project {
+        var p = makeProject(name: s.cleanName, sampleRate: sampleRate)
+        p.tempo = s.clampedTempo
+        p.timeSignature = s.timeSignature
+        p.loop = TimeRegion(enabled: false, start: 0, end: p.secondsPerBar * 4)
+        return p
+    }
+}
+
 public enum ProjectTemplates {
     static func track(_ name: String, _ kind: TrackKind, color: Int, preset: String?, instrument: String? = nil,
                       input: InputSelection = InputSelection(), arm: Bool = false) -> Track {

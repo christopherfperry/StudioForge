@@ -44,12 +44,20 @@ struct StudioForgeApp: App {
         }
         .commands {
             CommandGroup(replacing: .newItem) {
+                Button("New Project…") { model.showNewProject = true }.keyboardShortcut("n")
+                Divider()
                 Button("Open…") {
                     let p = NSOpenPanel(); p.canChooseDirectories = true
                     p.directoryURL = AppPaths.projects
                     p.allowedContentTypes = ProjectPackage.readableExtensions.compactMap { UTType(filenameExtension: $0) }
                     if p.runModal() == .OK, let u = p.url { model.open(u) }
                 }.keyboardShortcut("o")
+                Menu("Open Recent") {
+                    let recent = RecentProjects.shared.urls
+                    if recent.isEmpty { Text("No recent projects") }
+                    ForEach(recent, id: \.self) { u in Button(u.deletingPathExtension().lastPathComponent) { model.open(u) } }
+                }
+                Divider()
                 Button("Save") { model.save() }.keyboardShortcut("s")
                 Button("Save As…") { model.saveAs() }.keyboardShortcut("s", modifiers: [.command, .shift])
                 Button("Import Audio…") {
