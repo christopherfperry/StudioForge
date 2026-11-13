@@ -3,10 +3,59 @@ on: [push, workflow_dispatch]
 permissions:
   contents: write
 jobs:
+  # Built with the newest Xcode/SDK on macOS 27, then installed + launched on that runner.
   build:
-    runs-on: macos-latest
+    runs-on: xcode-27
     steps:
       - uses: actions/checkout@v4
       - run: bash packaging/ci_build.sh
+        env:
+          PUBLISH: "0"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-build
+          path: smoke/
+
+  # The same package installed and opened on the older supported macOS versions.
+  smoke:
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-26, macos-15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - run: bash packaging/smoke_test.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-${{ matrix.os }}
+          path: smoke/
+
+  publish:
+    needs: [build, smoke]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: smoke-*
+          path: smoke/
+          merge-multiple: true
+      - run: bash packaging/publish_release.sh
         env:
           GH_TOKEN: ${{ github.token }}

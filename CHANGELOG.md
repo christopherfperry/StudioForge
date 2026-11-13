@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0 — 2026-11-13
+- **Show Playing Notes** (transport **Notes** toggle, key **N**, or **View › Show Playing Notes** ⌥⌘N; remembered between launches). While the song plays, every track shows the note it is sounding: a badge in the track header and a tag riding next to the playhead. Instrument tracks show chords (e.g. `C4 E4 G4`); drum tracks show the drum names (`Kick + Closed Hat`); audio tracks (recordings, imports, split stems) use a background pitch tracker (YIN), so they show one note at a time and work best on single-note parts such as vocals, bass and lead lines. Muted clips and muted/un-soloed tracks show nothing.
+- **Latest macOS:** builds with Xcode 27 on macOS 27. Every build is now installed and launched automatically on macOS 27, 26 Tahoe and 15 Sequoia (`packaging/smoke_test.sh`: installer, code signature, architecture, launch, crash-report check, DMG mount); the release is only published if all pass.
+- Install instructions updated for macOS 15+, which removed Control-click › Open for unnotarized software: use **System Settings › Privacy & Security › Open Anyway**, or the new one-line Terminal install (no prompts).
+- 4 new unit tests (26 total on Linux).
+
 ## 0.3.0 — 2026-11-13
 - **Renamed to Fitzrovia Records DAW**: app bundle `Fitzrovia Records DAW.app`, installer `Install-FitzroviaRecordsDAW.pkg`, disk image `FitzroviaRecordsDAW-<version>.dmg`, window title, menus and docs. The bundle id (`com.studioforge.daw`) and project extensions (`.sfproj`/`.sforge`) are unchanged, so existing projects and settings keep working. `~/Music/StudioForge` and `~/Library/Application Support/StudioForge` are moved to the new names automatically (by the installer, and again on first launch). The installer removes the old `/Applications/StudioForge.app`.
 - **Import & Split Audio** (⇧⌘I / toolbar **Split**): split a file or the selected clip into vocals, drums, bass, guitar, piano/keys and other. Drum types: kick, snare, toms, hi-hat and cymbals, each selectable. Presets: Vocals + 3, Everything, Drums only. Stems are added as aligned tracks in one undo step and can mute the source. Cancel works safely mid-run.

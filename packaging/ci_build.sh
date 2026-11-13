@@ -29,10 +29,15 @@ rm -f dist/*.iso
 ls -la dist
 test -f dist/Install-FitzroviaRecordsDAW.pkg
 
+# Install the package on this runner and launch the app. A build that does not install and
+# open is never published.
+if [ "${SMOKE:-1}" = "1" ]; then
+  echo "== Install + launch smoke test =="
+  ./packaging/smoke_test.sh dist/Install-FitzroviaRecordsDAW.pkg
+fi
+
 # Publish to the permanent "latest" download page (needs GH_TOKEN from the workflow).
-if [ -n "${GH_TOKEN:-}" ] && command -v gh >/dev/null; then
-  echo "== Publishing release 'latest' =="
-  gh release delete latest --yes --cleanup-tag 2>/dev/null || true
-  gh release create latest dist/* --title "Fitzrovia Records DAW (latest build)" --latest \
-    --notes "Download Install-FitzroviaRecordsDAW.pkg and double-click it. First time only: Control-click it and choose Open."
+# The workflow sets PUBLISH=0 here and publishes after the smoke tests on every macOS version pass.
+if [ "${PUBLISH:-1}" = "1" ]; then
+  ./packaging/publish_release.sh
 fi

@@ -94,6 +94,9 @@ struct TransportBar: View {
                 .toggleStyle(.button).help("Punch in/out region")
             Toggle("Click", isOn: Binding(get: { model.project.metronome.enabled }, set: { v in model.edit("Metronome") { $0.metronome.enabled = v } }))
                 .toggleStyle(.button).keyboardShortcut("k", modifiers: []).help("Metronome (K)")
+            Toggle(isOn: $model.showNotes) { Label("Notes", systemImage: "music.note") }
+                .toggleStyle(.button).keyboardShortcut("n", modifiers: [])
+                .help("Show which note each track is playing (N)")
             Spacer()
             Button("Tone Picker") { sheet = .tonePicker }.help("Pick an artist + instrument and get a preset")
             Button("Presets") { sheet = .presets }
@@ -174,6 +177,17 @@ struct TrackLane: View {
                         flag("R", track.arm, .red) { v in model.edit("Arm") { p in p.tracks[p.trackIndex(track.id)!].arm = v } }
                     }
                 }
+                if model.showNotes {
+                    // Fixed slot so the header does not jump as notes start and stop.
+                    Text(model.playingNotes[track.id] ?? "–")
+                        .font(.system(.caption, design: .monospaced).bold())
+                        .lineLimit(1).truncationMode(.tail)
+                        .foregroundColor(model.playingNotes[track.id] == nil ? .secondary : .black)
+                        .padding(.horizontal, 5).padding(.vertical, 1)
+                        .background(model.playingNotes[track.id] == nil ? Color.gray.opacity(0.25) : Color.mint)
+                        .cornerRadius(3)
+                        .help("Note playing at the playhead")
+                }
             }
             .frame(width: 162, alignment: .leading).padding(4)
             .background(model.selectedTrackID == track.id ? Color.accentColor.opacity(0.25) : Color(nsColor: .controlBackgroundColor))
@@ -189,6 +203,16 @@ struct TrackLane: View {
                     MIDIClipView(clip: clip)
                         .frame(width: max(4, model.project.seconds(forBeat: clip.lengthBeats) * model.zoom), height: track.height - 8)
                         .offset(x: model.project.seconds(forBeat: clip.startBeat) * model.zoom, y: 4)
+                }
+                if model.showNotes, let label = model.playingNotes[track.id] {
+                    // Note tag riding next to the playhead on this lane.
+                    Text(label)
+                        .font(.system(.callout, design: .monospaced).bold())
+                        .foregroundColor(.black).lineLimit(1).fixedSize()
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Capsule().fill(Color.mint))
+                        .offset(x: model.position * model.zoom + 4, y: max(2, track.height / 2 - 11))
+                        .allowsHitTesting(false)
                 }
             }
             .frame(height: track.height)

@@ -68,7 +68,7 @@ def background(scale):
     texts = (("Install Fitzrovia Records DAW", font(24 * scale), 16, (255, 255, 255)),
              ("Recommended: double-click \u201cInstall Fitzrovia Records DAW.pkg\u201d", font(14 * scale), 250, (255, 190, 140)),
              ("Or drag Fitzrovia Records DAW onto Applications", font(13 * scale, False), 405, (210, 210, 220)),
-             ("Unsigned build? Control-click the item \u203a Open \u203a Open", font(12 * scale, False), 440, (160, 160, 175)))
+             ("Blocked? System Settings \u203a Privacy & Security \u203a Open Anyway", font(12 * scale, False), 440, (160, 160, 175)))
     for text, fnt, yy, col in texts:
         tw = d.textlength(text, font=fnt)
         d.text(((w - tw) / 2, yy * scale), text, font=fnt, fill=col)

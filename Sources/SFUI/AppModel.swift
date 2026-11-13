@@ -29,6 +29,19 @@ public final class AppModel: ObservableObject {
     @Published public var showSetup = false
     /// Opens the "Import & Split Audio" sheet (menu ⇧⌘I, toolbar "Split").
     @Published public var showSplitSheet = false
+    /// "Show Playing Notes" (transport "Notes" toggle, N, View menu). Persisted between launches.
+    @Published public var showNotes = UserDefaults.standard.bool(forKey: "SFShowNotes") {
+        didSet {
+            UserDefaults.standard.set(showNotes, forKey: "SFShowNotes")
+            if showNotes { refreshNotes() } else { playingNotes = [:] }
+        }
+    }
+    /// Track id → label of the note(s) sounding at the playhead ("C4", "C4 E4 G4", "Kick + Snare").
+    @Published public private(set) var playingNotes: [UUID: String] = [:]
+    /// Pitch tracks of audio files (keyed by resolved path), built in the background on demand.
+    private var pitchContours: [String: PitchContour] = [:]
+    private var pitchPending: Set<String> = []
+    private let pitchQueue = DispatchQueue(label: "fitzrovia.pitch", qos: .utility)
     public let permissions = PermissionsModel()
     @Published public var audioConfig = CoreAudioIO.Configuration()
 
@@ -89,6 +102,46 @@ public final class AppModel: ObservableObject {
         cpu = m.cpu
         masterPeak = max(m.masterL, m.masterR)
         engine.collectGarbage()
+        if showNotes { refreshNotes() }
+    }
+
+    // MARK: Playing notes
+
+    /// Recomputes the per-track note labels at the playhead. MIDI/drum tracks read their clips;
+    /// audio tracks use a background-computed pitch track (monophonic: one note per track).
+    func refreshNotes() {
+        let t = position
+        var out: [UUID: String] = [:]
+        let anySolo = project.anySolo
+        for track in project.tracks where track.isAudible(anySolo: anySolo) {
+            if !track.midiClips.isEmpty {
+                let label = NoteName.label(for: project.soundingMIDIPitches(track: track, at: t), drums: track.kind == .drums)
+                if !label.isEmpty { out[track.id] = label; continue }
+            }
+            if let hit = project.audioClipPosition(track: track, at: t) {
+                let path = ProjectPackage.resolve(hit.clip.file, in: packageURL).standardizedFileURL.path
+                if let contour = pitchContours[path] {
+                    if let n = contour.note(at: hit.fileTime) { out[track.id] = NoteName.name(n) }
+                } else {
+                    requestPitchContour(path)
+                }
+            }
+        }
+        if out != playingNotes { playingNotes = out }
+    }
+
+    private func requestPitchContour(_ path: String) {
+        guard !pitchPending.contains(path) else { return }
+        pitchPending.insert(path)
+        pitchQueue.async { [weak self] in
+            // Unreadable files get an empty contour so they are not retried every frame.
+            let c = (try? AudioDecoding.decode(URL(fileURLWithPath: path))).map { PitchTracker.contour($0) }
+                ?? PitchContour(hopSeconds: 1, notes: [])
+            DispatchQueue.main.async {
+                self?.pitchContours[path] = c
+                self?.pitchPending.remove(path)
+            }
+        }
     }
 
     // MARK: Document editing (every change is undoable)

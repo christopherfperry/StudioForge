@@ -391,3 +391,73 @@ final class SetupTests: XCTestCase {
         XCTAssertTrue(AppPaths.defaultProjectsFolder.path.hasSuffix("Fitzrovia Records DAW/Projects"))
     }
 }
+
+
+final class PlayingNotesTests: XCTestCase {
+    func tone(_ hz: Double, seconds: Double, sr: Double = 48_000, amp: Float = 0.4) -> [Float] {
+        // fundamental + a 2nd harmonic, like a real instrument
+        let w: Double = 2 * Double.pi * hz / sr
+        return (0..<Int(seconds * sr)).map { (i: Int) -> Float in
+            let ph: Double = w * Double(i)
+            let v: Double = sin(ph) + 0.4 * sin(2 * ph)
+            return amp * Float(v)
+        }
+    }
+
+    func testNoteNamesAndLabels() {
+        XCTAssertEqual(NoteName.name(60), "C4")
+        XCTAssertEqual(NoteName.name(69), "A4")
+        XCTAssertEqual(NoteName.name(61), "C#4")
+        XCTAssertEqual(NoteName.name(21), "A0")
+        XCTAssertEqual(NoteName.name(0), "C-1")
+        XCTAssertEqual(NoteName.label(for: [67, 60, 64, 60], drums: false), "C4 E4 G4")
+        XCTAssertEqual(NoteName.label(for: [36, 42], drums: true), "Kick + Closed Hat")
+        XCTAssertEqual(NoteName.label(for: [60, 62, 64, 65, 67, 69], drums: false), "C4 D4 E4 F4 +2")
+        XCTAssertEqual(NoteName.label(for: [], drums: false), "")
+        XCTAssertEqual(NoteName.midi(fromFrequency: 440), 69, accuracy: 1e-9)
+    }
+
+    func testSoundingMIDIPitchesFollowsClipsAndTempo() {
+        var p = Project(name: "N", tempo: 120)   // 0.5 s per beat
+        let id = p.addTrack(kind: .instrument, name: "Keys")
+        let i = p.trackIndex(id)!
+        p.tracks[i].midiClips = [MIDIClip(name: "c", startBeat: 4, lengthBeats: 4, notes: [
+            MIDINote(pitch: 60, velocity: 100, startBeat: 0, durationBeats: 2),
+            MIDINote(pitch: 64, velocity: 100, startBeat: 1, durationBeats: 1),
+            MIDINote(pitch: 72, velocity: 100, startBeat: 3, durationBeats: 8),   // runs past clip end
+        ])]
+        let t = p.tracks[i]
+        XCTAssertEqual(p.soundingMIDIPitches(track: t, at: 1.0), [])          // before the clip
+        XCTAssertEqual(p.soundingMIDIPitches(track: t, at: 2.1), [60])        // beat 4.2
+        XCTAssertEqual(p.soundingMIDIPitches(track: t, at: 2.6).sorted(), [60, 64])
+        XCTAssertEqual(p.soundingMIDIPitches(track: t, at: 3.9), [72])        // beat 7.8
+        XCTAssertEqual(p.soundingMIDIPitches(track: t, at: 4.1), [])          // clip ended
+        p.tracks[i].midiClips[0].muted = true
+        XCTAssertEqual(p.soundingMIDIPitches(track: p.tracks[i], at: 2.1), [])
+    }
+
+    func testAudioClipPositionMapsToFileTime() {
+        var p = Project(name: "A")
+        let id = p.addTrack(kind: .audio, name: "Bass")
+        let i = p.trackIndex(id)!
+        p.tracks[i].audioClips = [AudioClip(name: "b", file: "Audio/b.wav", start: 10, offset: 2, duration: 5)]
+        let hit = p.audioClipPosition(track: p.tracks[i], at: 12)
+        XCTAssertEqual(hit?.fileTime ?? -1, 4, accuracy: 1e-9)
+        XCTAssertNil(p.audioClipPosition(track: p.tracks[i], at: 15.5))
+    }
+
+    func testPitchTrackerFindsNotesAndSilence() {
+        let sr = 48_000.0
+        // A2 (bass), silence, A4, E5 (vocal range)
+        let samples = tone(110, seconds: 1) + [Float](repeating: 0, count: Int(sr / 2)) + tone(440, seconds: 1) + tone(659.255, seconds: 1)
+        let c = PitchTracker.contour(samples: samples, sampleRate: sr)
+        XCTAssertGreaterThan(c.duration, 3)
+        XCTAssertEqual(c.note(at: 0.5), 45)    // A2
+        XCTAssertNil(c.note(at: 1.25))         // silence
+        XCTAssertEqual(c.note(at: 2.0), 69)    // A4
+        XCTAssertEqual(c.note(at: 3.0), 76)    // E5
+        let noise = PitchTracker.contour(samples: (0..<48_000).map { _ in Float.random(in: -0.3...0.3) }, sampleRate: sr)
+        let voiced = noise.notes.compactMap { $0 }.count
+        XCTAssertLessThan(Double(voiced), Double(noise.notes.count) * 0.2, "white noise should mostly read as no note")
+    }
+}

@@ -51,6 +51,10 @@ struct StudioForgeApp: App {
                 Button("Import & Split Audio…") { model.showSplitSheet = true }
                     .keyboardShortcut("i", modifiers: [.command, .shift])
             }
+            CommandGroup(after: .toolbar) {
+                Toggle("Show Playing Notes", isOn: $model.showNotes)
+                    .keyboardShortcut("n", modifiers: [.command, .option])
+            }
             CommandGroup(after: .help) {
                 Button("Setup & Permissions…") { model.permissions.refresh(); model.showSetup = true }
                 Button("Show Library in Finder") { NSWorkspace.shared.activateFileViewerSelecting([AppPaths.musicRoot]) }

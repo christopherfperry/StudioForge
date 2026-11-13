@@ -40,10 +40,11 @@ Opening this disk image does not install anything by itself: macOS never runs an
 automatically from a disk image. Do the following:
 
 STEP 1 - start the installer
-  Control-click (or right-click) "Install Fitzrovia Records DAW.command" and choose Open,
-  then click Open again in the dialog.
-  (A plain double-click is blocked because macOS refuses unsigned scripts that came from
-  the internet. Control-click > Open is the supported way to allow it once.)
+  Double-click "Install Fitzrovia Records DAW.command". macOS blocks it the first time
+  because it is an unsigned script from the internet. Click Done, then open
+  System Settings > Privacy & Security, click "Open Anyway" and enter your password.
+  (macOS 13-14 only: Control-click > Open also works. macOS 15 Sequoia and later removed that.)
+  Or in Terminal:  bash "/Volumes/<this disk>/Install Fitzrovia Records DAW.command"
 
 STEP 2 - what happens next (a Terminal window shows progress)
   1. It checks for the Xcode Command Line Tools. If they are missing it offers to install

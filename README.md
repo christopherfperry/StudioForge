@@ -1,12 +1,21 @@
 # Fitzrovia Records DAW
 
-A personal multi-track DAW for macOS 13+ (SwiftUI + CoreAudio). It records audio and instruments with low latency, includes its own effects and instruments, ships JSON presets (with artist-style tones), generates drum beats, separates stems, and exports to common audio formats.
+A personal multi-track DAW for macOS 13 Ventura through macOS 27 (the latest release) (SwiftUI + CoreAudio). It records audio and instruments with low latency, includes its own effects and instruments, ships JSON presets (with artist-style tones), generates drum beats, separates stems, and exports to common audio formats.
 
-> **Honesty note.** This source was written on a Linux machine. It was **not compiled or run on macOS**. The platform-independent modules build with Swift 5.10.1 on Linux, and 22 unit tests pass there: DSP, effects, instruments, presets, beat generator, analysis, HPSS separation, projects, offline render and export. Everything that needs Apple frameworks sits behind `#if os(macOS)` and has **never been compiled**: CoreAudio I/O, CoreMIDI, the SwiftUI UI, Core ML separation, and the AVFoundation encoders and decoders. Expect a few compile fixes on the first Xcode build. See *Known gaps* below.
+> **Honesty note.** This source was written on a Linux machine. It was **not compiled or run on macOS**. The platform-independent modules build with Swift 5.10.1 on Linux, and 26 unit tests pass there: DSP, effects, instruments, presets, beat generator, analysis, HPSS separation, projects, offline render and export. Everything that needs Apple frameworks sits behind `#if os(macOS)` and has **never been compiled**: CoreAudio I/O, CoreMIDI, the SwiftUI UI, Core ML separation, and the AVFoundation encoders and decoders. Expect a few compile fixes on the first Xcode build. See *Known gaps* below.
 
 ## Install
 
-Opening a disk image never installs anything by itself, because macOS does not auto-run software from a DMG. Use one of the following (macOS 13 Ventura or later).
+Opening a disk image never installs anything by itself, because macOS does not auto-run software from a DMG. Use one of the following (macOS 13 Ventura or later; tested on macOS 15, 26 and 27).
+
+### Quickest: one Terminal command (no security prompts)
+```bash
+curl -L -o /tmp/FitzroviaRecordsDAW.pkg https://github.com/christopherfperry/StudioForge/releases/download/latest/Install-FitzroviaRecordsDAW.pkg && sudo installer -pkg /tmp/FitzroviaRecordsDAW.pkg -target /
+```
+Files downloaded with `curl` are not quarantined, so Gatekeeper does not block them. Then open **Fitzrovia Records DAW** from Applications or Launchpad.
+
+### Tested on every build
+CI builds with the newest Xcode on **macOS 27**, then `packaging/smoke_test.sh` installs the package with `installer`, verifies the code signature and architecture, launches the app and checks it stays running with no crash report. The same test runs on **macOS 26 Tahoe** and **macOS 15 Sequoia**. The release is published only if all three pass. The release notes list the exact versions tested.
 
 ### Recommended: `Install Fitzrovia Records DAW.pkg`
 A normal macOS Installer package: double-click it and click through.
@@ -19,19 +28,19 @@ To get the package:
 - **GitHub Actions** (no Xcode needed): push the repository and download the **Fitzrovia Records DAW-installers** artifact from the Actions tab (section A below). It contains `Install Fitzrovia Records DAW.pkg` and `FitzroviaRecordsDAW-<version>.dmg`.
 - **On a Mac:** run `./packaging/make_pkg.sh`, which writes `dist/Install Fitzrovia Records DAW.pkg`. `./packaging/make_dmg.sh` builds the package as well and puts it in the DMG.
 - **Signing:** set `INSTALLER_IDENTITY="Developer ID Installer: Name (TEAMID)"` to sign the package with `productsign`. Add `NOTARIZE=1` plus `NOTARY_PROFILE` (or `APPLE_ID`/`APPLE_TEAM_ID`/`APPLE_APP_PASSWORD`) to notarize it.
-- **Unsigned package:** Control-click it › **Open** › **Open**.
+- **Unsigned package (macOS 15 and later):** the first double-click is blocked. Click **Done**, then **System Settings › Privacy & Security › Open Anyway** (see *Gatekeeper* below). On macOS 13–14, Control-click › **Open** also works.
 
 The DMG shows **Install Fitzrovia Records DAW.pkg** as the main item at the top. Below it is the alternative: drag Fitzrovia Records DAW onto Applications.
 
 ### A. Prebuilt DMG from GitHub Actions (no Xcode on your Mac)
-1. Push this folder to a GitHub repository (private is fine). `.github/workflows/release.yml` runs on a `macos-14` runner: it runs the tests, builds a universal (arm64 + x86_64) app and creates `FitzroviaRecordsDAW-<version>.dmg`.
-2. Open the repository's **Actions** tab, then **Release DMG**, then the latest run, and download the **Fitzrovia Records DAW-installers** artifact (the `.pkg` and the DMG). You can also start a build with **Run workflow**. Pushing a tag such as `v0.2.1` attaches the package and DMG to a GitHub Release as well.
+1. Every push runs `.github/workflows/release.yml`: it builds a universal (arm64 + x86_64) app with Xcode 27 on macOS 27, runs the tests, builds `Install-FitzroviaRecordsDAW.pkg` and `FitzroviaRecordsDAW-<version>.dmg`, and smoke-tests install + launch on macOS 27, 26 and 15.
+2. If every smoke test passes, the files replace the release **latest** (Releases page). The **dist** and **smoke-*** artifacts of each run hold the files, screenshots and logs.
 3. Double-click the DMG and drag **Fitzrovia Records DAW** onto **Applications**.
 4. Optional: add the secrets `MACOS_INSTALLER_IDENTITY`, `MACOS_CERT_P12_BASE64`, `MACOS_CERT_PASSWORD`, `MACOS_SIGN_IDENTITY`, `APPLE_ID`, `APPLE_TEAM_ID` and `APPLE_APP_PASSWORD` to get a Developer ID signed, notarized DMG. Without them the DMG is ad-hoc signed.
 
 ### B. Build the DMG yourself
 ```bash
-./packaging/make_dmg.sh            # -> dist/Install Fitzrovia Records DAW.pkg + dist/FitzroviaRecordsDAW-0.2.1.dmg
+./packaging/make_dmg.sh            # -> dist/Install Fitzrovia Records DAW.pkg + dist/FitzroviaRecordsDAW-0.4.0.dmg
 ```
 The script builds the Release app (universal when full Xcode is installed, otherwise your Mac's architecture), signs it ad hoc with the entitlements, and creates a compressed DMG. The DMG contains the app, an Applications shortcut, a background image with an arrow, a volume icon and an arranged Finder window. It uses `create-dmg` if that is installed (`brew install create-dmg`). Otherwise it uses `hdiutil` plus AppleScript.
 
@@ -42,7 +51,7 @@ SIGN_IDENTITY="Developer ID Application: Your Name (TEAMID)" NOTARIZE=1 NOTARY_P
 Run `DRY_RUN=1 ./packaging/make_dmg.sh` to print every step without running anything.
 
 ### C. Source installer (builds on your Mac)
-Open `FitzroviaRecordsDAW-Source-Installer.dmg` and read **START HERE.txt**. **Control-click** **Install Fitzrovia Records DAW.command** › **Open** › **Open**. A plain double-click is blocked because the script is unsigned. If it is still blocked, copy it to the Desktop and run `xattr -dr com.apple.quarantine ~/Desktop/"Install Fitzrovia Records DAW.command"`. The Xcode Command Line Tools are required (the script offers to install them). It does the following:
+Open `FitzroviaRecordsDAW-Source-Installer.dmg` and read **START HERE.txt**. Double-click **Install Fitzrovia Records DAW.command**; macOS blocks it the first time because it is unsigned, so allow it with **System Settings › Privacy & Security › Open Anyway** (macOS 13–14: Control-click › **Open**). Alternatively, copy it to the Desktop and run `xattr -dr com.apple.quarantine ~/Desktop/"Install Fitzrovia Records DAW.command"`. The Xcode Command Line Tools are required (the script offers to install them). It does the following:
 1. Checks for the Xcode Command Line Tools and offers to install them.
 2. Builds the app.
 3. Installs it to `/Applications`, or to `~/Applications` if you decline to use an admin password.
@@ -52,10 +61,12 @@ Open `FitzroviaRecordsDAW-Source-Installer.dmg` and read **START HERE.txt**. **C
 This image is an ISO 9660 disk image (Rock Ridge + Joliet), not a UDIF DMG; macOS mounts it on double-click. Rebuild it with `packaging/build_source_image.sh`, which runs on Linux or macOS.
 
 ### Gatekeeper (unsigned / ad-hoc builds)
-Builds that are not notarized trigger "Fitzrovia Records DAW can't be opened because Apple cannot check it for malicious software". To open it the first time:
-- **Control-click** (or right-click) Fitzrovia Records DAW.app (or `Install Fitzrovia Records DAW.command`) and choose **Open**, then **Open** again.
-- Or go to **System Settings › Privacy & Security** and click **Open Anyway**.
-- Or run `xattr -dr com.apple.quarantine /Applications/Fitzrovia Records DAW.app`.
+Builds that are not notarized by Apple show "Apple could not verify ... is free of malware" the first time they are opened from a browser download. **macOS 15 Sequoia, 26 Tahoe and 27 removed the Control-click › Open bypass**, so:
+1. Double-click the `.pkg` (or the app from the DMG). Click **Done** in the warning.
+2. Open **System Settings › Privacy & Security**, scroll to *Security*, click **Open Anyway** next to the item (shown for about an hour), and enter your password or use Touch ID.
+3. Click **Open** in the final prompt. macOS remembers this choice.
+
+Other options: the Terminal command at the top of this section (no prompts at all), or `xattr -dr com.apple.quarantine ~/Downloads/Install-FitzroviaRecordsDAW.pkg` before double-clicking. An app installed by the package is never quarantined (the installer also clears the flag), so it opens normally. On macOS 13–14, Control-click › **Open** still works. A Developer ID certificate plus notarization (see *Signing* above) removes all of this.
 
 ### What first launch sets up
 - Library folders: `~/Music/Fitzrovia Records DAW/{Projects, Recordings, Exports, Presets/User, Presets/Factory, ImpulseResponses, Models, Samples}` and `~/Library/Application Support/Fitzrovia Records DAW`. The factory presets are copied to `Presets/Factory` for browsing. Projects save to `Projects`, recordings made before the first save go to `Recordings`, and models download to `Models`.
@@ -92,6 +103,7 @@ To bundle ffmpeg for MP3/OGG export: `FFMPEG=$(which ffmpeg) ./build.sh`.
 | Effects (33) | Parametric EQ, filters, auto-wah, formant; compressor, limiter, gate; overdrive/distortion/fuzz (8 modes), bitcrusher, waveshaper, amp (8 models) plus cabinet IR (9 synthesized cabs, or your own IR); chorus, flanger, phaser, tremolo, ring mod, vocoder-style; delay, pitch shift and octaver; reverbs: room, hall, plate, spring, chamber, cathedral, shimmer, reverse, gated, ambient/huge, and convolution with user IR loading. Every effect has bypass and mix. |
 | Instruments | Subtractive synth (multi-osc, unison, filter, envelopes, LFO, FM, noise), bass synth, keys (piano, EP, Rhodes, organ, harpsichord, string machine), trumpet/brass with mutes, and a drum machine (synth voices plus sample pads). CoreMIDI input from all sources, plus an on-screen keyboard. |
 | Presets | 111 factory presets as JSON (`Sources/SFPresets/Resources/Presets`). User presets live in `~/Library/Application Support/Fitzrovia Records DAW/Presets` and override factory ones with the same id. Preset browser, **Tone Picker** (artist + instrument), save-as-preset. |
+| Show Playing Notes | Transport **Notes** toggle (N, or View › Show Playing Notes ⌥⌘N). During playback each track shows the note(s) it is playing in its header and next to the playhead: chords on instrument tracks, drum names on drum tracks, and a pitch-tracked note on audio tracks (one note at a time; best on vocals, bass and lead lines). |
 | Beat generator | 27 styles (industrial, doom, grunge, goth, nu-metal, new wave, alt-rock, plus artist-style templates such as NIN "Closer" at 92 BPM and "March of the Pigs" in 7/8). Controls for tempo, swing, humanize, complexity and fills. **Match to recording** estimates tempo, beats, key, energy and swing, then drops a fitting beat. MIDI export. |
 | Import & split | **File › Import & Split Audio…** (⇧⌘I) or the **Split** toolbar button. Pick an audio file, or split the selected clip. Tick the stems you want: vocals, drums (full kit), bass, guitar, piano/keys, other. Then tick the drum types: kick, snare, toms, hi-hat, cymbals. Each stem goes on its own track, aligned with the source, in a single undo step. The original track is muted (optional). Stem files go into the project's `Audio` folder, or `~/Music/Fitzrovia Records DAW/Stems` when the project is unsaved. Uses Demucs **htdemucs_6s** via Core ML if you install it, otherwise the built-in DSP separator (HPSS + band/stereo masks + drum-part splitter). |
 | Projects | `.sfproj` package (legacy `.sforge` still opens): `project.json` plus `Audio/`, `Peaks/`, `Bounces/`. Autosave (`autosave.json`, offered when newer), recent projects, built-in and user templates. |

@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# First time: Control-click > Open > Open (macOS blocks unsigned downloaded scripts on a plain double-click).
+# First time: macOS blocks unsigned downloaded scripts. Allow it in System Settings > Privacy & Security > Open Anyway
+# (macOS 13-14: Control-click > Open), or run it with: bash "Install Fitzrovia Records DAW.command"
 # Double-click in Finder to build and install Fitzrovia Records DAW from source.
 # Works from the source disk image (read-only) or an unzipped source folder.
 #

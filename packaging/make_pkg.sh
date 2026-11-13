@@ -90,7 +90,7 @@ if [[ -n "${INSTALLER_IDENTITY:-}" ]]; then
   run pkgutil --check-signature "$PKG"
 else
   run cp "$UNSIGNED" "$PKG"
-  echo "Note: unsigned package. On first open: Control-click 'Install Fitzrovia Records DAW.pkg' > Open > Open."
+  echo "Note: unsigned package. macOS 15+: double-click, then System Settings > Privacy & Security > Open Anyway (or: sudo installer -pkg <pkg> -target /)."
 fi
 
 # 6. Notarize

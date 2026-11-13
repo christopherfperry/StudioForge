@@ -164,5 +164,5 @@ if [[ "$DRY_RUN" != "1" ]]; then
   shasum -a 256 "$DMG" | tee "$DMG.sha256"
 fi
 echo "Done: $DMG"
-[[ "$SIGN_IDENTITY" == "-" ]] && echo "Note: ad-hoc signed. On first launch, Control-click Fitzrovia Records DAW.app > Open (Gatekeeper)."
+[[ "$SIGN_IDENTITY" == "-" ]] && echo "Note: ad-hoc signed. First launch of a downloaded copy: System Settings > Privacy & Security > Open Anyway (macOS 15+)."
 exit 0
