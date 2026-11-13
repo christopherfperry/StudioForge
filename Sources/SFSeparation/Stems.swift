@@ -23,12 +23,25 @@ public enum Stem: String, CaseIterable, Codable, Identifiable, Hashable {
     public var sortIndex: Int { Stem.allCases.firstIndex(of: self) ?? 0 }
 }
 
+/// Separation quality. `.high` uses two-pass HPSS, coherence-based centre detection, pitch-aware
+/// bass, Wiener refinement and short-window drum refinement (slower, cleaner).
+public enum SeparationQuality: String, CaseIterable, Codable, Identifiable {
+    case standard, high
+    public var id: String { rawValue }
+    public var displayName: String { self == .standard ? "Standard (fast)" : "High (slower)" }
+}
+
 public struct SeparationOptions {
     public var stems: Set<Stem>
     /// Split the drum stem further into kick / snare / toms / hi-hat / cymbals.
     public var splitDrums: Bool
-    public init(stems: Set<Stem> = [.vocals, .bass, .drums, .guitar, .other], splitDrums: Bool = true) {
+    public var quality: SeparationQuality
+    /// Artefact reduction strength, 0 (off) … 1 (strongest).
+    public var artefactReduction: Float
+    public init(stems: Set<Stem> = [.vocals, .bass, .drums, .guitar, .other], splitDrums: Bool = true,
+                quality: SeparationQuality = .standard, artefactReduction: Float = 0) {
         self.stems = stems; self.splitDrums = splitDrums
+        self.quality = quality; self.artefactReduction = min(1, max(0, artefactReduction))
     }
     /// Vocals + instrumental-style 4 stems.
     public static let fourStem = SeparationOptions(stems: [.vocals, .drums, .bass, .other], splitDrums: false)

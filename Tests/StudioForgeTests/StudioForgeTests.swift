@@ -461,3 +461,181 @@ final class PlayingNotesTests: XCTestCase {
         XCTAssertLessThan(Double(voiced), Double(noise.notes.count) * 0.2, "white noise should mostly read as no note")
     }
 }
+
+// MARK: - 0.5.0: high-quality split, artefact reduction, matching synth
+
+final class QualitySplitTests: XCTestCase {
+    func energy(_ a: AudioData?) -> Float { (a?.channels ?? []).reduce(0) { $0 + $1.reduce(0) { $0 + $1 * $1 } } }
+
+    /// Goertzel power of `hz` in the mono mix of `a`.
+    func tone(_ a: AudioData?, _ hz: Double) -> Double {
+        guard let a = a else { return 0 }
+        let x = a.mono, w = 2 * Double.pi * hz / a.sampleRate, c = 2 * cos(w)
+        var s1 = 0.0, s2 = 0.0
+        for v in x { let s = Double(v) + c * s1 - s2; s2 = s1; s1 = s }
+        return (s1 * s1 + s2 * s2 - c * s1 * s2) / Double(max(1, x.count))
+    }
+
+    func testOptionsDefaultsAreBackwardCompatible() {
+        let o = SeparationOptions()
+        XCTAssertEqual(o.quality, .standard)
+        XCTAssertEqual(o.artefactReduction, 0)
+        XCTAssertEqual(SeparationOptions(artefactReduction: 3).artefactReduction, 1)
+        XCTAssertEqual(SeparationOptions.fourStem.quality, .standard)
+    }
+
+    /// Centred bass (55 Hz + harmonics) and vocal (220 Hz), hard-left guitar (660 / 880 Hz), clicks.
+    func makeMix(seconds: Double = 3) -> AudioData {
+        let sr = 44_100.0, n = Int(sr * seconds)
+        var l = [Float](repeating: 0, count: n), r = l
+        for i in 0..<n {
+            let t = Double(i) / sr
+            let bass = 0.3 * sin(2 * .pi * 55 * t) + 0.12 * sin(2 * .pi * 110 * t) + 0.06 * sin(2 * .pi * 165 * t)
+            let vocal = 0.15 * sin(2 * .pi * 220 * t + 2 * sin(2 * .pi * 5 * t))
+            let guitar = 0.15 * sin(2 * .pi * 660 * t) + 0.1 * sin(2 * .pi * 880 * t)
+            l[i] = Float(bass + vocal + guitar); r[i] = Float(bass + vocal)
+        }
+        for s in stride(from: 0, to: n, by: Int(sr / 2)) {
+            for k in 0..<300 where s + k < n {
+                let v = Float(0.6 * exp(-Double(k) / 60)) * (k % 2 == 0 ? 1 : -1)
+                l[s + k] += v; r[s + k] += v
+            }
+        }
+        return AudioData(channels: [l, r], sampleRate: sr)
+    }
+
+    func testHighQualitySplitRoutesSourcesAndReconstructs() throws {
+        let mix = makeMix()
+        let opts = SeparationOptions(stems: [.vocals, .bass, .drums, .guitar, .other], splitDrums: false, quality: .high)
+        let stems = try DSPStemSeparator().separate(mix, options: opts, progress: { _, _ in }, isCancelled: { false })
+        for s in opts.expectedStems {
+            XCTAssertEqual(stems[s]?.frameCount, mix.frameCount, "\(s)")
+            XCTAssertTrue(stems[s]?.channels.allSatisfy { $0.allSatisfy(\.isFinite) } ?? false, "\(s) not finite")
+        }
+        // Pitch-aware bass keeps the bass harmonics; guitar tones stay out of the bass.
+        XCTAssertGreaterThan(tone(stems[.bass], 55), 10 * tone(stems[.guitar], 55))
+        XCTAssertGreaterThan(tone(stems[.bass], 110), tone(stems[.guitar], 110) + tone(stems[.other], 110))
+        let g660 = tone(stems[.guitar], 660) + tone(stems[.other], 660)
+        XCTAssertGreaterThan(g660, 5 * tone(stems[.bass], 660))
+        XCTAssertGreaterThan(g660, tone(stems[.vocals], 660))
+        XCTAssertGreaterThan(tone(stems[.vocals], 220), tone(stems[.guitar], 220))
+        // Wiener masks partition the mix: the stems add back up to (almost) the input.
+        var err: Float = 0, total: Float = 0
+        let skip = 4096   // ignore STFT edge frames
+        for c in 0..<2 {
+            for i in skip..<(mix.frameCount - skip) {
+                var sum: Float = 0
+                for s in opts.expectedStems { sum += stems[s]!.channels[c][i] }
+                let d = sum - mix.channels[c][i]
+                err += d * d; total += mix.channels[c][i] * mix.channels[c][i]
+            }
+        }
+        XCTAssertLessThan(err / total, 0.05, "stems should sum back to the mix")
+    }
+
+    func testArtefactReductionRunsInSeparatorAndStaysFinite() throws {
+        let mix = makeMix(seconds: 2)
+        for q in SeparationQuality.allCases {
+            let opts = SeparationOptions(stems: [.vocals, .bass, .drums, .guitar], splitDrums: true, quality: q, artefactReduction: 0.7)
+            let stems = try DSPStemSeparator().separate(mix, options: opts, progress: { _, _ in }, isCancelled: { false })
+            for s in opts.expectedStems {
+                XCTAssertTrue(stems[s]?.channels.allSatisfy { $0.allSatisfy(\.isFinite) } ?? false, "\(q) \(s)")
+            }
+            XCTAssertGreaterThan(energy(stems[.bass]), 0)
+        }
+    }
+
+    func testArtefactReducerRemovesSpecklesAndGatesResidue() {
+        let frames = 40, bins = 64
+        let mag = [Float](repeating: 1, count: frames * bins)
+        // Musical noise: isolated speckles in mask B, complement in A.
+        var b = [Float](repeating: 0.02, count: frames * bins)
+        for f in stride(from: 3, to: frames, by: 7) { for k in stride(from: 5, to: bins, by: 11) { b[f * bins + k] = 0.6 } }
+        let a = b.map { 1 - $0 }
+        XCTAssertEqual(ArtefactReducer(strength: 0).refine([a, b], mixMagnitude: mag, frames: frames, bins: bins, binHz: 50)[1], b)
+        let out = ArtefactReducer(strength: 0.8).refine([a, b], mixMagnitude: mag, frames: frames, bins: bins, binHz: 50)
+        XCTAssertLessThan(out[1].max()!, 0.3, "speckles should be smoothed away")
+        for i in 0..<(frames * bins) {
+            XCTAssertTrue(out[0][i].isFinite && out[1][i].isFinite)
+            XCTAssertGreaterThanOrEqual(out[0][i], 0); XCTAssertGreaterThanOrEqual(out[1][i], 0)
+            XCTAssertLessThanOrEqual(out[0][i] + out[1][i], 1.0001)
+        }
+        XCTAssertGreaterThan(out[0].reduce(0, +) / Float(frames * bins), 0.8, "the main stem must survive")
+
+        // Faint residue in a quiet passage is gated.
+        var quietMag = mag
+        for i in (20 * bins)..<(frames * bins) { quietMag[i] = 1e-5 }
+        let half = [Float](repeating: 0.5, count: frames * bins)
+        let gated = ArtefactReducer(strength: 0.8).refine([half], mixMagnitude: quietMag, frames: frames, bins: bins, binHz: 50)[0]
+        let before = half[(20 * bins)...].reduce(0, +), after = gated[(20 * bins)...].reduce(0, +)
+        XCTAssertLessThan(after, 0.2 * before)
+        XCTAssertGreaterThan(gated[5 * bins + 10], 0.4, "loud passage is untouched")
+    }
+}
+
+final class SynthGeneratorTests: XCTestCase {
+    let sr = 22_050.0
+
+    func sine(_ midis: [Int], seconds: Double, amp: Double = 0.2) -> [Float] {
+        let n = Int(sr * seconds)
+        return (0..<n).map { i in
+            let t = Double(i) / sr
+            var v = 0.0
+            for m in midis {
+                let f = 440 * pow(2, Double(m - 69) / 12)
+                v += amp * (sin(2 * .pi * f * t) + 0.3 * sin(4 * .pi * f * t))
+            }
+            return Float(v)
+        }
+    }
+
+    func chordAudio(_ chords: [[Int]], seconds: Double) -> AudioData {
+        AudioData(channels: [chords.flatMap { sine($0, seconds: seconds, amp: 0.12) }], sampleRate: sr)
+    }
+
+    func testChordDetectionFindsMajorAndMinorTriads() {
+        let audio = chordAudio([[60, 64, 67], [57, 60, 64], [53, 57, 60], [55, 59, 62]], seconds: 2)
+        let g = SynthTrackGenerator(tempo: 120)   // 2 beats per 1 s window
+        let key = g.detectKey([audio])
+        let chords = g.detectChords(audio, keyRoot: key.root, minor: key.minor, keyConfidence: key.confidence)
+        XCTAssertEqual(chords.map(\.name), ["C", "Am", "F", "G"])
+        XCTAssertEqual(chords.map(\.startBeat), [0, 4, 8, 12])
+        XCTAssertEqual(chords.first?.lengthBeats, 4)
+    }
+
+    func testBassNotesFollowPitchAndAreQuantised() {
+        let audio = AudioData(channels: [sine([33], seconds: 1, amp: 0.4) + sine([38], seconds: 1, amp: 0.4)
+                                         + sine([40], seconds: 1, amp: 0.4)], sampleRate: sr)
+        let notes = SynthTrackGenerator(tempo: 120).bassNotes(audio, keyRoot: 9, minor: true)
+        XCTAssertEqual(notes.map(\.pitch), [33, 38, 40])
+        XCTAssertEqual(notes.map(\.startBeat), [0, 2, 4])
+        for n in notes { XCTAssertEqual((n.lengthBeats / 0.5).rounded() * 0.5, n.lengthBeats, accuracy: 1e-9) }
+        // Out-of-key pitches snap to the scale.
+        XCTAssertEqual(SynthTrackGenerator.snap(61, to: SynthTrackGenerator.scale(root: 0, minor: false)), 60)
+    }
+
+    func testEveryStyleIsInKeyOnGridAndPlayable() {
+        let guitar = chordAudio([[60, 64, 67], [57, 60, 64], [53, 57, 60], [55, 59, 62]], seconds: 2)
+        let bass = AudioData(channels: [[36, 33, 41, 43].flatMap { sine([$0], seconds: 2, amp: 0.4) }], sampleRate: sr)
+        let scale = SynthTrackGenerator.scale(root: 0, minor: false)
+        for style in SynthStyle.allCases {
+            let r = SynthTrackGenerator(tempo: 120).generate(style: style, guitar: guitar, bass: bass)
+            XCTAssertFalse(r.notes.isEmpty, "\(style)")
+            XCTAssertTrue(scale == SynthTrackGenerator.scale(root: r.keyRoot, minor: r.keyIsMinor), "key \(r.keyName)")
+            let step = style == .arpeggio ? 0.25 : 0.5
+            for n in r.notes {
+                XCTAssertTrue(scale.contains(n.pitch % 12), "\(style) \(n.pitch) out of key")
+                XCTAssertEqual((n.startBeat / step).rounded() * step, n.startBeat, accuracy: 1e-9)
+                XCTAssertGreaterThan(n.durationBeats, 0)
+                XCTAssertLessThan(n.startBeat, r.lengthBeats)
+            }
+            XCTAssertEqual(r.lengthBeats, 16)
+            XCTAssertNotNil(InstrumentRegistry.shared.make(r.instrument.type), "\(r.instrument.type) not registered")
+        }
+        let pad = SynthTrackGenerator(tempo: 120).generate(style: .pad, guitar: guitar, bass: nil)
+        let atBeat4 = Set(pad.notes.filter { $0.startBeat == 4 }.map { $0.pitch % 12 })
+        XCTAssertEqual(atBeat4, [9, 0, 4], "pad follows the A minor chord")
+        let bs = SynthTrackGenerator(tempo: 120).generate(style: .bassSynth, guitar: nil, bass: bass)
+        XCTAssertEqual(bs.notes.map { $0.pitch % 12 }, [0, 9, 5, 7])
+    }
+}

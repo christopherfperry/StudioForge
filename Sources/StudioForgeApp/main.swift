@@ -50,6 +50,11 @@ struct StudioForgeApp: App {
                 }.keyboardShortcut("i")
                 Button("Import & Split Audio…") { model.showSplitSheet = true }
                     .keyboardShortcut("i", modifiers: [.command, .shift])
+                Menu("Generate Matching Synth") {
+                    ForEach(AppModel.synthStyleMenu, id: \.id) { item in
+                        Button(item.name) { model.generateMatchingSynth(styleID: item.id) }
+                    }
+                }
             }
             CommandGroup(after: .toolbar) {
                 Toggle("Show Playing Notes", isOn: $model.showNotes)

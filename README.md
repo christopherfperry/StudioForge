@@ -42,7 +42,7 @@ The DMG shows **Install Fitzrovia Records DAW.pkg** as the main item at the top.
 
 ### B. Build the DMG yourself
 ```bash
-./packaging/make_dmg.sh            # -> dist/Install Fitzrovia Records DAW.pkg + dist/FitzroviaRecordsDAW-0.4.0.dmg
+./packaging/make_dmg.sh            # -> dist/Install Fitzrovia Records DAW.pkg + dist/FitzroviaRecordsDAW-0.5.0.dmg
 ```
 The script builds the Release app (universal when full Xcode is installed, otherwise your Mac's architecture), signs it ad hoc with the entitlements, and creates a compressed DMG. The DMG contains the app, an Applications shortcut, a background image with an arrow, a volume icon and an arranged Finder window. It uses `create-dmg` if that is installed (`brew install create-dmg`). Otherwise it uses `hdiutil` plus AppleScript.
 
@@ -113,6 +113,12 @@ To bundle ffmpeg for MP3/OGG export: `FFMPEG=$(which ffmpeg) ./build.sh`.
 | UX | Onboarding tour, one-click templates (Vocals, Guitar, Band, Beat + Synth), dark theme, tooltips, drag-and-drop audio import, mixer, inspector with generic controls for every effect and instrument. |
 
 Keyboard shortcuts: Space = play/stop, R = record, L = loop, K = metronome, S = split, X = mixer, ⌘Z / ⇧⌘Z = undo/redo, ⌘S = save, ⌘O = open, ⌘I = import, ⌘E = export, ⌘+ / ⌘− = zoom.
+
+## Split quality, artefact reduction and matching synth (0.5.0)
+- **Import & Split › Quality:** *Standard* (fast) or *High* (two-pass HPSS, stereo-coherence vocal detection, pitch-aware bass with harmonics, Wiener mask refinement, short-window drum clean-up). High takes roughly 2–3× longer.
+- **Reduce artefacts** (with strength): smooths musical noise and warbling, gates faint bleed in quiet passages, softens harsh highs, and keeps attacks sharp. Settings are remembered.
+- **Generate matching synth track:** after a split (tick the option and pick a style), or right-click any audio clip › **Generate Matching Synth**, or **File › Generate Matching Synth**. It reads the guitar track for chords and the bass track for notes, detects the key, quantises to the project tempo, and adds an instrument track: *Pad* (follows chords), *Bass synth* (doubles the bass) or *Arpeggio*.
+- The separator is still DSP-based (no neural model), so expect some bleed on dense mixes.
 
 ## Stem-separation model (first-run download, about 1–2 GB)
 

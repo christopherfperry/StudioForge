@@ -366,6 +366,90 @@ public final class AppModel: ObservableObject {
         }
     }
 
+    // MARK: Matching synth generator
+
+    /// The part of a decoded file that a clip actually plays (offset / duration in seconds).
+    public static func slice(_ audio: AudioData, offset: Double, duration: Double?) -> AudioData {
+        let sr = audio.sampleRate
+        let a = max(0, min(audio.frameCount, Int(offset * sr)))
+        let b = duration.map { max(a, min(audio.frameCount, a + Int($0 * sr))) } ?? audio.frameCount
+        guard a > 0 || b < audio.frameCount else { return audio }
+        return AudioData(channels: audio.channels.map { Array($0[a..<b]) }, sampleRate: sr)
+    }
+
+    /// Builds a synth part from guitar and/or bass audio (call off the main thread).
+    public static func makeSynthPart(style: SynthStyle, guitar: AudioData?, bass: AudioData?,
+                                     tempo: Double, beatsPerBar: Int) -> SynthGenerationResult? {
+        guard guitar != nil || bass != nil else { return nil }
+        let r = SynthTrackGenerator(tempo: tempo, beatsPerBar: beatsPerBar).generate(style: style, guitar: guitar, bass: bass)
+        return r.notes.isEmpty ? nil : r
+    }
+
+    /// Adds a generated synth part as a new instrument track (one undo step).
+    public func addGeneratedSynth(_ r: SynthGenerationResult, startSeconds: Double) {
+        var newID: UUID?
+        edit("Generate Synth Track") { p in
+            let id = p.addTrack(kind: .instrument, name: r.trackName, instrument: r.instrument)
+            if let i = p.trackIndex(id) {
+                p.tracks[i].midiClips.append(MIDIClip(name: "\(r.trackName) (\(r.keyName))",
+                                                      startBeat: p.beats(forSeconds: startSeconds),
+                                                      lengthBeats: r.lengthBeats, notes: r.notes))
+            }
+            newID = id
+        }
+        if let id = newID { selectedTrackID = id }
+        status = "Added \(r.trackName): \(r.notes.count) notes, key \(r.keyName), \(r.chords.count) chord changes"
+    }
+
+    /// Guitar / bass audio tracks used by "Generate Matching Synth": tracks named "guitar" or "bass",
+    /// falling back to the selected audio track.
+    func synthSourceClips() -> (guitar: (URL, AudioClip)?, bass: (URL, AudioClip)?) {
+        func first(_ word: String) -> (URL, AudioClip)? {
+            guard let t = project.tracks.first(where: { $0.kind == .audio && !$0.audioClips.isEmpty
+                && $0.name.lowercased().contains(word) }), let c = t.audioClips.first else { return nil }
+            return (ProjectPackage.resolve(c.file, in: packageURL), c)
+        }
+        var g = first("guitar"), b = first("bass")
+        if g == nil && b == nil, let t = project.tracks.first(where: { $0.id == selectedTrackID && $0.kind == .audio }),
+           let c = t.audioClips.first {
+            g = (ProjectPackage.resolve(c.file, in: packageURL), c)
+        }
+        return (g, b)
+    }
+
+    /// Style ids and names for menus in modules that don't import SFBeatGen.
+    public static let synthStyleMenu: [(id: String, name: String)] = SynthStyle.allCases.map { ($0.rawValue, $0.displayName) }
+    public func generateMatchingSynth(styleID: String) {
+        generateMatchingSynth(style: SynthStyle(rawValue: styleID) ?? .pad)
+    }
+
+    /// Analyses the project's guitar and bass tracks and adds a matching synth track.
+    public func generateMatchingSynth(style: SynthStyle) {
+        let src = synthSourceClips()
+        guard src.guitar != nil || src.bass != nil else {
+            status = "Add or select a guitar or bass audio track first."; return
+        }
+        let tempo = project.tempo, bpb = project.timeSignature.numerator
+        let starts = [src.guitar?.1.start, src.bass?.1.start].compactMap { $0 }
+        let ref = starts.min() ?? 0
+        status = "Analysing guitar / bass for a \(style.trackName.lowercased())…"
+        DispatchQueue.global(qos: .userInitiated).async {
+            func load(_ s: (URL, AudioClip)?) -> AudioData? {
+                guard let (url, clip) = s, let audio = try? AudioDecoding.decode(url) else { return nil }
+                var a = AppModel.slice(audio, offset: clip.offset, duration: clip.duration)
+                // Pad so both sources share the same time origin (the earliest clip start).
+                let pad = Int((clip.start - ref) * a.sampleRate)
+                if pad > 0 { a = AudioData(channels: a.channels.map { [Float](repeating: 0, count: pad) + $0 }, sampleRate: a.sampleRate) }
+                return a
+            }
+            let r = AppModel.makeSynthPart(style: style, guitar: load(src.guitar), bass: load(src.bass), tempo: tempo, beatsPerBar: bpb)
+            DispatchQueue.main.async {
+                guard let r = r else { self.status = "No clear notes or chords found."; return }
+                self.addGeneratedSynth(r, startSeconds: ref)
+            }
+        }
+    }
+
     public func finishWelcome() {
         UserDefaults.standard.set(true, forKey: "SFWelcomeDone")
         showWelcome = false

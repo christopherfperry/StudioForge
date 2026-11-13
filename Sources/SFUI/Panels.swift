@@ -197,10 +197,18 @@ struct StemSeparatorSheet: View {
     @State private var addToProject = true
     @State private var muteSource = true
     @State private var downloadURL = SeparationModelManager.shared.configuredDownloadURL?.absoluteString ?? ""
+    @AppStorage("SFSplitQuality") private var quality = SeparationQuality.high.rawValue
+    @AppStorage("SFReduceArtefacts") private var reduceArtefacts = true
+    @AppStorage("SFArtefactStrength") private var artefactStrength = 0.5
+    @AppStorage("SFGenerateSynth") private var generateSynth = false
+    @AppStorage("SFSynthStyle") private var synthStyle = SynthStyle.pad.rawValue
 
     private var options: SeparationOptions {
-        SeparationOptions(stems: stems, splitDrums: splitDrums && !drumParts.isEmpty)
+        SeparationOptions(stems: stems, splitDrums: splitDrums && !drumParts.isEmpty,
+                          quality: SeparationQuality(rawValue: quality) ?? .high,
+                          artefactReduction: reduceArtefacts ? Float(artefactStrength) : 0)
     }
+    private var canGenerateSynth: Bool { stems.contains(.guitar) || stems.contains(.bass) }
 
     private func toggle(_ s: Stem, in set: Binding<Set<Stem>>) -> Binding<Bool> {
         Binding(get: { set.wrappedValue.contains(s) },
@@ -257,6 +265,28 @@ struct StemSeparatorSheet: View {
                 Button("Everything") { stems = Set(Stem.mainStems); splitDrums = true; drumParts = Set(Stem.drumParts) }
                 Button("Drums only") { stems = []; splitDrums = true; drumParts = Set(Stem.drumParts) }
             }.controlSize(.small)
+            GroupBox("Quality") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Picker("Split quality", selection: $quality) {
+                        ForEach(SeparationQuality.allCases) { q in Text(q.displayName).tag(q.rawValue) }
+                    }.pickerStyle(.segmented)
+                    HStack {
+                        Toggle("Reduce artefacts", isOn: $reduceArtefacts)
+                            .help("Smooths warbling, musical noise, faint bleed and harsh highs")
+                        Slider(value: $artefactStrength, in: 0.1...1) { Text("Strength") }
+                            .disabled(!reduceArtefacts).frame(maxWidth: 220)
+                        Text("\(Int(artefactStrength * 100))%").font(.caption).monospacedDigit()
+                    }
+                    Text("Applies to the built-in separator. Higher strength sounds smoother but can dull detail.")
+                        .font(.caption).foregroundColor(.secondary)
+                }.frame(maxWidth: .infinity, alignment: .leading)
+            }
+            HStack {
+                Toggle("Generate a matching synth track", isOn: $generateSynth).disabled(!canGenerateSynth || !addToProject)
+                Picker("", selection: $synthStyle) {
+                    ForEach(SynthStyle.allCases) { s in Text(s.displayName).tag(s.rawValue) }
+                }.labelsHidden().frame(maxWidth: 220).disabled(!generateSynth || !canGenerateSynth || !addToProject)
+            }.help("Uses the guitar and bass stems to write chords / bass notes for a new synth track")
             Toggle("Add stems to the project as new tracks", isOn: $addToProject)
             Toggle("Mute the original track after splitting a clip", isOn: $muteSource).disabled(!addToProject)
             if job.running {
@@ -286,6 +316,8 @@ struct StemSeparatorSheet: View {
         let wantedParts = drumParts
         let folder = model.stemOutputFolder
         let add = addToProject, mute = muteSource && source.trackID != nil
+        let synth: SynthStyle? = add && generateSynth && canGenerateSynth ? SynthStyle(rawValue: synthStyle) ?? .pad : nil
+        let tempo = model.project.tempo, bpb = model.project.timeSignature.numerator
         let job = self.job
         job.running = true; job.cancelled = false; job.progress = 0; job.message = "Decoding \(source.displayName)…"
         DispatchQueue.global(qos: .userInitiated).async {
@@ -302,9 +334,20 @@ struct StemSeparatorSheet: View {
                 DispatchQueue.main.async { job.message = "Writing \(count) stems…" }
                 let urls = try StemWriter.write(stems, baseName: source.displayName, to: folder)
                 let durations = stems.mapValues { $0.duration }
+                var part: SynthGenerationResult?
+                if let style = synth {
+                    DispatchQueue.main.async { job.message = "Generating \(style.trackName.lowercased())..." }
+                    func clip(_ a: AudioData?) -> AudioData? {
+                        a.map { AppModel.slice($0, offset: source.offset, duration: source.duration) }
+                    }
+                    part = AppModel.makeSynthPart(style: style, guitar: clip(stems[.guitar]), bass: clip(stems[.bass]),
+                                                  tempo: tempo, beatsPerBar: bpb)
+                }
                 DispatchQueue.main.async {
                     job.running = false
                     if add { model.addSeparatedStems(urls, durations: durations, source: source, muteSource: mute) }
+                    if let p = part { model.addGeneratedSynth(p, startSeconds: source.start) }
+                    else if synth != nil { model.status += " — no clear notes for a synth track" }
                     else {
                         model.status = "Wrote \(urls.count) stems to \(folder.path)"
                         NSWorkspace.shared.activateFileViewerSelecting(Array(urls.values))

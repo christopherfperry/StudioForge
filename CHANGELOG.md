@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 — 2026-11-13
+- **High-quality splitting:** new *Quality* setting (Standard / High). High adds a second HPSS pass, stereo-coherence vocal detection, pitch-aware bass (fundamental and harmonics), Wiener mask refinement and short-window drum clean-up. The engine is still DSP: converting Demucs to Core ML failed (rank-6 tensors, dynamic casts), so the Core ML import remains optional.
+- **Reduce artefacts** toggle and strength: time–frequency mask smoothing, soft mask floor, spectral gating of faint residue, transient preservation and high-frequency smoothing. Remembered between launches.
+- **Generate matching synth track** from guitar and bass: chord detection (chroma + triad templates), YIN bass tracking, key detection, grid quantisation. Styles: Pad, Bass synth, Arpeggio. Available in the split sheet, the clip context menu and the File menu.
+- 7 new unit tests (33 total on Linux).
+
 ## 0.4.0 — 2026-11-13
 - **Show Playing Notes** (transport **Notes** toggle, key **N**, or **View › Show Playing Notes** ⌥⌘N; remembered between launches). While the song plays, every track shows the note it is sounding: a badge in the track header and a tag riding next to the playhead. Instrument tracks show chords (e.g. `C4 E4 G4`); drum tracks show the drum names (`Kick + Closed Hat`); audio tracks (recordings, imports, split stems) use a background pitch tracker (YIN), so they show one note at a time and work best on single-note parts such as vocals, bass and lead lines. Muted clips and muted/un-soloed tracks show nothing.
 - **Latest macOS:** every CI build is now installed and launched automatically (`packaging/smoke_test.sh`: installer, code signature, architecture, launch, crash-report check, DMG mount) and is only published if that passes. `packaging/release-workflow-macos27.yml` extends this to build with Xcode 27 on macOS 27 and test on macOS 26 and 15 (it must be copied into `.github/workflows/` by the repo owner).

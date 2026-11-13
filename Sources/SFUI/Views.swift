@@ -279,6 +279,12 @@ struct ClipView: View {
                 Button(clip.muted ? "Unmute Clip" : "Mute Clip") { model.edit("Mute Clip") { p in
                     if let (t, c) = p.locateAudioClip(clip.id) { p.tracks[t].audioClips[c].muted.toggle() } } }
                 Divider()
+                Menu("Generate Matching Synth") {
+                    ForEach(SynthStyle.allCases) { style in
+                        Button(style.displayName) { model.selectedTrackID = trackID; model.generateMatchingSynth(style: style) }
+                    }
+                }.help("Builds a synth track from the project's guitar and bass tracks (or this track)")
+                Divider()
                 Button("Delete", role: .destructive) { model.edit("Delete Clip") { $0.deleteClip(clip.id) } }
             }
             .frame(width: geo.size.width, height: geo.size.height)
