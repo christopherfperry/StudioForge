@@ -45,6 +45,10 @@ public struct SynthGenerationResult {
     public var keyName: String { NoteName.pitchClasses[keyRoot] + (keyIsMinor ? " minor" : " major") }
     public var instrument: InstrumentState
     public var trackName: String
+    /// Genre whose register / timbre profile shaped the part, and why it was chosen.
+    public var genre: MusicGenre = .pop
+    public var genreReason: String = ""
+    public var features = GenreFeatures()
 }
 
 /// Builds a synth part that matches existing guitar and/or bass audio:
@@ -233,7 +237,10 @@ public struct SynthTrackGenerator {
 
     // MARK: - Generation
 
-    public func generate(style: SynthStyle, guitar: AudioData?, bass: AudioData?) -> SynthGenerationResult {
+    /// - Parameter genre: `.auto` guesses the genre from the audio; otherwise the given genre's
+    ///   register (note frequencies), chord voicing, rhythm and synth timbre are used.
+    public func generate(style: SynthStyle, guitar: AudioData?, bass: AudioData?,
+                         genre: MusicGenre = .auto) -> SynthGenerationResult {
         let sources = [guitar, bass].compactMap { $0 }
         let key = detectKey(sources)
         let bassLine = bass.map { bassNotes($0, keyRoot: key.root, minor: key.minor, snapToKey: key.confidence > 0.3) } ?? []
@@ -247,40 +254,51 @@ public struct SynthTrackGenerator {
         let bar = Double(beatsPerBar)
         let lengthBeats = max(bar, ((duration / secondsPerBeat) / bar).rounded(.up) * bar)
 
+        let features = GenreTone.features(guitar: guitar, bass: bass, tempo: tempo, chords: chords,
+                                          beatsPerBar: beatsPerBar, keyConfidence: key.confidence)
+        let chosen: (genre: MusicGenre, reason: String) = genre == .auto ? GenreTone.classify(features) : (genre, "chosen manually")
+        let prof = GenreTone.profile(chosen.genre)
+        let scale = Self.scale(root: key.root, minor: key.minor)
+
         var notes: [MIDINote] = []
         switch style {
         case .pad:
             var previous: [Int] = []
             for c in chords {
-                let voicing = Self.voice(c, near: previous, low: 55, high: 72)
+                let voicing = Self.voice(c, near: previous, profile: prof, scale: scale, range: prof.padRange)
                 previous = voicing
                 for p in voicing { notes.append(MIDINote(pitch: p, velocity: 80, startBeat: c.startBeat, durationBeats: c.lengthBeats)) }
-                notes.append(MIDINote(pitch: Self.fold(36 + c.root, low: 40, high: 51), velocity: 70,
-                                      startBeat: c.startBeat, durationBeats: c.lengthBeats))
+                let root = Self.fold(c.root, low: prof.bassRange.lowerBound + 7, high: prof.bassRange.lowerBound + 18)
+                if root < voicing.first ?? 127 {
+                    notes.append(MIDINote(pitch: root, velocity: 70, startBeat: c.startBeat, durationBeats: c.lengthBeats))
+                }
             }
         case .bassSynth:
+            let lo = prof.bassRange.lowerBound, hi = prof.bassRange.upperBound
             if !bassLine.isEmpty {
                 for n in bassLine {
-                    notes.append(MIDINote(pitch: Self.fold(n.pitch, low: 28, high: 52), velocity: 100,
-                                          startBeat: n.startBeat, durationBeats: n.lengthBeats * 0.95))
+                    notes.append(MIDINote(pitch: Self.fold(n.pitch, low: lo, high: hi), velocity: 100,
+                                          startBeat: n.startBeat, durationBeats: max(0.05, n.lengthBeats * prof.bassGate)))
                 }
             } else {
                 for c in chords {
                     var b = c.startBeat
                     while b < c.startBeat + c.lengthBeats - 1e-9 {
-                        notes.append(MIDINote(pitch: Self.fold(36 + c.root, low: 28, high: 47), velocity: b == c.startBeat ? 105 : 90,
-                                              startBeat: b, durationBeats: grid * 0.9))
+                        notes.append(MIDINote(pitch: Self.fold(c.root, low: lo, high: min(hi, lo + 11)), velocity: b == c.startBeat ? 105 : 90,
+                                              startBeat: b, durationBeats: grid * prof.bassGate))
                         b += grid
                     }
                 }
             }
         case .arpeggio:
-            let step = 0.25
+            let step = prof.arpStep
             var previous: [Int] = []
             for c in chords {
-                let v = Self.voice(c, near: previous, low: 57, high: 72)
+                let v = Self.voice(c, near: previous, profile: prof, scale: scale, range: prof.arpRange)
                 previous = v
-                let pattern = [v[0], v[1], v[2], v[0] + 12, v[2], v[1]]   // up-down
+                var pattern = v + [v[0] + 12]
+                pattern += v.dropFirst().reversed()                        // up-down
+                pattern = pattern.map { Self.fold($0, low: prof.arpRange.lowerBound, high: prof.arpRange.upperBound) }
                 var b = c.startBeat, i = 0
                 while b < c.startBeat + c.lengthBeats - 1e-9 {
                     let accent = abs(b.rounded() - b) < 1e-9
@@ -293,7 +311,34 @@ public struct SynthTrackGenerator {
         notes = notes.filter { $0.startBeat < lengthBeats }.sorted { ($0.startBeat, $0.pitch) < ($1.startBeat, $1.pitch) }
         return SynthGenerationResult(notes: notes, lengthBeats: lengthBeats, chords: chords, bassNotes: bassLine,
                                      keyRoot: key.root, keyIsMinor: key.minor,
-                                     instrument: Self.instrument(for: style), trackName: style.trackName)
+                                     instrument: prof.instrument(for: style),
+                                     trackName: "\(style.trackName) (\(chosen.genre.displayName))",
+                                     genre: chosen.genre, genreReason: chosen.reason, features: features)
+    }
+
+    /// Genre-aware voicing: power chords (root-5th-octave) for rock/metal, added diatonic 7ths for
+    /// jazz/R&B/funk/hip-hop, otherwise a close triad — kept inside the genre's register.
+    static func voice(_ chord: DetectedChord, near previous: [Int], profile: GenreToneProfile,
+                      scale: Set<Int>, range: ClosedRange<Int>) -> [Int] {
+        if profile.powerChords {
+            // Lowest root that fits root + fifth + octave in the range.
+            var root = range.lowerBound + ((chord.root - range.lowerBound) % 12 + 12) % 12
+            if root + 12 > range.upperBound { root -= 12 }
+            if root < range.lowerBound && root + 12 + 12 <= range.upperBound { root += 12 }
+            return [root, root + 7, root + 12]
+        }
+        var triad = voice(chord, near: previous, low: range.lowerBound, high: range.upperBound)
+        if profile.sevenths {
+            let major7 = (chord.root + 11) % 12, minor7 = (chord.root + 10) % 12
+            // Diatonic seventh only — never add a note outside the key.
+            let options = chord.minor ? [minor7] : [major7, minor7]
+            guard let pc = options.first(where: { scale.isEmpty || scale.contains($0) }) else { return triad }
+            var p = (triad.last ?? 60) + 1
+            while ((p % 12) + 12) % 12 != pc { p += 1 }
+            if p > range.upperBound { p -= 12 }
+            if !triad.contains(p) { triad.append(p); triad.sort() }
+        }
+        return triad
     }
 
     /// Chords implied by the bass line: diatonic triad on each bass note's pitch class, one per window.

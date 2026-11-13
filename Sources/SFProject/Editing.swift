@@ -124,6 +124,23 @@ extension Project {
         else if let (t, c) = locateMIDIClip(id) { tracks[t].midiClips.remove(at: c) }
     }
 
+    /// Removes tracks by id. Returns how many were removed.
+    @discardableResult
+    public mutating func deleteTracks(_ ids: Set<UUID>) -> Int {
+        let before = tracks.count
+        tracks.removeAll { ids.contains($0.id) }
+        return before - tracks.count
+    }
+
+    /// Ids of every stem track produced by the same split as `id` (empty if it isn't a stem).
+    public func stemSiblings(of id: UUID) -> Set<UUID> {
+        guard let g = tracks.first(where: { $0.id == id })?.stemGroup else { return [] }
+        return Set(tracks.filter { $0.stemGroup == g }.map(\.id))
+    }
+
+    /// Ids of all stem tracks in the project.
+    public var allStemTrackIDs: Set<UUID> { Set(tracks.filter(\.isStem).map(\.id)) }
+
     /// Adds a new track with a sensible default name and colour.
     @discardableResult
     public mutating func addTrack(kind: TrackKind, name: String? = nil, instrument: InstrumentState? = nil) -> UUID {
@@ -158,9 +175,11 @@ extension Project {
         var insertAt = tracks.count
         if let a = afterTrack, let i = trackIndex(a) { insertAt = i + 1 }
         let color = tracks.count % 12
+        let group = UUID().uuidString
         var ids: [UUID] = []
         for (k, s) in stems.enumerated() {
             var t = Track(name: s.name, kind: .audio, colorIndex: color)
+            t.stemGroup = group
             let off = max(0, min(offset, s.fileDuration))
             let len = max(0, min(duration ?? (s.fileDuration - off), s.fileDuration - off))
             var clip = AudioClip(name: s.name, file: s.file, start: max(0, start), offset: off, duration: len)

@@ -123,6 +123,10 @@ public struct Track: Codable, Hashable, Identifiable {
     public var midiClips: [MIDIClip] = []
     public var presetID: String?
     public var height: Double = 80
+    /// Set on tracks created by one "Split into Stems" run (shared by all stems of that split),
+    /// so they can be found and deleted together.
+    public var stemGroup: String?
+    public var isStem: Bool { stemGroup != nil }
 
     public init(name: String, kind: TrackKind, colorIndex: Int = 0, effects: [EffectState] = [], instrument: InstrumentState? = nil) {
         self.name = name; self.kind = kind; self.colorIndex = colorIndex; self.effects = effects; self.instrument = instrument
@@ -130,7 +134,7 @@ public struct Track: Codable, Hashable, Identifiable {
 
     enum CodingKeys: String, CodingKey {
         case id, name, kind, colorIndex, volumeDB, pan, mute, solo, arm, monitor, recordClean, captureWet, input
-        case effects, instrument, audioClips, midiClips, presetID, height
+        case effects, instrument, audioClips, midiClips, presetID, height, stemGroup
     }
 
     public init(from decoder: Decoder) throws {
@@ -154,6 +158,7 @@ public struct Track: Codable, Hashable, Identifiable {
         midiClips = try c.decodeIfPresent([MIDIClip].self, forKey: .midiClips) ?? []
         presetID = try c.decodeIfPresent(String.self, forKey: .presetID)
         height = try c.decodeIfPresent(Double.self, forKey: .height) ?? 80
+        stemGroup = try c.decodeIfPresent(String.self, forKey: .stemGroup)
     }
 
     /// Whether this track is audible given the global solo state.

@@ -105,7 +105,8 @@ struct TransportBar: View {
                 .help("Import audio (or use the selected clip) and split it into vocals, instruments and drum parts")
             Button("Export") { sheet = .export }.keyboardShortcut("e", modifiers: [.command])
             Button { sheet = .audio } label: { Image(systemName: "slider.horizontal.3") }.help("Audio device & latency settings")
-            Toggle(isOn: $showMixer) { Image(systemName: "dial.medium") }.toggleStyle(.button).help("Show mixer (X)")
+            Toggle(isOn: $showMixer) { Label("Mixer", systemImage: "slider.vertical.3") }.toggleStyle(.button)
+                .help("Show the mixer: volume faders, pan, mute/solo for every track and stem (X)")
                 .keyboardShortcut("x", modifiers: [])
         }
         .padding(8)
@@ -168,30 +169,42 @@ struct TrackLane: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(track.name).font(.headline).lineLimit(1)
+            VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 4) {
-                    flag("M", track.mute, .yellow) { v in model.edit("Mute") { p in p.tracks[p.trackIndex(track.id)!].mute = v } }
-                    flag("S", track.solo, .green) { v in model.edit("Solo") { p in p.tracks[p.trackIndex(track.id)!].solo = v } }
+                    if track.isStem {
+                        Image(systemName: "square.stack.3d.down.right").font(.caption2).foregroundColor(.secondary)
+                            .help("Stem track from Import & Split")
+                    }
+                    Text(track.name).font(.headline).lineLimit(1)
+                    Spacer(minLength: 0)
+                    Button { model.deleteTrack(track.id) } label: { Image(systemName: "trash") }
+                        .buttonStyle(.borderless).foregroundColor(.secondary)
+                        .help(track.isStem ? "Delete this stem (⌘⌫, undo with ⌘Z)" : "Delete this track (⌘⌫, undo with ⌘Z)")
+                }
+                HStack(spacing: 4) {
+                    flag("M", track.mute, .yellow) { v in model.edit("Mute") { p in if let i = p.trackIndex(track.id) { p.tracks[i].mute = v } } }
+                    flag("S", track.solo, .green) { v in model.edit("Solo") { p in if let i = p.trackIndex(track.id) { p.tracks[i].solo = v } } }
                     if track.kind == .audio || track.instrument != nil {
-                        flag("R", track.arm, .red) { v in model.edit("Arm") { p in p.tracks[p.trackIndex(track.id)!].arm = v } }
+                        flag("R", track.arm, .red) { v in model.edit("Arm") { p in if let i = p.trackIndex(track.id) { p.tracks[i].arm = v } } }
+                    }
+                    if model.showNotes {
+                        // Fixed slot so the header does not jump as notes start and stop.
+                        Text(model.playingNotes[track.id] ?? "–")
+                            .font(.system(.caption, design: .monospaced).bold())
+                            .lineLimit(1).truncationMode(.tail)
+                            .foregroundColor(model.playingNotes[track.id] == nil ? .secondary : .black)
+                            .padding(.horizontal, 5).padding(.vertical, 1)
+                            .background(model.playingNotes[track.id] == nil ? Color.gray.opacity(0.25) : Color.mint)
+                            .cornerRadius(3)
+                            .help("Note playing at the playhead")
                     }
                 }
-                if model.showNotes {
-                    // Fixed slot so the header does not jump as notes start and stop.
-                    Text(model.playingNotes[track.id] ?? "–")
-                        .font(.system(.caption, design: .monospaced).bold())
-                        .lineLimit(1).truncationMode(.tail)
-                        .foregroundColor(model.playingNotes[track.id] == nil ? .secondary : .black)
-                        .padding(.horizontal, 5).padding(.vertical, 1)
-                        .background(model.playingNotes[track.id] == nil ? Color.gray.opacity(0.25) : Color.mint)
-                        .cornerRadius(3)
-                        .help("Note playing at the playhead")
-                }
+                VolumeControl(model: model, trackID: track.id, volumeDB: track.volumeDB, compact: true)
             }
             .frame(width: 162, alignment: .leading).padding(4)
             .background(model.selectedTrackID == track.id ? Color.accentColor.opacity(0.25) : Color(nsColor: .controlBackgroundColor))
             .onTapGesture { model.selectedTrackID = track.id }
+            .contextMenu { TrackMenuItems(model: model, track: track) }
             ZStack(alignment: .topLeading) {
                 Color(nsColor: .textBackgroundColor).opacity(0.15)
                 ForEach(track.audioClips) { clip in
@@ -201,6 +214,11 @@ struct TrackLane: View {
                 }
                 ForEach(track.midiClips) { clip in
                     MIDIClipView(clip: clip)
+                        .contextMenu {
+                            Button("Delete Clip", role: .destructive) { model.edit("Delete Clip") { $0.deleteClip(clip.id) } }
+                            Divider()
+                            TrackMenuItems(model: model, track: track)
+                        }
                         .frame(width: max(4, model.project.seconds(forBeat: clip.lengthBeats) * model.zoom), height: track.height - 8)
                         .offset(x: model.project.seconds(forBeat: clip.startBeat) * model.zoom, y: 4)
                 }
@@ -279,13 +297,12 @@ struct ClipView: View {
                 Button(clip.muted ? "Unmute Clip" : "Mute Clip") { model.edit("Mute Clip") { p in
                     if let (t, c) = p.locateAudioClip(clip.id) { p.tracks[t].audioClips[c].muted.toggle() } } }
                 Divider()
-                Menu("Generate Matching Synth") {
-                    ForEach(SynthStyle.allCases) { style in
-                        Button(style.displayName) { model.selectedTrackID = trackID; model.generateMatchingSynth(style: style) }
-                    }
-                }.help("Builds a synth track from the project's guitar and bass tracks (or this track)")
+                SynthMenuItems(model: model, trackID: trackID)
                 Divider()
-                Button("Delete", role: .destructive) { model.edit("Delete Clip") { $0.deleteClip(clip.id) } }
+                Button("Delete Clip", role: .destructive) { model.edit("Delete Clip") { $0.deleteClip(clip.id) } }
+                if let t = model.project.tracks.first(where: { $0.id == trackID }) {
+                    TrackMenuItems(model: model, track: t)
+                }
             }
             .frame(width: geo.size.width, height: geo.size.height)
         }
@@ -338,7 +355,19 @@ struct InspectorView: View {
             if let id = model.selectedTrackID, let track = model.project.tracks.first(where: { $0.id == id }) {
                 VStack(alignment: .leading, spacing: 10) {
                     TextField("Name", text: model.binding(track: id, \.name, label: "Rename")!).font(.headline)
-                    Text(track.kind.displayName).foregroundColor(.secondary)
+                    Text(track.isStem ? "Stem (audio)" : track.kind.displayName).foregroundColor(.secondary)
+                    GroupBox("Volume & pan") {
+                        VStack(alignment: .leading, spacing: 6) {
+                            VolumeControl(model: model, trackID: id, volumeDB: track.volumeDB, compact: false)
+                            HStack {
+                                Text("Pan").font(.caption)
+                                Slider(value: model.binding(track: id, \.pan, label: "Pan")!, in: -1...1)
+                                Text(panText(track.pan)).font(.caption.monospacedDigit()).frame(width: 34)
+                                    .onTapGesture(count: 2) { model.edit("Pan") { p in if let i = p.trackIndex(id) { p.tracks[i].pan = 0 } } }
+                                    .help("Double-click to centre")
+                            }
+                        }
+                    }
                     if track.kind == .audio {
                         GroupBox("Input & recording") {
                             Stepper("Input channel: \(track.input.firstChannel + 1)", value: model.binding(track: id, \.input.firstChannel, label: "Input")!, in: 0...63)
@@ -377,12 +406,23 @@ struct InspectorView: View {
                     if track.instrument != nil {
                         GroupBox("Instrument") { InstrumentEditor(model: model, track: track) }
                     }
-                    Button("Delete Track", role: .destructive) { model.edit("Delete Track") { $0.tracks.removeAll { $0.id == id } } }
+                    HStack {
+                        Button(role: .destructive) { model.deleteTrack(id) } label: {
+                            Label(track.isStem ? "Delete Stem" : "Delete Track", systemImage: "trash")
+                        }
+                        if track.isStem && model.project.stemSiblings(of: id).count > 1 {
+                            Button(role: .destructive) { model.deleteStemGroup(of: id) } label: { Text("Delete All Stems From This Split") }
+                        }
+                    }
                 }.padding(10)
             } else {
                 Text("Select a track to edit its input, effects and instrument.").foregroundColor(.secondary).padding()
             }
         }
+    }
+
+    func panText(_ p: Float) -> String {
+        abs(p) < 0.01 ? "C" : (p < 0 ? "L\(Int(-p * 100))" : "R\(Int(p * 100))")
     }
 
     func savePreset(_ t: Track) {
@@ -491,25 +531,140 @@ struct MixerView: View {
         ScrollView(.horizontal) {
             HStack(alignment: .bottom, spacing: 8) {
                 ForEach(model.project.tracks) { t in
-                    VStack {
-                        Text(t.name).font(.caption).lineLimit(1).frame(width: 70)
-                        Slider(value: model.binding(track: t.id, \.pan, label: "Pan")!, in: -1...1).frame(width: 70).help("Pan")
-                        Slider(value: model.binding(track: t.id, \.volumeDB, label: "Volume")!, in: -60...6)
-                            .rotationEffect(.degrees(-90)).frame(width: 100, height: 20).padding(.vertical, 40)
-                        Text(String(format: "%.1f dB", t.volumeDB)).font(.caption2.monospacedDigit())
+                    VStack(spacing: 4) {
+                        Text(t.name).font(.caption).lineLimit(1).frame(width: 84)
+                        Slider(value: model.binding(track: t.id, \.pan, label: "Pan")!, in: -1...1).frame(width: 74).help("Pan (left / right)")
+                        Fader(value: model.volumeBinding(t.id)).frame(height: 84)
+                            .help("Volume — drag, scroll, or double-click for 0 dB")
+                        Text(VolumeControl.dbText(t.volumeDB)).font(.caption2.monospacedDigit())
+                        HStack(spacing: 3) {
+                            mini("M", t.mute, .yellow) { model.edit("Mute") { p in if let i = p.trackIndex(t.id) { p.tracks[i].mute.toggle() } } }
+                            mini("S", t.solo, .green) { model.edit("Solo") { p in if let i = p.trackIndex(t.id) { p.tracks[i].solo.toggle() } } }
+                            Button { model.deleteTrack(t.id) } label: { Image(systemName: "trash").font(.caption2) }
+                                .buttonStyle(.borderless).help(t.isStem ? "Delete stem" : "Delete track")
+                        }
                     }
                     .padding(4).background(model.selectedTrackID == t.id ? Color.accentColor.opacity(0.2) : Color.clear).cornerRadius(4)
                     .onTapGesture { model.selectedTrackID = t.id }
+                    .contextMenu { TrackMenuItems(model: model, track: t) }
                 }
                 Divider()
-                VStack {
+                VStack(spacing: 4) {
                     Text("Master").font(.caption.bold())
-                    ProgressView(value: Double(min(1, model.masterPeak))).frame(width: 70)
-                    Slider(value: Binding(get: { model.project.master.volumeDB }, set: { v in model.edit("Master Volume") { $0.master.volumeDB = v } }), in: -60...6)
-                        .rotationEffect(.degrees(-90)).frame(width: 100, height: 20).padding(.vertical, 40)
+                    ProgressView(value: Double(min(1, model.masterPeak))).frame(width: 74)
+                    Fader(value: model.masterVolumeBinding).frame(height: 84).help("Master volume — double-click for 0 dB")
+                    Text(VolumeControl.dbText(model.project.master.volumeDB)).font(.caption2.monospacedDigit())
                 }
             }.padding(8)
         }
+    }
+
+    func mini(_ title: String, _ on: Bool, _ color: Color, _ action: @escaping () -> Void) -> some View {
+        Button(title, action: action).buttonStyle(.plain).frame(width: 20, height: 16)
+            .background(on ? color : Color.gray.opacity(0.3)).foregroundColor(on ? .black : .primary).cornerRadius(3)
+    }
+}
+
+/// Vertical volume fader (-60…+6 dB) with a 0 dB mark; double-click resets to 0 dB, scroll nudges.
+struct Fader: View {
+    @Binding var value: Float
+    private let range = AppModel.volumeRange
+
+    var body: some View {
+        GeometryReader { geo in
+            let h = geo.size.height
+            let frac = CGFloat((value - range.lowerBound) / (range.upperBound - range.lowerBound))
+            let zero = CGFloat((0 - range.lowerBound) / (range.upperBound - range.lowerBound))
+            ZStack(alignment: .bottom) {
+                RoundedRectangle(cornerRadius: 3).fill(Color.gray.opacity(0.25)).frame(width: 6)
+                RoundedRectangle(cornerRadius: 3).fill(Color.accentColor.opacity(0.8)).frame(width: 6, height: max(0, frac * h))
+                Rectangle().fill(Color.white.opacity(0.5)).frame(width: 18, height: 1).offset(y: -zero * h)
+                RoundedRectangle(cornerRadius: 3).fill(Color.white).frame(width: 26, height: 10)
+                    .shadow(radius: 1).offset(y: -(frac * h) + 5)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .contentShape(Rectangle())
+            .gesture(DragGesture(minimumDistance: 0).onChanged { g in
+                let f = Float(1 - min(max(g.location.y / h, 0), 1))
+                value = (range.lowerBound + f * (range.upperBound - range.lowerBound) * 10).rounded() / 10
+            })
+            .onTapGesture(count: 2) { value = 0 }
+        }
+        .frame(width: 44)
+        .accessibilityElement()
+        .accessibilityLabel("Volume")
+        .accessibilityValue(VolumeControl.dbText(value))
+        .accessibilityAdjustableAction { dir in value = min(range.upperBound, max(range.lowerBound, value + (dir == .increment ? 1 : -1))) }
+    }
+}
+
+/// Horizontal volume control used in track headers (compact) and the inspector (full).
+struct VolumeControl: View {
+    @ObservedObject var model: AppModel
+    let trackID: UUID
+    let volumeDB: Float
+    let compact: Bool
+
+    static func dbText(_ v: Float) -> String { v <= AppModel.volumeRange.lowerBound + 0.05 ? "−∞ dB" : String(format: "%+.1f dB", v) }
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: volumeDB <= -59.9 ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                .font(.caption2).foregroundColor(.secondary)
+            if !compact {
+                Button { model.nudgeVolume(trackID, by: -1) } label: { Image(systemName: "minus") }.buttonStyle(.borderless)
+                    .help("Volume down 1 dB")
+            }
+            Slider(value: model.volumeBinding(trackID), in: AppModel.volumeRange)
+                .controlSize(.mini)
+                .help("Track volume — drag to change, double-click the dB value to reset to 0 dB")
+            if !compact {
+                Button { model.nudgeVolume(trackID, by: 1) } label: { Image(systemName: "plus") }.buttonStyle(.borderless)
+                    .help("Volume up 1 dB")
+            }
+            Text(Self.dbText(volumeDB)).font(.caption2.monospacedDigit()).frame(width: compact ? 46 : 52, alignment: .trailing)
+                .onTapGesture(count: 2) { model.setVolume(trackID, 0) }
+            if !compact {
+                Button("0 dB") { model.setVolume(trackID, 0) }.controlSize(.small).help("Reset to 0 dB")
+            }
+        }
+    }
+}
+
+/// Track / stem commands shared by the track header, clip and mixer context menus.
+struct TrackMenuItems: View {
+    @ObservedObject var model: AppModel
+    let track: Track
+    var body: some View {
+        Menu("Volume") {
+            ForEach([6, 3, 0, -3, -6, -12, -18], id: \.self) { (db: Int) in
+                Button(db == 0 ? "0 dB (reset)" : String(format: "%+d dB", db)) { model.setVolume(track.id, Float(db)) }
+            }
+            Divider()
+            Button("Up 1 dB") { model.nudgeVolume(track.id, by: 1) }
+            Button("Down 1 dB") { model.nudgeVolume(track.id, by: -1) }
+        }
+        Button(track.isStem ? "Delete Stem" : "Delete Track", role: .destructive) { model.deleteTrack(track.id) }
+        if track.isStem && model.project.stemSiblings(of: track.id).count > 1 {
+            Button("Delete All Stems From This Split", role: .destructive) { model.deleteStemGroup(of: track.id) }
+        }
+    }
+}
+
+/// "Generate Matching Synth" submenu: style plus the genre that sets its register and tone.
+struct SynthMenuItems: View {
+    @ObservedObject var model: AppModel
+    let trackID: UUID
+    var body: some View {
+        Menu("Generate Matching Synth") {
+            ForEach(SynthStyle.allCases) { style in
+                Button(style.displayName) { model.selectedTrackID = trackID; model.generateMatchingSynth(style: style) }
+            }
+            Divider()
+            Picker("Genre: \(model.synthGenre.displayName)", selection: Binding(get: { model.synthGenreID }, set: { model.synthGenreID = $0 })) {
+                ForEach(MusicGenre.allCases) { g in Text(g.displayName).tag(g.rawValue) }
+            }
+        }.help("Builds a synth track from the project's guitar and bass tracks (or this track), in the chosen genre's register and tone")
     }
 }
 #endif

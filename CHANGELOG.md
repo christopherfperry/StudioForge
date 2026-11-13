@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.0 — 2026-11-13
+- **Delete tracks and stems:** trash button in every track header and mixer strip, right-click *Delete Track / Delete Stem*, ⌘⌫ for the selected track, *Delete All Stems From This Split*, and Edit › Delete All Stems. Undoable. Stem tracks are tagged (saved in the project; older projects load unchanged).
+- **Easier volume:** per-track volume slider and dB readout in each header; redesigned mixer faders with 0 dB mark, double-click reset and mute/solo; *Volume & pan* box at the top of the inspector with −/+ 1 dB and 0 dB buttons; right-click *Volume* presets; ⌥⌘↑/↓ shortcuts; fader drags are a single undo step. The mixer button is now labelled *Mixer*.
+- **Genre-matched synth tones:** new Genre setting (Auto-detect + 10 genres) in the split sheet, File menu and clip menu. Each genre has its own register, voicing, rhythm and synth timbre; Auto-detect uses rule-based audio features.
+- 6 new unit tests (39 total on Linux).
+
 ## 0.5.0 — 2026-11-13
 - **High-quality splitting:** new *Quality* setting (Standard / High). High adds a second HPSS pass, stereo-coherence vocal detection, pitch-aware bass (fundamental and harmonics), Wiener mask refinement and short-window drum clean-up. The engine is still DSP: converting Demucs to Core ML failed (rank-6 tensors, dynamic casts), so the Core ML import remains optional.
 - **Reduce artefacts** toggle and strength: time–frequency mask smoothing, soft mask floor, spectral gating of faint residue, transient preservation and high-frequency smoothing. Remembered between launches.

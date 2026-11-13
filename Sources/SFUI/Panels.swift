@@ -202,6 +202,7 @@ struct StemSeparatorSheet: View {
     @AppStorage("SFArtefactStrength") private var artefactStrength = 0.5
     @AppStorage("SFGenerateSynth") private var generateSynth = false
     @AppStorage("SFSynthStyle") private var synthStyle = SynthStyle.pad.rawValue
+    @AppStorage("SFSynthGenre") private var synthGenre = MusicGenre.auto.rawValue
 
     private var options: SeparationOptions {
         SeparationOptions(stems: stems, splitDrums: splitDrums && !drumParts.isEmpty,
@@ -286,6 +287,10 @@ struct StemSeparatorSheet: View {
                 Picker("", selection: $synthStyle) {
                     ForEach(SynthStyle.allCases) { s in Text(s.displayName).tag(s.rawValue) }
                 }.labelsHidden().frame(maxWidth: 220).disabled(!generateSynth || !canGenerateSynth || !addToProject)
+                Picker("Genre", selection: $synthGenre) {
+                    ForEach(MusicGenre.allCases) { g in Text(g.displayName).tag(g.rawValue) }
+                }.frame(maxWidth: 200).disabled(!generateSynth || !canGenerateSynth || !addToProject)
+                    .help("Sets the synth's register, voicing and tone to suit the genre. Auto-detect listens to the guitar and bass.")
             }.help("Uses the guitar and bass stems to write chords / bass notes for a new synth track")
             Toggle("Add stems to the project as new tracks", isOn: $addToProject)
             Toggle("Mute the original track after splitting a clip", isOn: $muteSource).disabled(!addToProject)
@@ -317,6 +322,7 @@ struct StemSeparatorSheet: View {
         let folder = model.stemOutputFolder
         let add = addToProject, mute = muteSource && source.trackID != nil
         let synth: SynthStyle? = add && generateSynth && canGenerateSynth ? SynthStyle(rawValue: synthStyle) ?? .pad : nil
+        let genre = MusicGenre(rawValue: synthGenre) ?? .auto
         let tempo = model.project.tempo, bpb = model.project.timeSignature.numerator
         let job = self.job
         job.running = true; job.cancelled = false; job.progress = 0; job.message = "Decoding \(source.displayName)…"
@@ -341,7 +347,7 @@ struct StemSeparatorSheet: View {
                         a.map { AppModel.slice($0, offset: source.offset, duration: source.duration) }
                     }
                     part = AppModel.makeSynthPart(style: style, guitar: clip(stems[.guitar]), bass: clip(stems[.bass]),
-                                                  tempo: tempo, beatsPerBar: bpb)
+                                                  tempo: tempo, beatsPerBar: bpb, genre: genre)
                 }
                 DispatchQueue.main.async {
                     job.running = false

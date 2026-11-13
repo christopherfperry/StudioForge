@@ -146,17 +146,24 @@ public final class AppModel: ObservableObject {
 
     // MARK: Document editing (every change is undoable)
 
-    public func edit(_ label: String, _ change: (inout Project) -> Void) {
+    /// `coalesce`: continuous gestures (fader drags) with the same label within ~1 s become one undo step.
+    public func edit(_ label: String, coalesce: Bool = false, _ change: (inout Project) -> Void) {
         let before = project
         var p = project
         change(&p)
         guard p != before else { return }
-        undo.record(before, label: label)
+        let now = Date()
+        if !(coalesce && undo.undoLabel == label && now.timeIntervalSince(lastCoalescedEdit) < 1.0) {
+            undo.record(before, label: label)
+        }
+        lastCoalescedEdit = coalesce ? now : .distantPast
         p.modifiedAt = Date()
         project = p
         isDirty = true
         engine.update(project: p)
     }
+
+    private var lastCoalescedEdit = Date.distantPast
 
     public var canUndo: Bool { undo.canUndo }
     public var canRedo: Bool { undo.canRedo }
@@ -319,6 +326,58 @@ public final class AppModel: ObservableObject {
         status = "Added \(specs.count) stem tracks" + (failed > 0 ? " (\(failed) could not be added)" : "")
     }
 
+    // MARK: Deleting tracks & stems (one undo step each)
+
+    /// Deletes tracks; selection moves to the nearest remaining track.
+    public func deleteTracks(_ ids: Set<UUID>, label: String) {
+        guard !ids.isEmpty else { return }
+        let names = project.tracks.filter { ids.contains($0.id) }.map(\.name)
+        let firstIndex = project.tracks.firstIndex { ids.contains($0.id) } ?? 0
+        var removed = 0
+        edit(label) { p in removed = p.deleteTracks(ids) }
+        guard removed > 0 else { return }
+        for id in ids { playingNotes[id] = nil }
+        if let sel = selectedTrackID, ids.contains(sel) {
+            selectedTrackID = project.tracks[safe: min(firstIndex, project.tracks.count - 1)]?.id
+        }
+        status = (removed == 1 ? "Deleted “\(names.first ?? "track")”" : "Deleted \(removed) tracks") + " — ⌘Z to undo"
+    }
+
+    public func deleteTrack(_ id: UUID) {
+        let isStem = project.tracks.first { $0.id == id }?.isStem ?? false
+        deleteTracks([id], label: isStem ? "Delete Stem" : "Delete Track")
+    }
+    public func deleteSelectedTrack() {
+        if let id = selectedTrackID { deleteTrack(id) } else { status = "Select a track to delete." }
+    }
+    /// Deletes every stem from the same split as `id`.
+    public func deleteStemGroup(of id: UUID) { deleteTracks(project.stemSiblings(of: id), label: "Delete Stems") }
+    public func deleteAllStems() {
+        let ids = project.allStemTrackIDs
+        if ids.isEmpty { status = "There are no stem tracks." } else { deleteTracks(ids, label: "Delete All Stems") }
+    }
+    public var hasStems: Bool { !project.allStemTrackIDs.isEmpty }
+
+    // MARK: Track volume
+
+    public static let volumeRange: ClosedRange<Float> = -60...6
+    public func setVolume(_ id: UUID, _ db: Float) {
+        let v = min(Self.volumeRange.upperBound, max(Self.volumeRange.lowerBound, db))
+        edit("Volume", coalesce: true) { p in if let i = p.trackIndex(id) { p.tracks[i].volumeDB = v } }
+    }
+    public func nudgeVolume(_ id: UUID, by db: Float) {
+        guard let t = project.tracks.first(where: { $0.id == id }) else { return }
+        setVolume(id, (t.volumeDB + db).rounded())
+    }
+    public func volumeBinding(_ id: UUID) -> Binding<Float> {
+        Binding(get: { [weak self] in self?.project.tracks.first { $0.id == id }?.volumeDB ?? 0 },
+                set: { [weak self] v in self?.setVolume(id, v) })
+    }
+    public var masterVolumeBinding: Binding<Float> {
+        Binding(get: { [weak self] in self?.project.master.volumeDB ?? 0 },
+                set: { [weak self] v in self?.edit("Master Volume", coalesce: true) { $0.master.volumeDB = v } })
+    }
+
     public func addTrack(_ kind: TrackKind) { edit("Add Track") { p in selectedTrackID = p.addTrack(kind: kind) } }
 
     public func splitAtPlayhead() { edit("Split") { p in p.splitClips(at: position) } }
@@ -379,9 +438,9 @@ public final class AppModel: ObservableObject {
 
     /// Builds a synth part from guitar and/or bass audio (call off the main thread).
     public static func makeSynthPart(style: SynthStyle, guitar: AudioData?, bass: AudioData?,
-                                     tempo: Double, beatsPerBar: Int) -> SynthGenerationResult? {
+                                     tempo: Double, beatsPerBar: Int, genre: MusicGenre = .auto) -> SynthGenerationResult? {
         guard guitar != nil || bass != nil else { return nil }
-        let r = SynthTrackGenerator(tempo: tempo, beatsPerBar: beatsPerBar).generate(style: style, guitar: guitar, bass: bass)
+        let r = SynthTrackGenerator(tempo: tempo, beatsPerBar: beatsPerBar).generate(style: style, guitar: guitar, bass: bass, genre: genre)
         return r.notes.isEmpty ? nil : r
     }
 
@@ -398,7 +457,8 @@ public final class AppModel: ObservableObject {
             newID = id
         }
         if let id = newID { selectedTrackID = id }
-        status = "Added \(r.trackName): \(r.notes.count) notes, key \(r.keyName), \(r.chords.count) chord changes"
+        status = "Added \(r.trackName): \(r.notes.count) notes, key \(r.keyName), \(r.chords.count) chord changes — "
+            + "\(r.genre.displayName) tone (\(r.genreReason))"
     }
 
     /// Guitar / bass audio tracks used by "Generate Matching Synth": tracks named "guitar" or "bass",
@@ -424,7 +484,19 @@ public final class AppModel: ObservableObject {
     }
 
     /// Analyses the project's guitar and bass tracks and adds a matching synth track.
+    /// Genre used for generated synth tones (persisted; `.auto` detects it from the audio).
+    public var synthGenre: MusicGenre {
+        get { MusicGenre(rawValue: UserDefaults.standard.string(forKey: "SFSynthGenre") ?? "") ?? .auto }
+        set { objectWillChange.send(); UserDefaults.standard.set(newValue.rawValue, forKey: "SFSynthGenre") }
+    }
+    public static let genreMenu: [(id: String, name: String)] = MusicGenre.allCases.map { ($0.rawValue, $0.displayName) }
+    public var synthGenreID: String {
+        get { synthGenre.rawValue }
+        set { synthGenre = MusicGenre(rawValue: newValue) ?? .auto }
+    }
+
     public func generateMatchingSynth(style: SynthStyle) {
+        let genre = synthGenre
         let src = synthSourceClips()
         guard src.guitar != nil || src.bass != nil else {
             status = "Add or select a guitar or bass audio track first."; return
@@ -442,7 +514,7 @@ public final class AppModel: ObservableObject {
                 if pad > 0 { a = AudioData(channels: a.channels.map { [Float](repeating: 0, count: pad) + $0 }, sampleRate: a.sampleRate) }
                 return a
             }
-            let r = AppModel.makeSynthPart(style: style, guitar: load(src.guitar), bass: load(src.bass), tempo: tempo, beatsPerBar: bpb)
+            let r = AppModel.makeSynthPart(style: style, guitar: load(src.guitar), bass: load(src.bass), tempo: tempo, beatsPerBar: bpb, genre: genre)
             DispatchQueue.main.async {
                 guard let r = r else { self.status = "No clear notes or chords found."; return }
                 self.addGeneratedSynth(r, startSeconds: ref)

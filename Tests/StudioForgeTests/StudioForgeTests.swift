@@ -639,3 +639,123 @@ final class SynthGeneratorTests: XCTestCase {
         XCTAssertEqual(bs.notes.map { $0.pitch % 12 }, [0, 9, 5, 7])
     }
 }
+
+final class GenreToneTests: XCTestCase {
+    let sr = 22_050.0
+    func tone(_ midis: [Int], seconds: Double, amp: Double = 0.15, clip: Float? = nil) -> [Float] {
+        let n = Int(sr * seconds)
+        return (0..<n).map { i in
+            let t = Double(i) / sr
+            var v: Float = 0
+            for m in midis { v += Float(amp * sin(2 * .pi * 440 * pow(2, Double(m - 69) / 12) * t)) }
+            if let c = clip { v = max(-c, min(c, v * 12)) }   // hard clipping = distortion
+            return v
+        }
+    }
+
+    func testEveryGenreHasPlayableInstrumentsAndSaneRegisters() {
+        for g in MusicGenre.concrete {
+            let p = GenreTone.profile(g)
+            for st in SynthStyle.allCases {
+                XCTAssertNotNil(InstrumentRegistry.shared.make(p.instrument(for: st).type), "\(g) \(st)")
+            }
+            XCTAssertLessThan(p.bassRange.upperBound, p.padRange.upperBound, "\(g)")
+            XCTAssertGreaterThanOrEqual(p.padRange.count, 13, "\(g) pad range must hold an octave")
+            XCTAssertGreaterThanOrEqual(p.bassRange.count, 13, "\(g) bass range must hold an octave")
+            XCTAssertGreaterThanOrEqual(GenreTone.hz(p.bassRange.lowerBound), 29, "\(g) bass below audible sub range")
+        }
+        // Genre registers differ the way the styles do: hip-hop sub bass sits lowest, ambient pads highest.
+        XCTAssertLessThan(GenreTone.profile(.hipHop).bassRange.lowerBound, GenreTone.profile(.pop).bassRange.lowerBound)
+        XCTAssertLessThan(GenreTone.profile(.metal).bassRange.lowerBound, GenreTone.profile(.funk).bassRange.lowerBound)
+        XCTAssertGreaterThan(GenreTone.profile(.ambient).padRange.upperBound, GenreTone.profile(.rock).padRange.upperBound)
+        let cut = { (g: MusicGenre) in GenreTone.profile(g).pad.params["cutoff"] ?? 0 }
+        XCTAssertGreaterThan(cut(.electronic), cut(.ambient), "electronic pads brighter than ambient")
+    }
+
+    func testClassifierRules() {
+        var f = GenreFeatures(); f.distortion = 0.9; f.tempo = 170
+        XCTAssertEqual(GenreTone.classify(f).genre, .metal)
+        f.distortion = 0.55; f.tempo = 120
+        XCTAssertEqual(GenreTone.classify(f).genre, .rock)
+        f = GenreFeatures(); f.tempo = 90; f.subWeight = 0.5
+        XCTAssertEqual(GenreTone.classify(f).genre, .hipHop)
+        f = GenreFeatures(); f.tempo = 65; f.sustain = 0.9; f.onsetRate = 0.5
+        XCTAssertEqual(GenreTone.classify(f).genre, .ambient)
+        f = GenreFeatures(); f.tempo = 110; f.onsetRate = 6; f.sustain = 0.4
+        XCTAssertEqual(GenreTone.classify(f).genre, .funk)
+    }
+
+    func testDistortedGuitarIsDetectedAsHeavierThanCleanGuitar() {
+        let clean = AudioData(channels: [tone([52, 59, 64], seconds: 3)], sampleRate: sr)
+        let dirty = AudioData(channels: [tone([40, 47, 52], seconds: 3, clip: 0.3)], sampleRate: sr)
+        let fc = GenreTone.features(guitar: clean, bass: nil, tempo: 120, chords: [], beatsPerBar: 4, keyConfidence: 1)
+        let fd = GenreTone.features(guitar: dirty, bass: nil, tempo: 120, chords: [], beatsPerBar: 4, keyConfidence: 1)
+        XCTAssertGreaterThan(fd.distortion, fc.distortion + 0.2, "clean \(fc.distortion) dirty \(fd.distortion)")
+        XCTAssertTrue([.rock, .metal].contains(GenreTone.classify(fd).genre))
+        XCTAssertFalse([.rock, .metal].contains(GenreTone.classify(fc).genre))
+    }
+
+    func testGenreShapesRegisterVoicingAndTone() {
+        let guitar = AudioData(channels: [[[60, 64, 67], [57, 60, 64], [53, 57, 60], [55, 59, 62]]
+            .flatMap { tone($0, seconds: 2, amp: 0.12) }], sampleRate: sr)
+        let bass = AudioData(channels: [[36, 33, 41, 43].flatMap { tone([$0], seconds: 2, amp: 0.4) }], sampleRate: sr)
+        let gen = SynthTrackGenerator(tempo: 120)
+        let scale = SynthTrackGenerator.scale(root: 0, minor: false)
+        for g in MusicGenre.concrete {
+            let p = GenreTone.profile(g)
+            for st in SynthStyle.allCases {
+                let r = gen.generate(style: st, guitar: guitar, bass: bass, genre: g)
+                XCTAssertEqual(r.genre, g)
+                XCTAssertFalse(r.notes.isEmpty, "\(g) \(st)")
+                XCTAssertEqual(r.instrument, p.instrument(for: st))
+                for n in r.notes { XCTAssertTrue(scale.contains(n.pitch % 12), "\(g) \(st) \(n.pitch) out of key") }
+                switch st {
+                case .bassSynth: for n in r.notes { XCTAssertTrue(p.bassRange.contains(n.pitch), "\(g) bass \(n.pitch)") }
+                case .arpeggio: for n in r.notes { XCTAssertTrue(p.arpRange.contains(n.pitch), "\(g) arp \(n.pitch)") }
+                case .pad:
+                    let upper = r.notes.filter { $0.pitch >= p.padRange.lowerBound }
+                    for n in upper { XCTAssertTrue(p.padRange.contains(n.pitch), "\(g) pad \(n.pitch)") }
+                }
+            }
+        }
+        // Metal pads are power chords (no thirds); jazz pads add sevenths.
+        let metal = gen.generate(style: .pad, guitar: guitar, bass: nil, genre: .metal)
+        let first = Set(metal.notes.filter { $0.startBeat == 0 }.map { $0.pitch % 12 })
+        XCTAssertEqual(first, [0, 7], "C power chord")
+        let jazz = gen.generate(style: .pad, guitar: guitar, bass: nil, genre: .jazz)
+        XCTAssertTrue(Set(jazz.notes.filter { $0.startBeat == 0 }.map { $0.pitch % 12 }).contains(11), "Cmaj7")
+        // Hip-hop bass plays lower than electronic bass for the same line.
+        let hh = gen.generate(style: .bassSynth, guitar: nil, bass: bass, genre: .hipHop).notes.map(\.pitch)
+        let el = gen.generate(style: .bassSynth, guitar: nil, bass: bass, genre: .electronic).notes.map(\.pitch)
+        XCTAssertLessThan(hh.reduce(0, +), el.reduce(0, +))
+    }
+}
+
+final class TrackDeletionTests: XCTestCase {
+    func testDeleteTracksAndStemGroups() {
+        var p = Project(name: "T")
+        let keep = p.addTrack(kind: .audio, name: "Mix")
+        let a = p.addStemTracks([.init(name: "Vox", file: "a.wav", fileDuration: 4), .init(name: "Bass", file: "b.wav", fileDuration: 4)], start: 0)
+        let b = p.addStemTracks([.init(name: "Drums", file: "c.wav", fileDuration: 4)], start: 0)
+        XCTAssertEqual(p.stemSiblings(of: a[0]), Set(a))
+        XCTAssertEqual(p.stemSiblings(of: keep), [])
+        XCTAssertEqual(p.allStemTrackIDs, Set(a + b))
+        XCTAssertEqual(p.deleteTracks(p.stemSiblings(of: a[1])), 2)
+        XCTAssertEqual(p.tracks.map(\.id), [keep] + b)
+        XCTAssertEqual(p.deleteTracks([keep]), 1)
+        XCTAssertEqual(p.deleteTracks([UUID()]), 0)
+        XCTAssertEqual(p.tracks.count, 1)
+    }
+
+    func testStemGroupSurvivesSaveAndOldProjectsLoad() throws {
+        var p = Project(name: "T")
+        let ids = p.addStemTracks([.init(name: "Vox", file: "a.wav", fileDuration: 4)], start: 0)
+        p.addTrack(kind: .audio, name: "Plain")
+        let data = try JSONEncoder().encode(p)
+        let back = try JSONDecoder().decode(Project.self, from: data)
+        XCTAssertTrue(back.tracks.first { $0.id == ids[0] }!.isStem)
+        XCTAssertFalse(back.tracks.last!.isStem)
+        let old = try JSONDecoder().decode(Track.self, from: #"{"name":"Old","kind":"audio"}"#.data(using: .utf8)!)
+        XCTAssertNil(old.stemGroup)
+    }
+}

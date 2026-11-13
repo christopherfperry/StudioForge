@@ -54,6 +54,10 @@ struct StudioForgeApp: App {
                     ForEach(AppModel.synthStyleMenu, id: \.id) { item in
                         Button(item.name) { model.generateMatchingSynth(styleID: item.id) }
                     }
+                    Divider()
+                    Picker("Genre", selection: $model.synthGenreID) {
+                        ForEach(AppModel.genreMenu, id: \.id) { g in Text(g.name).tag(g.id) }
+                    }
                 }
             }
             CommandGroup(after: .toolbar) {
@@ -67,6 +71,20 @@ struct StudioForgeApp: App {
             CommandGroup(replacing: .undoRedo) {
                 Button("Undo") { model.undoAction() }.keyboardShortcut("z")
                 Button("Redo") { model.redoAction() }.keyboardShortcut("z", modifiers: [.command, .shift])
+            }
+            CommandGroup(after: .pasteboard) {
+                Divider()
+                Button("Delete Selected Track / Stem") { model.deleteSelectedTrack() }
+                    .keyboardShortcut(.delete, modifiers: [.command])
+                    .disabled(model.selectedTrackID == nil)
+                Button("Delete All Stems") { model.deleteAllStems() }
+                    .disabled(!model.hasStems)
+                Divider()
+                Button("Selected Track Volume Up 1 dB") { if let id = model.selectedTrackID { model.nudgeVolume(id, by: 1) } }
+                    .keyboardShortcut(.upArrow, modifiers: [.command, .option])
+                Button("Selected Track Volume Down 1 dB") { if let id = model.selectedTrackID { model.nudgeVolume(id, by: -1) } }
+                    .keyboardShortcut(.downArrow, modifiers: [.command, .option])
+                Button("Reset Selected Track Volume to 0 dB") { if let id = model.selectedTrackID { model.setVolume(id, 0) } }
             }
         }
     }

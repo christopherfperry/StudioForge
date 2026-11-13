@@ -42,7 +42,7 @@ The DMG shows **Install Fitzrovia Records DAW.pkg** as the main item at the top.
 
 ### B. Build the DMG yourself
 ```bash
-./packaging/make_dmg.sh            # -> dist/Install Fitzrovia Records DAW.pkg + dist/FitzroviaRecordsDAW-0.5.0.dmg
+./packaging/make_dmg.sh            # -> dist/Install Fitzrovia Records DAW.pkg + dist/FitzroviaRecordsDAW-0.6.0.dmg
 ```
 The script builds the Release app (universal when full Xcode is installed, otherwise your Mac's architecture), signs it ad hoc with the entitlements, and creates a compressed DMG. The DMG contains the app, an Applications shortcut, a background image with an arrow, a volume icon and an arranged Finder window. It uses `create-dmg` if that is installed (`brew install create-dmg`). Otherwise it uses `hdiutil` plus AppleScript.
 
@@ -119,6 +119,11 @@ Keyboard shortcuts: Space = play/stop, R = record, L = loop, K = metronome, S = 
 - **Reduce artefacts** (with strength): smooths musical noise and warbling, gates faint bleed in quiet passages, softens harsh highs, and keeps attacks sharp. Settings are remembered.
 - **Generate matching synth track:** after a split (tick the option and pick a style), or right-click any audio clip › **Generate Matching Synth**, or **File › Generate Matching Synth**. It reads the guitar track for chords and the bass track for notes, detects the key, quantises to the project tempo, and adds an instrument track: *Pad* (follows chords), *Bass synth* (doubles the bass) or *Arpeggio*.
 - The separator is still DSP-based (no neural model), so expect some bleed on dense mixes.
+
+## Deleting tracks/stems, volume, genre-matched synths (0.6.0)
+- **Delete a track or stem:** click the trash icon in its header, right-click it › *Delete Track / Delete Stem*, use the mixer's trash button, or select it and press **⌘⌫** (Edit › Delete Selected Track / Stem). Stems from one split can be removed together (*Delete All Stems From This Split*), or all at once with **Edit › Delete All Stems**. Everything is undoable with ⌘Z.
+- **Volume:** every track and stem header now has its own volume slider and dB readout (double-click the value for 0 dB). The **Mixer** button (key X) shows faders with 0 dB marks (drag, double-click to reset). The inspector has a *Volume & pan* box with −/+ 1 dB buttons and a 0 dB reset. Right-click a track › *Volume* for quick levels, or use ⌥⌘↑ / ⌥⌘↓ on the selected track. A fader drag counts as one undo step.
+- **Genre-matched synth tones:** *Generate Matching Synth* now has a **Genre** setting (Auto-detect, Rock, Metal, Pop, Funk, R&B / Soul, Hip-hop, Electronic, Ambient, Jazz, Folk / Acoustic). The genre sets the note register (the frequencies the synth plays at), chord voicing (power chords for rock/metal, diatonic sevenths for jazz/R&B/funk/hip-hop), rhythm (arpeggio speed, bass note length) and timbre (waveform, filter brightness, envelope, drive; Rhodes for jazz/R&B, string machine for folk, 808-style sine sub for hip-hop). Auto-detect guesses the genre from the guitar and bass (distortion, brightness, note density, sustain, sub-bass, tempo, chord changes); it is a rule-based guess, so pick the genre manually if it misjudges.
 
 ## Stem-separation model (first-run download, about 1–2 GB)
 
