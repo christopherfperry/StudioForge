@@ -2,7 +2,12 @@
 <html><head><meta charset="utf-8"><style>body{font-family:-apple-system,Helvetica,sans-serif;font-size:13px;line-height:1.45}td{padding:1px 10px 1px 0;vertical-align:top}</style></head>
 <body>
 <h2>Read Me — Fitzrovia Records DAW @VERSION@</h2>
-<h3>What's new in 0.6</h3>
+<h3>What's new in 0.7</h3>
+<ul>
+<li><b>New Project window</b> (File › New Project…, ⌘N, and at launch): pick a template, name the project, set tempo and time signature, and choose where it is saved.</li>
+<li><b>AI stem separation</b>: in the Split window click <b>Download AI Model</b> (≈&nbsp;67&nbsp;MB, once). Vocals, drums, bass, guitar, piano and other are then isolated by a neural network (Demucs v4, MIT licence) running on your Mac. The window shows which engine is in use.</li>
+</ul>
+<h3>Also in 0.6</h3>
 <ul>
 <li><b>Mute, solo and arm buttons respond anywhere on the coloured box.</b> Muted or solo-silenced tracks are dimmed and labelled; muted clips are dimmed and struck through.</li>
 <li><b>Exports match what you hear</b>: soloed-out and muted tracks no longer leak into bounces.</li>
@@ -18,6 +23,7 @@
 <tr><td>⌃⌘M / ⌃⌘S</td><td>Mute / solo selected track</td><td>X</td><td>Show / hide the mixer</td></tr>
 <tr><td>⌘⌫</td><td>Delete selected track or stem</td><td>⌘Z / ⇧⌘Z</td><td>Undo / redo</td></tr>
 <tr><td>⇧⌘I</td><td>Import &amp; Split Audio</td><td>⌘E</td><td>Export</td></tr>
+<tr><td>⌘N</td><td>New Project</td><td>⌘O</td><td>Open project</td></tr>
 </table>
 <h3>Microphone permission</h3>
 <p>macOS does <b>not</b> allow any installer to grant audio-input access in advance. The first time you open the app, a
@@ -29,5 +35,5 @@ or use <b>Help › Setup &amp; Permissions</b> inside the app.</p>
 Fitzrovia Records DAW, open <b>System Settings › Privacy &amp; Security</b>, click <b>Open Anyway</b> and enter your password.
 (On macOS 15 Sequoia and later, Control-click › Open no longer bypasses this; on macOS 13–14 it still works.)</p>
 <h3>Uninstalling</h3>
-<p>Drag <b>Applications › Fitzrovia Records DAW</b> to the Trash. Your projects in Music › Fitzrovia Records DAW are kept.</p>
+<p>Drag <b>Applications › Fitzrovia Records DAW</b> to the Trash. Your projects in Music › Fitzrovia Records DAW are kept. The AI model, if downloaded, can be removed first with <b>Remove AI Model</b> in the Split window.</p>
 </body></html>

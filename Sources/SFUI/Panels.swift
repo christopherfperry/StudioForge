@@ -557,11 +557,11 @@ struct OnboardingView: View {
     @ObservedObject var model: AppModel
     @State private var page = 0
     let pages: [(String, String, String)] = [
-        ("waveform", "Welcome to Fitzrovia Records DAW", "A simple multi-track studio. Click New Song and pick Vocals, Guitar, Band or Beat + Synth."),
+        ("waveform", "Welcome to Fitzrovia Records DAW", "A simple multi-track studio. Click New Project (⌘N), pick Vocals, Guitar, Band or Beat + Synth, name it and click Create."),
         ("mic", "Record", "Arm a track (R button), pick its input in the Inspector, press R or the record button. Fitzrovia Records DAW always records the clean, dry signal — effects stay editable later."),
         ("slider.horizontal.3", "Low latency", "Open Audio Settings to choose your interface and a buffer of 32–128 samples while recording. Turn Monitor off to use your interface's direct monitoring."),
         ("paintpalette", "Tone Picker", "Choose an artist style and instrument, and Fitzrovia Records DAW loads a matching preset. Every preset is editable and saved as JSON."),
-        ("metronome", "Beats & stems", "Generate drum beats by style, or let Fitzrovia Records DAW match a beat to your recording. Split any song into vocals, guitar, bass, piano and drum parts with the Split button."),
+        ("metronome", "Beats & stems", "Generate drum beats by style, or let Fitzrovia Records DAW match a beat to your recording. Split any song into vocals, guitar, bass, piano and drum parts with the Split button (download the AI model there once for the cleanest stems)."),
         ("slider.vertical.3", "Mix & tidy up", "Click M to mute and S to solo (⌃⌘M / ⌃⌘S for the selected track). Drag the faders in the Mixer (X), double-click for 0 dB. Delete a track or stem with the trash button or ⌘⌫ — ⌘Z undoes anything."),
         ("square.and.arrow.up", "Export", "Bounce to WAV, AIFF, FLAC, AAC, ALAC, CAF (MP3/OGG with ffmpeg), export stems and MIDI."),
     ]
