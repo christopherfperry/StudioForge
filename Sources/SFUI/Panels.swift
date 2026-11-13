@@ -168,32 +168,53 @@ struct BeatGeneratorSheet: View {
     }
 }
 
-// MARK: Stem separation
+// MARK: Import & split (stem separation)
 
 final class SeparationJob: ObservableObject {
     @Published var progress = 0.0
     @Published var message = ""
     @Published var running = false
     @Published var modelState: SeparationModelManager.State = SeparationModelManager.shared.state
-    var cancelled = false
+    private let lock = NSLock()
+    private var _cancelled = false
+    /// Read from the worker thread, written from the UI — guarded by a lock.
+    var cancelled: Bool {
+        get { lock.lock(); defer { lock.unlock() }; return _cancelled }
+        set { lock.lock(); _cancelled = newValue; lock.unlock() }
+    }
     init() { SeparationModelManager.shared.onChange = { [weak self] s in self?.modelState = s } }
 }
 
+/// "Import & Split Audio": pick a file (or the selected clip), choose which instruments / vocals /
+/// drum parts to extract, and add each stem as an aligned track in one undo step.
 struct StemSeparatorSheet: View {
     @ObservedObject var model: AppModel
     let close: () -> Void
     @StateObject private var job = SeparationJob()
+    @State private var stems: Set<Stem> = Set(Stem.mainStems)
     @State private var splitDrums = true
+    @State private var drumParts: Set<Stem> = Set(Stem.drumParts)
     @State private var addToProject = true
+    @State private var muteSource = true
     @State private var downloadURL = SeparationModelManager.shared.configuredDownloadURL?.absoluteString ?? ""
 
+    private var options: SeparationOptions {
+        SeparationOptions(stems: stems, splitDrums: splitDrums && !drumParts.isEmpty)
+    }
+
+    private func toggle(_ s: Stem, in set: Binding<Set<Stem>>) -> Binding<Bool> {
+        Binding(get: { set.wrappedValue.contains(s) },
+                set: { on in if on { set.wrappedValue.insert(s) } else { set.wrappedValue.remove(s) } })
+    }
+
     var body: some View {
-        SheetFrame(title: "Stem Separation", close: close) {
-            GroupBox("Model") {
-                VStack(alignment: .leading) {
+        SheetFrame(title: "Import & Split Audio", close: close) {
+            GroupBox("Separation engine") {
+                VStack(alignment: .leading, spacing: 6) {
                     switch job.modelState {
-                    case .installed: Text("Demucs htdemucs_6s installed — high-quality separation (vocals, drums, bass, guitar, piano, other).")
-                    case .notInstalled: Text("Model not installed (\(SeparationModelManager.approximateDownloadSize)). The DSP fallback (HPSS + band masks) will be used.")
+                    case .installed: Text("Demucs htdemucs_6s installed — high-quality ML separation.")
+                    case .notInstalled: Text("Built-in DSP separator (no download). For higher quality, import a Demucs Core ML model (\(SeparationModelManager.approximateDownloadSize)).")
+                            .font(.caption).foregroundColor(.secondary)
                     case .downloading(let p): ProgressView("Downloading model…", value: p)
                     case .installing: ProgressView("Installing model…")
                     case .failed(let e): Text(e).foregroundColor(.orange)
@@ -203,46 +224,99 @@ struct StemSeparatorSheet: View {
                         Button("Download") {
                             SeparationModelManager.shared.configuredDownloadURL = URL(string: downloadURL)
                             SeparationModelManager.shared.startDownload()
-                        }.disabled(URL(string: downloadURL) == nil)
-                        Button("Import…") {
-                            let p = NSOpenPanel(); p.canChooseDirectories = true
+                        }.disabled(URL(string: downloadURL)?.scheme == nil)
+                        Button("Import Model…") {
+                            let p = NSOpenPanel(); p.canChooseDirectories = true; p.canChooseFiles = true
                             if p.runModal() == .OK, let u = p.url {
-                                do { try SeparationModelManager.shared.importModel(from: u) } catch { model.status = error.localizedDescription }
+                                SeparationModelManager.shared.importModelInBackground(from: u) { err in
+                                    if let e = err { model.status = "Model import failed: \(e.localizedDescription)" }
+                                }
                             }
                         }.help("Import a model converted with tools/convert_demucs_to_coreml.py")
                     }
+                }.frame(maxWidth: .infinity, alignment: .leading)
+            }
+            HStack(alignment: .top, spacing: 24) {
+                GroupBox("Instruments & vocals") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        ForEach(Stem.mainStems) { s in Toggle(s == .drums ? "Drums (full kit)" : s.displayName, isOn: toggle(s, in: $stems)) }
+                    }.frame(minWidth: 180, alignment: .leading)
+                }
+                GroupBox("Drum types") {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Toggle("Split drums into parts", isOn: $splitDrums)
+                        ForEach(Stem.drumParts) { s in
+                            Toggle(s.displayName, isOn: toggle(s, in: $drumParts)).padding(.leading, 16).disabled(!splitDrums)
+                        }
+                    }.frame(minWidth: 180, alignment: .leading)
                 }
             }
-            Toggle("Split drums into kick / snare / toms / hi-hat / cymbals", isOn: $splitDrums)
+            HStack {
+                Text("Presets:").font(.caption)
+                Button("Vocals + 3") { stems = SeparationOptions.fourStem.stems; splitDrums = false }
+                Button("Everything") { stems = Set(Stem.mainStems); splitDrums = true; drumParts = Set(Stem.drumParts) }
+                Button("Drums only") { stems = []; splitDrums = true; drumParts = Set(Stem.drumParts) }
+            }.controlSize(.small)
             Toggle("Add stems to the project as new tracks", isOn: $addToProject)
-            if job.running { ProgressView(job.message, value: job.progress); Button("Cancel") { job.cancelled = true } }
-            else { Button("Choose Audio File & Separate…") { choose() }.keyboardShortcut(.defaultAction) }
+            Toggle("Mute the original track after splitting a clip", isOn: $muteSource).disabled(!addToProject)
+            if job.running {
+                ProgressView(job.message, value: job.progress)
+                Button("Cancel") { job.cancelled = true }
+            } else {
+                HStack {
+                    Button("Import Audio File & Split…") { chooseFile() }.keyboardShortcut(.defaultAction)
+                    if let src = model.selectedClipSplitSource {
+                        Button("Split Selected Clip “\(src.displayName)”") { run(src) }
+                    }
+                }.disabled(options.isEmpty)
+                if options.isEmpty { Text("Choose at least one stem or drum part.").font(.caption).foregroundColor(.orange) }
+            }
         }
     }
 
-    func choose() {
+    func chooseFile() {
         let panel = NSOpenPanel(); panel.allowedContentTypes = [.audio]
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        job.running = true; job.cancelled = false
-        let options = SeparationOptions(stems: Set(Stem.allCases.filter { !$0.isDrumPart }), splitDrums: splitDrums)
-        let folder = (model.packageURL?.appendingPathComponent(ProjectPackage.audioFolder) ?? AppPaths.sub("Stems"))
+        run(AppModel.SplitSource(url: url, displayName: url.deletingPathExtension().lastPathComponent,
+                                 start: 0, offset: 0, duration: nil, trackID: nil))
+    }
+
+    func run(_ source: AppModel.SplitSource) {
+        let opts = options
+        let wantedParts = drumParts
+        let folder = model.stemOutputFolder
+        let add = addToProject, mute = muteSource && source.trackID != nil
         let job = self.job
+        job.running = true; job.cancelled = false; job.progress = 0; job.message = "Decoding \(source.displayName)…"
         DispatchQueue.global(qos: .userInitiated).async {
             do {
-                let audio = try AudioDecoding.decode(url)
+                let audio = try AudioDecoding.decode(source.url)
                 let sep = SeparatorFactory.best()
-                let stems = try sep.separate(audio, options: options, progress: { p, m in
+                var stems = try sep.separate(audio, options: opts, progress: { p, m in
                     DispatchQueue.main.async { job.progress = p; job.message = "\(sep.name): \(m)" }
                 }, isCancelled: { job.cancelled })
-                let urls = try StemWriter.write(stems, baseName: url.deletingPathExtension().lastPathComponent, to: folder)
+                // Keep only what was ticked (separators may return extra stems, e.g. the full kit).
+                stems = stems.filter { k, _ in k.isDrumPart ? (opts.splitDrums && wantedParts.contains(k)) : opts.stems.contains(k) }
+                if job.cancelled { throw StudioForgeError.cancelled }
+                let count = stems.count
+                DispatchQueue.main.async { job.message = "Writing \(count) stems…" }
+                let urls = try StemWriter.write(stems, baseName: source.displayName, to: folder)
+                let durations = stems.mapValues { $0.duration }
                 DispatchQueue.main.async {
                     job.running = false
-                    if addToProject { model.importAudio(urls.sorted { $0.key.rawValue < $1.key.rawValue }.map { $0.value }) }
-                    model.status = "Separated \(urls.count) stems with \(sep.name)"
+                    if add { model.addSeparatedStems(urls, durations: durations, source: source, muteSource: mute) }
+                    else {
+                        model.status = "Wrote \(urls.count) stems to \(folder.path)"
+                        NSWorkspace.shared.activateFileViewerSelecting(Array(urls.values))
+                    }
                     close()
                 }
             } catch {
-                DispatchQueue.main.async { job.running = false; model.status = "Separation failed: \(error.localizedDescription)" }
+                DispatchQueue.main.async {
+                    job.running = false
+                    if let e = error as? StudioForgeError, case .cancelled = e { model.status = "Split cancelled" }
+                    else { model.status = "Split failed: \(error.localizedDescription)" }
+                }
             }
         }
     }

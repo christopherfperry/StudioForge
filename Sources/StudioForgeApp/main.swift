@@ -43,10 +43,13 @@ struct StudioForgeApp: App {
                     if p.runModal() == .OK, let u = p.url { model.open(u) }
                 }.keyboardShortcut("o")
                 Button("Save") { model.save() }.keyboardShortcut("s")
+                Button("Save As…") { model.saveAs() }.keyboardShortcut("s", modifiers: [.command, .shift])
                 Button("Import Audio…") {
                     let p = NSOpenPanel(); p.allowsMultipleSelection = true; p.allowedContentTypes = [.audio]
                     if p.runModal() == .OK { model.importAudio(p.urls, at: model.position) }
                 }.keyboardShortcut("i")
+                Button("Import & Split Audio…") { model.showSplitSheet = true }
+                    .keyboardShortcut("i", modifiers: [.command, .shift])
             }
             CommandGroup(after: .help) {
                 Button("Setup & Permissions…") { model.permissions.refresh(); model.showSetup = true }

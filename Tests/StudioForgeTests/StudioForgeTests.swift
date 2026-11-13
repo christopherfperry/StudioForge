@@ -248,6 +248,53 @@ final class SeparationTests: XCTestCase {
 }
 
 final class ProjectTests: XCTestCase {
+    func testAddStemTracksIsOneMutationAlignedToSourceClip() {
+        var p = Project(name: "T")
+        let src = p.addTrack(kind: .audio, name: "Mix")
+        let other = p.addTrack(kind: .audio, name: "After")
+        let specs = [Project.StemTrackSpec(name: "Vocals", file: "Audio/v.wav", fileDuration: 10),
+                     Project.StemTrackSpec(name: "Kick", file: "Audio/k.wav", fileDuration: 10)]
+        let ids = p.addStemTracks(specs, start: 4, offset: 2, duration: 5, afterTrack: src, muteTrack: src)
+        XCTAssertEqual(ids.count, 2)
+        XCTAssertEqual(p.tracks.map(\.name), ["Mix", "Vocals", "Kick", "After"])
+        XCTAssertTrue(p.tracks[0].mute)
+        XCTAssertEqual(p.trackIndex(other), 3)
+        let c = p.tracks[2].audioClips[0]
+        XCTAssertEqual(c.start, 4); XCTAssertEqual(c.offset, 2); XCTAssertEqual(c.duration, 5)
+        // Duration is clamped to the file.
+        p.addStemTracks([Project.StemTrackSpec(name: "X", file: "x", fileDuration: 3)], start: 0, offset: 2, duration: 5)
+        XCTAssertEqual(p.tracks.last?.audioClips.first?.duration, 1)
+        XCTAssertTrue(p.addStemTracks([], start: 0).isEmpty)
+    }
+
+    func testAdoptAndRelocateClipsDoNotDuplicateOrLoseAudio() throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("sf-reloc-\(UUID())")
+        defer { try? fm.removeItem(at: root) }
+        let oldPkg = root.appendingPathComponent("A.sfproj"), newPkg = root.appendingPathComponent("B.sfproj")
+        try ProjectPackage.create(at: oldPkg)
+        let a = AudioData(channels: [[Float](repeating: 0.1, count: 100)], sampleRate: 44_100)
+        let inside = oldPkg.appendingPathComponent("Audio/stem.wav")
+        try AudioFileIO.writeWAV(a, to: inside, format: .int24)
+        // A file already inside the package is referenced, not copied.
+        XCTAssertEqual(try ProjectPackage.adopt(inside, into: oldPkg), "Audio/stem.wav")
+        XCTAssertEqual(try fm.contentsOfDirectory(atPath: oldPkg.appendingPathComponent("Audio").path).count, 1)
+        // Save As: relative clips are copied into the new package once even if shared by two clips.
+        var p = Project(name: "T")
+        let t = p.addTrack(kind: .audio)
+        let i = try XCTUnwrap(p.trackIndex(t))
+        p.tracks[i].audioClips = [AudioClip(name: "a", file: "Audio/stem.wav", start: 0, duration: 1),
+                                  AudioClip(name: "b", file: "Audio/stem.wav", start: 2, duration: 1),
+                                  AudioClip(name: "gone", file: "/nonexistent/x.wav", start: 0, duration: 1)]
+        try ProjectPackage.create(at: newPkg)
+        let r = ProjectPackage.relocateClips(p, from: oldPkg, to: newPkg)
+        let files = r.tracks[i].audioClips.map(\.file)
+        XCTAssertEqual(files[0], "Audio/stem.wav"); XCTAssertEqual(files[1], files[0])
+        XCTAssertEqual(files[2], "/nonexistent/x.wav")
+        XCTAssertTrue(fm.fileExists(atPath: newPkg.appendingPathComponent(files[0]).path))
+        XCTAssertEqual(try fm.contentsOfDirectory(atPath: newPkg.appendingPathComponent("Audio").path).count, 1)
+    }
+
     func testSaveLoadRoundTrip() throws {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("sf-\(UUID()).\(ProjectPackage.fileExtension)")
         defer { try? FileManager.default.removeItem(at: url) }

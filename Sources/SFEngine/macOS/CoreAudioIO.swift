@@ -187,7 +187,9 @@ public final class CoreAudioIO: AudioIODriver {
                                        &cb, UInt32(MemoryLayout<AURenderCallbackStruct>.size)), "set render callback")
 
         guard inputChannelCount > 0 else { return }
-        let inUnit = duplex ? out : inputUnit!
+        // Split mode without an input unit (device vanished / failed to open) must not crash:
+        // continue output-only.
+        guard let inUnit = duplex ? out : inputUnit else { return }
         var inFmt = Self.floatFormat(sampleRate: sampleRate, channels: UInt32(inputChannelCount))
         try check(AudioUnitSetProperty(inUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 1,
                                        &inFmt, UInt32(MemoryLayout<AudioStreamBasicDescription>.size)), "set input format")

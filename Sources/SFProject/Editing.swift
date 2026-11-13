@@ -135,6 +135,43 @@ extension Project {
         tracks.append(t)
         return t.id
     }
+
+    /// One separated stem to place on its own audio track.
+    public struct StemTrackSpec: Equatable {
+        public var name: String
+        public var file: String
+        public var fileDuration: Double
+        public init(name: String, file: String, fileDuration: Double) {
+            self.name = name; self.file = file; self.fileDuration = fileDuration
+        }
+    }
+
+    /// Adds one audio track per stem in a single mutation (one undo step). Each stem clip copies
+    /// the source clip's timeline placement (`start`, `offset`, `duration`), so a split of a trimmed
+    /// clip lines up sample-accurately with the original. Tracks are inserted after `afterTrack`
+    /// (or at the end) and share one colour; `muteTrack` is muted so the stems replace the mix.
+    @discardableResult
+    public mutating func addStemTracks(_ stems: [StemTrackSpec], start: Double, offset: Double = 0,
+                                       duration: Double? = nil, afterTrack: UUID? = nil,
+                                       muteTrack: UUID? = nil) -> [UUID] {
+        guard !stems.isEmpty else { return [] }
+        var insertAt = tracks.count
+        if let a = afterTrack, let i = trackIndex(a) { insertAt = i + 1 }
+        let color = tracks.count % 12
+        var ids: [UUID] = []
+        for (k, s) in stems.enumerated() {
+            var t = Track(name: s.name, kind: .audio, colorIndex: color)
+            let off = max(0, min(offset, s.fileDuration))
+            let len = max(0, min(duration ?? (s.fileDuration - off), s.fileDuration - off))
+            var clip = AudioClip(name: s.name, file: s.file, start: max(0, start), offset: off, duration: len)
+            clip.fadeIn = 0; clip.fadeOut = 0
+            t.audioClips = [clip]
+            tracks.insert(t, at: min(insertAt + k, tracks.count))
+            ids.append(t.id)
+        }
+        if let m = muteTrack, let i = trackIndex(m) { tracks[i].mute = true }
+        return ids
+    }
 }
 
 /// Snapshot-based undo/redo. Projects are value types, so a snapshot is a copy; clip audio lives

@@ -50,6 +50,10 @@ public struct MainView: View {
             case .audio: AudioSettingsSheet(model: model) { sheet = nil }
             }
         }
+        .onChange(of: model.showSplitSheet) { show in
+            // Menu command "Import & Split Audio…" (⇧⌘I) routes through the model.
+            if show { sheet = .stems; model.showSplitSheet = false }
+        }
         .sheet(isPresented: $model.showOnboarding) { OnboardingView(model: model) }
         .background(EmptyView().sheet(isPresented: $model.showWelcome) {
             WelcomePermissionView(model: model, permissions: model.permissions).interactiveDismissDisabled()
@@ -94,7 +98,8 @@ struct TransportBar: View {
             Button("Tone Picker") { sheet = .tonePicker }.help("Pick an artist + instrument and get a preset")
             Button("Presets") { sheet = .presets }
             Button("Beat") { sheet = .beat }.help("Generate or match a drum beat")
-            Button("Stems") { sheet = .stems }.help("Split a song into stems")
+            Button { sheet = .stems } label: { Label("Split", systemImage: "waveform.badge.plus") }
+                .help("Import audio (or use the selected clip) and split it into vocals, instruments and drum parts")
             Button("Export") { sheet = .export }.keyboardShortcut("e", modifiers: [.command])
             Button { sheet = .audio } label: { Image(systemName: "slider.horizontal.3") }.help("Audio device & latency settings")
             Toggle(isOn: $showMixer) { Image(systemName: "dial.medium") }.toggleStyle(.button).help("Show mixer (X)")

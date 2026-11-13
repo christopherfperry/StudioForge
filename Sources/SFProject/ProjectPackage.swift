@@ -93,6 +93,44 @@ public enum ProjectPackage {
         return "\(audioFolder)/\(dest.lastPathComponent)"
     }
 
+    /// Package-relative path ("Audio/x.wav") if `file` already lives inside `package`, else nil.
+    public static func relativePath(of file: URL, in package: URL) -> String? {
+        let f = file.standardizedFileURL.resolvingSymlinksInPath().path
+        let p = package.standardizedFileURL.resolvingSymlinksInPath().path
+        let prefix = p.hasSuffix("/") ? p : p + "/"
+        guard f.hasPrefix(prefix) else { return nil }
+        return String(f.dropFirst(prefix.count))
+    }
+
+    /// Returns a clip path for `file`: package-relative without copying when it is already inside
+    /// the package, otherwise a copy is imported. Without a package the absolute path is kept.
+    public static func adopt(_ file: URL, into package: URL?) throws -> String {
+        guard let pkg = package else { return file.path }
+        if let rel = relativePath(of: file, in: pkg) { return rel }
+        return try importAudio(file, into: pkg)
+    }
+
+    /// Makes every clip of `project` reference a file inside `newPackage`: absolute paths and paths
+    /// relative to `oldPackage` (Save As) are copied in. Files already inside are left untouched.
+    /// Clips whose source file is missing keep their original path.
+    public static func relocateClips(_ project: Project, from oldPackage: URL?, to newPackage: URL) -> Project {
+        var p = project
+        var copied: [String: String] = [:]   // source path → new relative path (shared files copied once)
+        for ti in p.tracks.indices {
+            for ci in p.tracks[ti].audioClips.indices {
+                let file = p.tracks[ti].audioClips[ci].file
+                let src = resolve(file, in: oldPackage)
+                if let rel = relativePath(of: src, in: newPackage) { p.tracks[ti].audioClips[ci].file = rel; continue }
+                if let done = copied[src.path] { p.tracks[ti].audioClips[ci].file = done; continue }
+                guard FileManager.default.fileExists(atPath: src.path),
+                      let rel = try? importAudio(src, into: newPackage) else { continue }
+                copied[src.path] = rel
+                p.tracks[ti].audioClips[ci].file = rel
+            }
+        }
+        return p
+    }
+
     /// A non-existing file URL in `dir` like "Base.wav", "Base 2.wav", ...
     public static func uniqueURL(in dir: URL, baseName: String, ext: String) -> URL {
         let fm = FileManager.default

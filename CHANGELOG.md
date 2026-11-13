@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0 — 2026-11-13
+- **Renamed to Fitzrovia Records DAW**: app bundle `Fitzrovia Records DAW.app`, installer `Install-FitzroviaRecordsDAW.pkg`, disk image `FitzroviaRecordsDAW-<version>.dmg`, window title, menus and docs. The bundle id (`com.studioforge.daw`) and project extensions (`.sfproj`/`.sforge`) are unchanged, so existing projects and settings keep working. `~/Music/StudioForge` and `~/Library/Application Support/StudioForge` are moved to the new names automatically (by the installer, and again on first launch). The installer removes the old `/Applications/StudioForge.app`.
+- **Import & Split Audio** (⇧⌘I / toolbar **Split**): split a file or the selected clip into vocals, drums, bass, guitar, piano/keys and other. Drum types: kick, snare, toms, hi-hat and cymbals, each selectable. Presets: Vocals + 3, Everything, Drums only. Stems are added as aligned tracks in one undo step and can mute the source. Cancel works safely mid-run.
+- DSP separator: guitar, piano/keys and other now each get their own content. Before, piano was never produced, and "other" came out silent whenever guitar was requested.
+- Drum-part splitter: hi-hats were classified as cymbals (the sustain measure was ~1 at every new hit). Toms no longer pick up the kick.
+- Stem files never overwrite an earlier split of the same song.
+- Fix: Save As left audio behind in the old project, so every clip in the new copy broke. Audio is now copied into the new package (shared files once). Added **File › Save As…** (⇧⌘S).
+- Fix: importing files that were already inside the project copied them again. Multi-file imports are now one undo step.
+- Fix: track controls (mute, volume, etc.) could edit the wrong track after tracks were added, removed or reordered (a binding captured the array index).
+- Fix: importing a separation model froze the UI (it ran on the main thread).
+- Fix: possible crash when the separate input device failed to open (force-unwrapped input unit).
+- 5 new unit tests (22 total on Linux).
+
 ## 0.2.1 — 2026-11-10
 - Fix: opening the source disk image installed nothing. macOS never auto-runs anything from a disk image, and Gatekeeper blocks a plain double-click on the unsigned `.command`.
 - New `packaging/make_pkg.sh`: builds a double-click macOS Installer package `Install StudioForge.pkg` with pkgbuild + productbuild. It installs StudioForge.app into /Applications (not relocatable) and requires macOS 13+. It has welcome, readme and conclusion pages that explain the first-launch microphone prompt; macOS does not let any installer grant microphone access in advance.

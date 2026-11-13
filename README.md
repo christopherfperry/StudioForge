@@ -2,7 +2,7 @@
 
 A personal multi-track DAW for macOS 13+ (SwiftUI + CoreAudio). It records audio and instruments with low latency, includes its own effects and instruments, ships JSON presets (with artist-style tones), generates drum beats, separates stems, and exports to common audio formats.
 
-> **Honesty note.** This source was written on a Linux machine. It was **not compiled or run on macOS**. The platform-independent modules build with Swift 5.10.1 on Linux, and 17 unit tests pass there: DSP, effects, instruments, presets, beat generator, analysis, HPSS separation, projects, offline render and export. Everything that needs Apple frameworks sits behind `#if os(macOS)` and has **never been compiled**: CoreAudio I/O, CoreMIDI, the SwiftUI UI, Core ML separation, and the AVFoundation encoders and decoders. Expect a few compile fixes on the first Xcode build. See *Known gaps* below.
+> **Honesty note.** This source was written on a Linux machine. It was **not compiled or run on macOS**. The platform-independent modules build with Swift 5.10.1 on Linux, and 22 unit tests pass there: DSP, effects, instruments, presets, beat generator, analysis, HPSS separation, projects, offline render and export. Everything that needs Apple frameworks sits behind `#if os(macOS)` and has **never been compiled**: CoreAudio I/O, CoreMIDI, the SwiftUI UI, Core ML separation, and the AVFoundation encoders and decoders. Expect a few compile fixes on the first Xcode build. See *Known gaps* below.
 
 ## Install
 
@@ -93,7 +93,7 @@ To bundle ffmpeg for MP3/OGG export: `FFMPEG=$(which ffmpeg) ./build.sh`.
 | Instruments | Subtractive synth (multi-osc, unison, filter, envelopes, LFO, FM, noise), bass synth, keys (piano, EP, Rhodes, organ, harpsichord, string machine), trumpet/brass with mutes, and a drum machine (synth voices plus sample pads). CoreMIDI input from all sources, plus an on-screen keyboard. |
 | Presets | 111 factory presets as JSON (`Sources/SFPresets/Resources/Presets`). User presets live in `~/Library/Application Support/Fitzrovia Records DAW/Presets` and override factory ones with the same id. Preset browser, **Tone Picker** (artist + instrument), save-as-preset. |
 | Beat generator | 27 styles (industrial, doom, grunge, goth, nu-metal, new wave, alt-rock, plus artist-style templates such as NIN "Closer" at 92 BPM and "March of the Pigs" in 7/8). Controls for tempo, swing, humanize, complexity and fills. **Match to recording** estimates tempo, beats, key, energy and swing, then drops a fitting beat. MIDI export. |
-| Stem separation | Demucs **htdemucs_6s** via Core ML (vocals, drums, bass, guitar, piano, other), with a model manager (download, import, delete, progress). DSP fallback with no model (HPSS plus band masks). Drum-part splitter: kick, snare, toms, hi-hat, cymbals. |
+| Import & split | **File › Import & Split Audio…** (⇧⌘I) or the **Split** toolbar button. Pick an audio file, or split the selected clip. Tick the stems you want: vocals, drums (full kit), bass, guitar, piano/keys, other. Then tick the drum types: kick, snare, toms, hi-hat, cymbals. Each stem goes on its own track, aligned with the source, in a single undo step. The original track is muted (optional). Stem files go into the project's `Audio` folder, or `~/Music/Fitzrovia Records DAW/Stems` when the project is unsaved. Uses Demucs **htdemucs_6s** via Core ML if you install it, otherwise the built-in DSP separator (HPSS + band/stereo masks + drum-part splitter). |
 | Projects | `.sfproj` package (legacy `.sforge` still opens): `project.json` plus `Audio/`, `Peaks/`, `Bounces/`. Autosave (`autosave.json`, offered when newer), recent projects, built-in and user templates. |
 | Export | WAV and AIFF (built in). FLAC, AAC/M4A, ALAC and CAF (Apple encoders, with ffmpeg fallback). MP3 and OGG need ffmpeg. Master, stems or both. Bit depth, sample rate, TPDF dither, normalize, loop range, MIDI. All exports are offline bounces. |
 | UX | Onboarding tour, one-click templates (Vocals, Guitar, Band, Beat + Synth), dark theme, tooltips, drag-and-drop audio import, mixer, inspector with generic controls for every effect and instrument. |
@@ -112,9 +112,9 @@ The Core ML model is **not bundled** (it is large, and Demucs weights have their
    ```
    Then use **Stems → Import…** and choose the `.mlpackage`. Model contract: input `mix` [1,2,N] at 44.1 kHz; output `sources` [1,6,2,N] in the order drums, bass, other, vocals, guitar, piano.
    The conversion script is **untested**. coremltools has no `istft`, so the script uses a matrix iDFT plus overlap-add. Check its output against PyTorch before relying on it.
-2. **Host your converted model** (a zipped `.mlpackage` or `.mlmodelc`) and paste its URL into the Stems sheet. The URL is stored in UserDefaults under `SFSeparationModelURL`. You then get a download progress bar.
+2. **Host your converted model** (a zipped `.mlpackage` or `.mlmodelc`) and paste its URL into the Split sheet. The URL is stored in UserDefaults under `SFSeparationModelURL`. You then get a download progress bar.
 
-Without the model, Fitzrovia Records DAW uses the DSP separator automatically. It is lower quality but always available.
+Without the model, Fitzrovia Records DAW uses the DSP separator automatically. It is lower quality but always available. Expect clean results for bass, drums and drum parts. Vocals, guitar, piano/keys and other are split heuristically (frequency band + stereo position), so they bleed into each other on dense mixes. No pre-converted model is published: an attempt to convert htdemucs_6s on Linux (coremltools 8.1) failed because Core ML rejects a rank-6 reshape inside the model. Converting it on a Mac may need changes to the model code.
 
 ## MP3 / OGG
 

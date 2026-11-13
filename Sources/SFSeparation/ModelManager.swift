@@ -97,6 +97,19 @@ public final class SeparationModelManager: NSObject {
         }
     }
 
+    /// Installs a model on a background queue (unzipping/compiling a 1–2 GB model used to freeze
+    /// the UI when called from a button). `completion` runs on the main queue with nil on success.
+    public func importModelInBackground(from url: URL, completion: @escaping (Error?) -> Void = { _ in }) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            do {
+                try self.importModel(from: url)
+                DispatchQueue.main.async { completion(nil) }
+            } catch {
+                DispatchQueue.main.async { completion(error) }
+            }
+        }
+    }
+
     func install(from url: URL) throws {
         let fm = FileManager.default
         try fm.createDirectory(at: directory, withIntermediateDirectories: true)

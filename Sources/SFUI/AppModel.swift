@@ -27,6 +27,8 @@ public final class AppModel: ObservableObject {
     /// First-launch welcome (folders + microphone permission). Shown before the onboarding tour.
     @Published public var showWelcome = false
     @Published public var showSetup = false
+    /// Opens the "Import & Split Audio" sheet (menu ⇧⌘I, toolbar "Split").
+    @Published public var showSplitSheet = false
     public let permissions = PermissionsModel()
     @Published public var audioConfig = CoreAudioIO.Configuration()
 
@@ -109,10 +111,18 @@ public final class AppModel: ObservableObject {
     public func redoAction() { if let p = undo.redo(current: project) { project = p; engine.update(project: p); isDirty = true } }
 
     public func binding<T>(track id: UUID, _ kp: WritableKeyPath<Track, T>, label: String) -> Binding<T>? where T: Equatable {
+        // Look the track up by id on every access: capturing the index edited the wrong track after
+        // tracks were added, deleted or reordered while a view still held the binding.
         guard let i = project.trackIndex(id) else { return nil }
-        let fallback = project.tracks[i][keyPath: kp]
-        return Binding(get: { [weak self] in self?.project.tracks[safe: i]?[keyPath: kp] ?? fallback },
-                       set: { [weak self] v in self?.edit(label) { p in if i < p.tracks.count { p.tracks[i][keyPath: kp] = v } } })
+        var last = project.tracks[i][keyPath: kp]
+        return Binding(get: { [weak self] in
+                           guard let self = self, let j = self.project.trackIndex(id) else { return last }
+                           last = self.project.tracks[j][keyPath: kp]
+                           return last
+                       },
+                       set: { [weak self] v in
+                           self?.edit(label) { p in if let j = p.trackIndex(id) { p.tracks[j][keyPath: kp] = v } }
+                       })
     }
 
     // MARK: Transport
@@ -159,14 +169,10 @@ public final class AppModel: ObservableObject {
         do {
             try ProjectPackage.save(project, to: target)
             if packageURL != target {
-                // Copy recordings/imports that lived outside the package into it.
-                var p = project
-                for ti in p.tracks.indices {
-                    for ci in p.tracks[ti].audioClips.indices where p.tracks[ti].audioClips[ci].file.hasPrefix("/") {
-                        let src = URL(fileURLWithPath: p.tracks[ti].audioClips[ci].file)
-                        if let rel = try? ProjectPackage.importAudio(src, into: target) { p.tracks[ti].audioClips[ci].file = rel }
-                    }
-                }
+                // Copy recordings/imports that lived outside the package into it — including audio
+                // that lived in the *previous* package on Save As (previously left behind, which
+                // broke every clip in the new copy).
+                let p = ProjectPackage.relocateClips(project, from: packageURL, to: target)
                 project = p
                 try ProjectPackage.save(p, to: target)
                 packageURL = target
@@ -178,6 +184,9 @@ public final class AppModel: ObservableObject {
         } catch { status = "Save failed: \(error.localizedDescription)" }
     }
 
+    /// Save As: always asks for a new location; audio from the old package is copied along.
+    public func saveAs() { if let u = askSaveURL() { save(as: u) } }
+
     private func askSaveURL() -> URL? {
         let panel = NSSavePanel()
         panel.nameFieldStringValue = "\(project.name).\(ProjectPackage.fileExtension)"
@@ -187,20 +196,74 @@ public final class AppModel: ObservableObject {
 
     // MARK: Import / tracks
 
+    /// Imports audio files as new tracks in ONE undo step. Files already inside the project
+    /// package are referenced instead of copied again.
     public func importAudio(_ urls: [URL], at time: Double = 0) {
+        var added: [(name: String, clip: String, file: String, duration: Double)] = []
+        var failures: [String] = []
         for url in urls {
             do {
                 let audio = try AudioDecoding.decode(url)
-                var file = url.path
-                if let pkg = packageURL { file = try ProjectPackage.importAudio(url, into: pkg) }
-                edit("Import Audio") { p in
-                    let id = p.addTrack(kind: .audio, name: url.deletingPathExtension().lastPathComponent)
+                let file = try ProjectPackage.adopt(url, into: packageURL)
+                added.append((url.deletingPathExtension().lastPathComponent, url.lastPathComponent, file, audio.duration))
+            } catch { failures.append("\(url.lastPathComponent): \(error.localizedDescription)") }
+        }
+        if !added.isEmpty {
+            edit(added.count == 1 ? "Import Audio" : "Import \(added.count) Audio Files") { p in
+                for a in added {
+                    let id = p.addTrack(kind: .audio, name: a.name)
                     if let i = p.trackIndex(id) {
-                        p.tracks[i].audioClips.append(AudioClip(name: url.lastPathComponent, file: file, start: time, duration: audio.duration))
+                        p.tracks[i].audioClips.append(AudioClip(name: a.clip, file: a.file, start: max(0, time), duration: a.duration))
                     }
                 }
-            } catch { status = "Import failed: \(error.localizedDescription)" }
+            }
         }
+        status = failures.isEmpty ? "Imported \(added.count) file(s)" : "Import failed: " + failures.joined(separator: "; ")
+    }
+
+    // MARK: Import & split
+
+    /// What a split works on: a file from disk, or an existing clip on the timeline.
+    public struct SplitSource {
+        public var url: URL
+        public var displayName: String
+        public var start: Double
+        public var offset: Double
+        public var duration: Double?
+        public var trackID: UUID?
+    }
+
+    /// The selected track's first audio clip (if any) as a split source.
+    public var selectedClipSplitSource: SplitSource? {
+        guard let t = project.tracks.first(where: { $0.id == selectedTrackID }), t.kind == .audio,
+              let c = t.audioClips.first else { return nil }
+        return SplitSource(url: ProjectPackage.resolve(c.file, in: packageURL), displayName: c.name,
+                           start: c.start, offset: c.offset, duration: c.duration, trackID: t.id)
+    }
+
+    /// Where new stem files are written: inside the open project, or the library's Stems folder.
+    public var stemOutputFolder: URL {
+        packageURL?.appendingPathComponent(ProjectPackage.audioFolder) ?? AppPaths.sub("Stems")
+    }
+
+    /// Adds separated stems as new tracks in one undo step ("Split into Stems"), aligned with the source.
+    public func addSeparatedStems(_ files: [Stem: URL], durations: [Stem: Double], source: SplitSource, muteSource: Bool) {
+        var specs: [Project.StemTrackSpec] = []
+        var failed = 0
+        for (stem, url) in files.sorted(by: { $0.key.sortIndex < $1.key.sortIndex }) {
+            guard let file = try? ProjectPackage.adopt(url, into: packageURL) else { failed += 1; continue }
+            specs.append(Project.StemTrackSpec(name: "\(source.displayName) – \(stem.displayName)", file: file,
+                                               fileDuration: durations[stem] ?? (source.duration ?? 0)))
+        }
+        guard !specs.isEmpty else { status = "No stems were added."; return }
+        var firstID: UUID?
+        edit("Split into Stems") { p in
+            let ids = p.addStemTracks(specs, start: source.start, offset: source.offset, duration: source.duration,
+                                      afterTrack: source.trackID, muteTrack: muteSource ? source.trackID : nil)
+            firstID = ids.first
+        }
+        if let f = firstID { selectedTrackID = f }
+        status = "Added \(specs.count) stem tracks" + (failed > 0 ? " (\(failed) could not be added)" : "")
     }
 
     public func addTrack(_ kind: TrackKind) { edit("Add Track") { p in selectedTrackID = p.addTrack(kind: kind) } }
