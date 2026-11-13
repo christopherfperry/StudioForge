@@ -100,7 +100,7 @@ main() {
   fi
   say "Installing to $dest/Fitzrovia Records DAW.app"
   if [[ "$DRY_RUN" != "1" ]]; then
-    pkill -x Fitzrovia Records DAW 2>/dev/null || true
+    pkill -x StudioForge 2>/dev/null || true   # executable name inside the app bundle
     mkdir -p "$dest" 2>/dev/null || $SUDO mkdir -p "$dest"
   fi
   run ${SUDO:+$SUDO} rm -rf "$dest/Fitzrovia Records DAW.app"

@@ -11,6 +11,11 @@ extension Notification.Name { static let sfOpenDocuments = Notification.Name("SF
 /// Receives .sfproj packages double-clicked in Finder (CFBundleDocumentTypes in Info.plist).
 final class AppDelegate: NSObject, NSApplicationDelegate {
     static var pending: [URL] = []
+    /// Set by the app: returns false when the user cancels quitting with unsaved changes.
+    static var confirmQuit: (() -> Bool)?
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        (AppDelegate.confirmQuit?() ?? true) ? .terminateNow : .terminateCancel
+    }
     func application(_ application: NSApplication, open urls: [URL]) {
         let projects = urls.filter { ProjectPackage.readableExtensions.contains($0.pathExtension.lowercased()) }
         guard !projects.isEmpty else { return }
@@ -31,7 +36,10 @@ struct StudioForgeApp: App {
     var body: some Scene {
         WindowGroup("Fitzrovia Records DAW") {
             MainView(model: model).frame(minWidth: 1100, minHeight: 700)
-                .onAppear { openPending() }
+                .onAppear {
+                    AppDelegate.confirmQuit = { [weak m = model] in m?.confirmDiscardChanges("quit") ?? true }
+                    openPending()
+                }
                 .onReceive(NotificationCenter.default.publisher(for: .sfOpenDocuments)) { _ in openPending() }
         }
         .commands {
@@ -69,12 +77,19 @@ struct StudioForgeApp: App {
                 Button("Show Library in Finder") { NSWorkspace.shared.activateFileViewerSelecting([AppPaths.musicRoot]) }
             }
             CommandGroup(replacing: .undoRedo) {
-                Button("Undo") { model.undoAction() }.keyboardShortcut("z")
-                Button("Redo") { model.redoAction() }.keyboardShortcut("z", modifiers: [.command, .shift])
+                Button(model.undoMenuTitle) { model.undoAction() }.keyboardShortcut("z")
+                Button(model.redoMenuTitle) { model.redoAction() }.keyboardShortcut("z", modifiers: [.command, .shift])
             }
             CommandGroup(after: .pasteboard) {
                 Divider()
-                Button("Delete Selected Track / Stem") { model.deleteSelectedTrack() }
+                Button("Delete Selected Track / Stem") {
+                    // ⌘⌫ while editing text (e.g. a track name) deletes text, not the track.
+                    if NSApp.keyWindow?.firstResponder is NSText {
+                        NSApp.sendAction(#selector(NSResponder.deleteToBeginningOfLine(_:)), to: nil, from: nil)
+                    } else {
+                        model.deleteSelectedTrack()
+                    }
+                }
                     .keyboardShortcut(.delete, modifiers: [.command])
                     .disabled(model.selectedTrackID == nil)
                 Button("Delete All Stems") { model.deleteAllStems() }

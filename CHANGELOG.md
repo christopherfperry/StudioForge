@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.2 — 2026-11-13
+- **Fixed: single-key shortcuts fired while typing.** Space, R, L, K, N, X and S no longer trigger transport and editing actions while you type in a text field (for example when renaming a track). They are now ignored whenever a text field, sheet or dialog has focus. ⌘⌫ in a text field now edits the text instead of deleting the track.
+- **Fixed: a stale "Arm at least one audio track" error came back on every Stop.** Errors are now cleared when you start recording or stop.
+- **Unsaved changes are protected:** New, Open and Quit ask *Save / Don't Save / Cancel* when the song has unsaved changes.
+- Recording: the R button toggles recording on and off, and shows a filled icon while recording. If microphone access was denied, the app says so instead of recording silence. After stopping, the status shows how many takes were recorded (⌘Z to undo).
+- Undo/Redo: menu items show what will be undone (for example "Undo Rename Track"). A track rename is now one undo step, not one per keystroke. "Nothing to undo" feedback was added.
+- The toolbar *Split* (cut at playhead) is renamed **Cut at Playhead** so it is not confused with stem *Split*. It now reports when there is no clip under the playhead.
+- Stem split: the "Added N stem tracks" message is no longer replaced by a Finder window. The Mixer visibility is remembered between launches. The Recent menu shows "No recent projects" when empty. Errors from *Save Current as Template* are shown. Onboarding has a new *Mix & tidy up* page.
+- Installer: the welcome, read-me and finish pages have been rewritten for 0.6.x (features, shortcuts, microphone permission, Gatekeeper, uninstall), and the version is filled in automatically. Fixed the `.command` installer's quit-running-app step (`pkill -x StudioForge`).
+- 7 new tests (49 total on Linux): record/stop error clearing, delete/undo/redo, live vs offline mute/solo gain parity, project save/load round-trip, export with mute, and a synth part for every genre.
+
 ## 0.6.1 — 2026-11-13
 - **Fixed: mute (and solo / arm) buttons often did nothing.** Only the letter inside the button took clicks; clicks on the rest of the coloured box fell through to the header and only selected the track. The whole box is now clickable, in the track headers and the mixer. Toggles read the current project state.
 - **Muted tracks are now visible:** muted tracks, and tracks silenced by another track's solo, are dimmed and labelled *MUTED* / *SOLO-OFF*. Muted clips are dimmed and struck through.

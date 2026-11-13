@@ -16,20 +16,19 @@ import SFExport
 public struct MainView: View {
     @ObservedObject var model: AppModel
     @State private var sheet: Sheet?
-    @State private var showMixer = true
     enum Sheet: String, Identifiable { case newSong, presets, tonePicker, beat, stems, export, audio; var id: String { rawValue } }
 
     public init(model: AppModel) { self.model = model }
 
     public var body: some View {
         VStack(spacing: 0) {
-            TransportBar(model: model, sheet: $sheet, showMixer: $showMixer)
+            TransportBar(model: model, sheet: $sheet, showMixer: $model.showMixer)
             Divider()
             HSplitView {
                 ArrangementView(model: model).frame(minWidth: 500)
                 InspectorView(model: model, sheet: $sheet).frame(minWidth: 260, idealWidth: 300, maxWidth: 380)
             }
-            if showMixer { Divider(); MixerView(model: model).frame(height: 180) }
+            if model.showMixer { Divider(); MixerView(model: model).frame(height: 180) }
             HStack {
                 Text(model.status).font(.caption).lineLimit(1)
                 Spacer()
@@ -39,6 +38,7 @@ public struct MainView: View {
             }.padding(.horizontal, 8).padding(.vertical, 3)
         }
         .preferredColorScheme(.dark)
+        .onAppear { model.installKeyMonitor() }
         .sheet(item: $sheet) { s in
             switch s {
             case .newSong: NewSongSheet(model: model) { sheet = nil }
@@ -79,23 +79,25 @@ struct TransportBar: View {
             Button { sheet = .newSong } label: { Label("New Song", systemImage: "plus.square") }.help("Start a new song from a template")
             Divider().frame(height: 22)
             Button(action: model.rewind) { Image(systemName: "backward.end.fill") }.help("Go to start (Return)")
+            // Single-key shortcuts (Space, Return, R, L, K, N, X, S) live in AppModel.handleKey so they
+            // never fire while typing in a text field.
             Button(action: model.togglePlay) { Image(systemName: model.isPlaying ? "stop.fill" : "play.fill") }
-                .keyboardShortcut(.space, modifiers: []).help("Play / Stop (Space)")
-            Button(action: model.record) { Image(systemName: "record.circle").foregroundColor(model.isRecording ? .red : .primary) }
-                .keyboardShortcut("r", modifiers: []).help("Record armed tracks (R)")
+                .help("Play / Stop (Space)")
+            Button(action: model.record) { Image(systemName: model.isRecording ? "record.circle.fill" : "record.circle").foregroundColor(model.isRecording ? .red : .primary) }
+                .help(model.isRecording ? "Stop recording (R)" : "Record armed tracks (R)")
             Text(timeString(model.position)).font(.system(.title3, design: .monospaced)).frame(width: 110)
             Stepper(value: Binding(get: { model.project.tempo }, set: { v in model.edit("Tempo") { $0.tempo = v } }), in: 30...300, step: 1) {
                 Text("\(Int(model.project.tempo)) BPM").monospacedDigit()
             }.help("Project tempo")
             Text(model.project.timeSignature.description)
             Toggle("Loop", isOn: Binding(get: { model.project.loop.enabled }, set: { v in model.edit("Loop") { $0.loop.enabled = v } }))
-                .toggleStyle(.button).keyboardShortcut("l", modifiers: []).help("Loop region (L)")
+                .toggleStyle(.button).help("Loop region (L)")
             Toggle("Punch", isOn: Binding(get: { model.project.punch.enabled }, set: { v in model.edit("Punch") { $0.punch.enabled = v } }))
                 .toggleStyle(.button).help("Punch in/out region")
             Toggle("Click", isOn: Binding(get: { model.project.metronome.enabled }, set: { v in model.edit("Metronome") { $0.metronome.enabled = v } }))
-                .toggleStyle(.button).keyboardShortcut("k", modifiers: []).help("Metronome (K)")
+                .toggleStyle(.button).help("Metronome (K)")
             Toggle(isOn: $model.showNotes) { Label("Notes", systemImage: "music.note") }
-                .toggleStyle(.button).keyboardShortcut("n", modifiers: [])
+                .toggleStyle(.button)
                 .help("Show which note each track is playing (N)")
             Spacer()
             Button("Tone Picker") { sheet = .tonePicker }.help("Pick an artist + instrument and get a preset")
@@ -107,7 +109,6 @@ struct TransportBar: View {
             Button { sheet = .audio } label: { Image(systemName: "slider.horizontal.3") }.help("Audio device & latency settings")
             Toggle(isOn: $showMixer) { Label("Mixer", systemImage: "slider.vertical.3") }.toggleStyle(.button)
                 .help("Show the mixer: volume faders, pan, mute/solo for every track and stem (X)")
-                .keyboardShortcut("x", modifiers: [])
         }
         .padding(8)
     }
@@ -157,7 +158,8 @@ struct ArrangementView: View {
             ToolbarItemGroup {
                 Button { model.zoom = max(5, model.zoom / 1.5) } label: { Image(systemName: "minus.magnifyingglass") }.keyboardShortcut("-", modifiers: [.command])
                 Button { model.zoom = min(800, model.zoom * 1.5) } label: { Image(systemName: "plus.magnifyingglass") }.keyboardShortcut("=", modifiers: [.command])
-                Button("Split") { model.splitAtPlayhead() }.keyboardShortcut("s", modifiers: []).help("Split clips at the playhead (S)")
+                Button { model.splitAtPlayhead() } label: { Label("Cut at Playhead", systemImage: "scissors") }
+                    .help("Cut the clips under the playhead in two (S). To separate a song into stems use Split in the transport bar.")
             }
         }
     }

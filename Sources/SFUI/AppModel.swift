@@ -29,6 +29,11 @@ public final class AppModel: ObservableObject {
     @Published public var showSetup = false
     /// Opens the "Import & Split Audio" sheet (menu ⇧⌘I, toolbar "Split").
     @Published public var showSplitSheet = false
+    /// Mixer panel visibility (transport "Mixer" toggle, X). Persisted between launches.
+    @Published public var showMixer = UserDefaults.standard.object(forKey: "SFShowMixer") as? Bool ?? true {
+        didSet { UserDefaults.standard.set(showMixer, forKey: "SFShowMixer") }
+    }
+    private var keyMonitor: Any?
     /// "Show Playing Notes" (transport "Notes" toggle, N, View menu). Persisted between launches.
     @Published public var showNotes = UserDefaults.standard.bool(forKey: "SFShowNotes") {
         didSet {
@@ -167,8 +172,38 @@ public final class AppModel: ObservableObject {
 
     public var canUndo: Bool { undo.canUndo }
     public var canRedo: Bool { undo.canRedo }
-    public func undoAction() { if let p = undo.undo(current: project) { project = p; engine.update(project: p); isDirty = true } }
-    public func redoAction() { if let p = undo.redo(current: project) { project = p; engine.update(project: p); isDirty = true } }
+    public var undoMenuTitle: String { undo.undoLabel.map { "Undo \($0)" } ?? "Undo" }
+    public var redoMenuTitle: String { undo.redoLabel.map { "Redo \($0)" } ?? "Redo" }
+    public func undoAction() {
+        guard let p = undo.undo(current: project) else { status = "Nothing to undo."; return }
+        restore(p)
+    }
+    public func redoAction() {
+        guard let p = undo.redo(current: project) else { status = "Nothing to redo."; return }
+        restore(p)
+    }
+    private func restore(_ p: Project) {
+        project = p; engine.update(project: p); isDirty = true
+        lastCoalescedEdit = .distantPast
+        // Undoing "Add Track" (or redoing a delete) can remove the selected track.
+        if let sel = selectedTrackID, p.trackIndex(sel) == nil { selectedTrackID = p.tracks.first?.id }
+    }
+
+    /// Asks before replacing a document with unsaved changes. Returns true to continue.
+    public func confirmDiscardChanges(_ action: String) -> Bool {
+        guard isDirty else { return true }
+        let alert = NSAlert()
+        alert.messageText = "Save changes to “\(project.name)” before you \(action)?"
+        alert.informativeText = "Your changes will be lost if you don't save them."
+        alert.addButton(withTitle: "Save")
+        alert.addButton(withTitle: "Don't Save")
+        alert.addButton(withTitle: "Cancel")
+        switch alert.runModal() {
+        case .alertFirstButtonReturn: save(); return !isDirty
+        case .alertSecondButtonReturn: return true
+        default: return false
+        }
+    }
 
     public func binding<T>(track id: UUID, _ kp: WritableKeyPath<Track, T>, label: String) -> Binding<T>? where T: Equatable {
         // Look the track up by id on every access: capturing the index edited the wrong track after
@@ -181,7 +216,8 @@ public final class AppModel: ObservableObject {
                            return last
                        },
                        set: { [weak self] v in
-                           self?.edit(label) { p in if let j = p.trackIndex(id) { p.tracks[j][keyPath: kp] = v } }
+                           // Coalesced: typing a name or dragging pan is one undo step, not one per keystroke.
+                           self?.edit(label, coalesce: true) { p in if let j = p.trackIndex(id) { p.tracks[j][keyPath: kp] = v } }
                        })
     }
 
@@ -192,15 +228,69 @@ public final class AppModel: ObservableObject {
     }
     public func stop() {
         let takes = engine.stop()
-        if !takes.isEmpty { edit("Record") { p in p = engine.applyTakes(takes, to: p) } }
+        if !takes.isEmpty {
+            edit("Record") { p in p = engine.applyTakes(takes, to: p) }
+            status = "Recorded \(takes.count) take(s) — ⌘Z to undo"
+        } else if isRecording {
+            status = "Stopped — nothing was recorded."
+        }
         if let e = engine.lastError { status = e }
     }
-    public func record() { if !engine.record() { status = engine.lastError ?? "Cannot record" } }
+    /// Record button / R: starts recording, or stops if already recording.
+    public func record() {
+        if engine.isRecording { stop(); return }
+        permissions.refresh()
+        if permissions.mic == .denied || permissions.mic == .restricted {
+            status = "Microphone access is off — allow Fitzrovia Records DAW in System Settings › Privacy & Security › Microphone (Help › Setup & Permissions)."
+            return
+        }
+        if permissions.mic == .notDetermined { showWelcome = true; return }
+        if !audioConfig.inputEnabled {
+            status = "Audio input is disabled — turn on “Enable audio input” in Audio Settings."
+            return
+        }
+        if engine.record() { status = "Recording…" } else { status = engine.lastError ?? "Cannot record" }
+    }
     public func rewind() { engine.seek(seconds: 0) }
+
+    // MARK: Single-key shortcuts
+    // Space, Return, R, L, K, N, X and S are handled here instead of as button key equivalents:
+    // button shortcuts without modifiers also fired while typing in a text field (renaming a track
+    // "drums" started recording and split clips).
+
+    public func installKeyMonitor() {
+        guard keyMonitor == nil else { return }
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] e in
+            (self?.handleKey(e) ?? false) ? nil : e
+        }
+    }
+
+    func handleKey(_ e: NSEvent) -> Bool {
+        guard e.modifierFlags.intersection([.command, .control, .option]).isEmpty,
+              let w = NSApp.keyWindow, w === NSApp.mainWindow, w.attachedSheet == nil,
+              !(w.firstResponder is NSText) else { return false }
+        switch e.keyCode {
+        case 49: if !e.isARepeat { togglePlay() }; return true      // Space
+        case 36, 76: rewind(); return true                            // Return / Enter
+        default: break
+        }
+        guard !e.isARepeat else { return false }
+        switch e.charactersIgnoringModifiers?.lowercased() ?? "" {
+        case "r": record()
+        case "l": edit("Loop") { $0.loop.enabled.toggle() }
+        case "k": edit("Metronome") { $0.metronome.enabled.toggle() }
+        case "n": showNotes.toggle()
+        case "x": showMixer.toggle()
+        case "s": splitAtPlayhead()
+        default: return false
+        }
+        return true
+    }
 
     // MARK: Projects
 
     public func newProject(from template: ProjectTemplate) {
+        guard confirmDiscardChanges("start a new song") else { return }
         var p = template.makeProject(name: "Untitled", sampleRate: engine.sampleRate)
         presets.applyReferencedPresets(to: &p)
         if let styleID = template.beatStyle, let style = beatStyles.style(id: styleID),
@@ -216,6 +306,8 @@ public final class AppModel: ObservableObject {
     }
 
     public func open(_ url: URL) {
+        guard url.standardizedFileURL != packageURL?.standardizedFileURL || !isDirty else { return }
+        guard confirmDiscardChanges("open another project") else { return }
         do {
             let p = try ProjectPackage.newerAutosave(in: url) ?? ProjectPackage.load(from: url)
             undo.clear(); project = p; packageURL = url; isDirty = false
@@ -402,7 +494,12 @@ public final class AppModel: ObservableObject {
 
     public func addTrack(_ kind: TrackKind) { edit("Add Track") { p in selectedTrackID = p.addTrack(kind: kind) } }
 
-    public func splitAtPlayhead() { edit("Split") { p in p.splitClips(at: position) } }
+    public func splitAtPlayhead() {
+        let before = project
+        edit("Split") { p in p.splitClips(at: position) }
+        status = project == before ? "No clip under the playhead to cut — move the playhead over a clip first."
+                                   : String(format: "Cut clips at %.2f s — ⌘Z to undo", position)
+    }
 
     public func apply(preset: Preset, to trackID: UUID) {
         edit("Apply Preset \(preset.name)") { p in if let i = p.trackIndex(trackID) { preset.apply(to: &p.tracks[i]) } }
@@ -410,7 +507,7 @@ public final class AppModel: ObservableObject {
 
     public func setParameter(track: UUID, effect: UUID, id: String, value: Float) {
         engine.setParameter(track: track, slot: effect, id: id, value: value)
-        edit("Change \(id)") { p in
+        edit("Change \(id)", coalesce: true) { p in
             if let ti = p.trackIndex(track), let ei = p.tracks[ti].effects.firstIndex(where: { $0.id == effect }) {
                 p.tracks[ti].effects[ei].params[id] = value
             }

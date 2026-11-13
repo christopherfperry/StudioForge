@@ -76,8 +76,11 @@ run pkgbuild --root "$STAGE/root" --component-plist "$COMPONENT_PLIST" --scripts
 
 # 4. Product archive with welcome / readme / conclusion pages
 sed "s/@VERSION@/$VERSION/g" packaging/pkg/distribution.xml > "$STAGE/distribution.xml"
-run mkdir -p "$STAGE/resources"
-run cp packaging/pkg/resources/welcome.html packaging/pkg/resources/readme.html packaging/pkg/resources/conclusion.html "$STAGE/resources/"
+mkdir -p "$STAGE/resources"
+for page in welcome readme conclusion; do
+  echo "+ sed @VERSION@ packaging/pkg/resources/$page.html > $STAGE/resources/$page.html"
+  sed "s/@VERSION@/$VERSION/g" "packaging/pkg/resources/$page.html" > "$STAGE/resources/$page.html"
+done
 if [[ -f packaging/assets/dmg_background.png ]]; then run cp packaging/assets/dmg_background.png "$STAGE/resources/background.png"; fi
 UNSIGNED="$STAGE/unsigned.pkg"
 run productbuild --distribution "$STAGE/distribution.xml" --resources "$STAGE/resources" \

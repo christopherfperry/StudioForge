@@ -276,6 +276,9 @@ public final class EngineController {
 
     public func stop() -> [RecordedTake] {
         let wasRecording = isRecording
+        // Errors belong to the action that caused them: a stale "Arm a track" message must not
+        // reappear on every later Stop.
+        lastError = nil
         core.transport.isRecording.value = false
         core.transport.isPlaying.value = false
         guard wasRecording else { return [] }
@@ -294,6 +297,7 @@ public final class EngineController {
     @discardableResult
     public func record(takeName: String? = nil) -> Bool {
         guard !isRecording else { return false }
+        lastError = nil
         let armed = project.tracks.filter { $0.arm && $0.kind == .audio }
         guard !armed.isEmpty else { lastError = "Arm at least one audio track to record."; return false }
         let folder: URL

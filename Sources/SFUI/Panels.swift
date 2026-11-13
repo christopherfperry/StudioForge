@@ -47,11 +47,15 @@ struct NewSongSheet: View {
                     if panel.runModal() == .OK, let url = panel.url { model.open(url); close() }
                 }
                 Menu("Recent") {
+                    if RecentProjects.shared.urls.isEmpty { Text("No recent projects") }
                     ForEach(RecentProjects.shared.urls, id: \.self) { u in Button(u.deletingPathExtension().lastPathComponent) { model.open(u); close() } }
                 }
                 Spacer()
                 Button("Save Current as Template") {
-                    try? ProjectTemplates.saveAsTemplate(model.project, name: model.project.name)
+                    do {
+                        try ProjectTemplates.saveAsTemplate(model.project, name: model.project.name)
+                        model.status = "Saved “\(model.project.name)” as a template"
+                    } catch { model.status = "Could not save template: \(error.localizedDescription)" }
                 }
             }
         }
@@ -354,7 +358,9 @@ struct StemSeparatorSheet: View {
                     if add { model.addSeparatedStems(urls, durations: durations, source: source, muteSource: mute) }
                     if let p = part { model.addGeneratedSynth(p, startSeconds: source.start) }
                     else if synth != nil { model.status += " — no clear notes for a synth track" }
-                    else {
+                    if !add {
+                        // Only reveal the files when they were not added to the project (previously
+                        // this also ran after adding stems and overwrote the "Added N stem tracks" status).
                         model.status = "Wrote \(urls.count) stems to \(folder.path)"
                         NSWorkspace.shared.activateFileViewerSelecting(Array(urls.values))
                     }
@@ -475,7 +481,8 @@ struct OnboardingView: View {
         ("mic", "Record", "Arm a track (R button), pick its input in the Inspector, press R or the record button. Fitzrovia Records DAW always records the clean, dry signal — effects stay editable later."),
         ("slider.horizontal.3", "Low latency", "Open Audio Settings to choose your interface and a buffer of 32–128 samples while recording. Turn Monitor off to use your interface's direct monitoring."),
         ("paintpalette", "Tone Picker", "Choose an artist style and instrument, and Fitzrovia Records DAW loads a matching preset. Every preset is editable and saved as JSON."),
-        ("metronome", "Beats & stems", "Generate drum beats by style, or let Fitzrovia Records DAW match a beat to your recording. Split any song into stems from the Stems button."),
+        ("metronome", "Beats & stems", "Generate drum beats by style, or let Fitzrovia Records DAW match a beat to your recording. Split any song into vocals, guitar, bass, piano and drum parts with the Split button."),
+        ("slider.vertical.3", "Mix & tidy up", "Click M to mute and S to solo (⌃⌘M / ⌃⌘S for the selected track). Drag the faders in the Mixer (X), double-click for 0 dB. Delete a track or stem with the trash button or ⌘⌫ — ⌘Z undoes anything."),
         ("square.and.arrow.up", "Export", "Bounce to WAV, AIFF, FLAC, AAC, ALAC, CAF (MP3/OGG with ffmpeg), export stems and MIDI."),
     ]
     var body: some View {

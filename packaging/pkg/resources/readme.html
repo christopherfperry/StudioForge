@@ -1,15 +1,29 @@
 <!DOCTYPE html>
-<html><head><meta charset="utf-8"><style>body{font-family:-apple-system,Helvetica,sans-serif;font-size:13px;line-height:1.45}</style></head>
+<html><head><meta charset="utf-8"><style>body{font-family:-apple-system,Helvetica,sans-serif;font-size:13px;line-height:1.45}td{padding:1px 10px 1px 0;vertical-align:top}</style></head>
 <body>
-<h2>About the microphone permission</h2>
-<p>To record, Fitzrovia Records DAW needs access to audio input (your microphone, guitar or audio interface).
-macOS does <b>not</b> allow any installer to grant this permission in advance. Instead:</p>
-<ol>
-<li>The first time you open Fitzrovia Records DAW, a welcome screen explains why audio input is needed.</li>
-<li>Click <b>Allow Audio Input…</b> and then <b>OK</b> in the macOS dialog.</li>
-</ol>
-<p>If you clicked <b>Don't Allow</b> by mistake, open <b>System Settings › Privacy &amp; Security › Microphone</b>
-and switch Fitzrovia Records DAW on, or use <b>Help › Setup &amp; Permissions</b> inside Fitzrovia Records DAW.</p>
+<h2>Read Me — Fitzrovia Records DAW @VERSION@</h2>
+<h3>What's new in 0.6</h3>
+<ul>
+<li><b>Mute, solo and arm buttons respond anywhere on the coloured box.</b> Muted or solo-silenced tracks are dimmed and labelled; muted clips are dimmed and struck through.</li>
+<li><b>Exports match what you hear</b>: soloed-out and muted tracks no longer leak into bounces.</li>
+<li><b>Delete tracks and stems</b> with the trash button, the right-click menu or ⌘⌫ (every delete can be undone with ⌘Z). Edit › Delete All Stems removes a whole split.</li>
+<li><b>Easier volume</b>: mixer faders with a 0&nbsp;dB mark and dB readout, double-click to reset, ⌥⌘↑ / ⌥⌘↓ for the selected track.</li>
+<li><b>Genre-matched synth tones</b> for Generate Matching Synth (10 genres or auto-detect).</li>
+<li>Typing in a text field (e.g. renaming a track) no longer triggers single-key shortcuts; you're asked before unsaved changes are discarded.</li>
+</ul>
+<h3>Handy shortcuts</h3>
+<table>
+<tr><td>Space</td><td>Play / stop</td><td>R</td><td>Record armed tracks</td></tr>
+<tr><td>Return</td><td>Go to start</td><td>S</td><td>Cut clips at the playhead</td></tr>
+<tr><td>⌃⌘M / ⌃⌘S</td><td>Mute / solo selected track</td><td>X</td><td>Show / hide the mixer</td></tr>
+<tr><td>⌘⌫</td><td>Delete selected track or stem</td><td>⌘Z / ⇧⌘Z</td><td>Undo / redo</td></tr>
+<tr><td>⇧⌘I</td><td>Import &amp; Split Audio</td><td>⌘E</td><td>Export</td></tr>
+</table>
+<h3>Microphone permission</h3>
+<p>macOS does <b>not</b> allow any installer to grant audio-input access in advance. The first time you open the app, a
+welcome screen explains why it is needed: click <b>Allow Audio Input…</b> and then <b>OK</b>. If you clicked
+<b>Don't Allow</b>, open <b>System Settings › Privacy &amp; Security › Microphone</b> and switch Fitzrovia Records DAW on,
+or use <b>Help › Setup &amp; Permissions</b> inside the app.</p>
 <h3>Opening an unsigned build</h3>
 <p>The app installed by this package is not quarantined and opens normally. If macOS ever says it could not verify
 Fitzrovia Records DAW, open <b>System Settings › Privacy &amp; Security</b>, click <b>Open Anyway</b> and enter your password.
